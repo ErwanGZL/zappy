@@ -61,7 +61,7 @@ std::string Network::getMessage()
     }
     char buffer[BUFSIZ] = {0};
     read(_socket, buffer, BUFSIZ);
-    _buffer = std::string(buffer);
+    _buffer += std::string(buffer);
     std::string message = _buffer.substr(0, _buffer.find("\n"));
     _buffer = _buffer.substr(_buffer.find("\n") + 1);
     return message;
@@ -79,6 +79,7 @@ int Network::handleMessages()
 {
     std::string message = getMessage();
     std::string data;
+    // std::cout << message << std::endl;
     if (message.find(" ") != std::string::npos)
         data = message.substr(message.find(" ") + 1);
 
@@ -134,7 +135,7 @@ int Network::handleMessages()
     else if (message.find("sbp") == 0)
         returnCode = commandParameter(data);
     else
-        std::cout << "Unknown command" << std::endl;
+        std::cout << "Unknown command" << message << std::endl;
     if (returnCode)
         return 1;
     return 0;

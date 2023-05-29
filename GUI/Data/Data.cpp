@@ -81,3 +81,44 @@ Player *Data::getPlayerById(int id)
     }
     return NULL;
 }
+
+void Data::removePlayer(int id)
+{
+    for (int i = 0; i < _players.size(); i++) {
+        if (_players[i]->getId() == id)
+            _players.erase(_players.begin() + i);
+    }
+}
+
+void Data::addEgg(int id, int x, int y, std::string team)
+{
+    Egg *egg = new Egg(id, x, y, team);
+    _eggs.push_back(egg);
+}
+
+Egg *Data::getEggById(int id)
+{
+    for (int i = 0; i < _eggs.size(); i++) {
+        if (_eggs[i]->getId() == id)
+            return _eggs[i];
+    }
+    return NULL;
+}
+
+void Data::removeEgg(int id)
+{
+    for (int i = 0; i < _eggs.size(); i++) {
+        if (_eggs[i]->getId() == id)
+            _eggs.erase(_eggs.begin() + i);
+    }
+}
+
+std::vector<Player*> Data::getPlayersByCoords(int x, int y)
+{
+    std::vector<Player*> players;
+    for (int i = 0; i < _players.size(); i++) {
+        if (_players[i]->getX() == x && _players[i]->getY() == y)
+            players.push_back(_players[i]);
+    }
+    return players;
+}

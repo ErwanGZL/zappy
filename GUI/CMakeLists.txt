@@ -21,12 +21,14 @@ set(SOURCES
     Data/Team.cpp
     Data/Tile.cpp
     Logger/Logger.cpp
+    Data/Egg.cpp
 )
 
 include_directories(Net)
 include_directories(Gui)
 include_directories(Data)
 include_directories(Logger)
+include_directories(Egg)
 
 
 # Create an executable target
