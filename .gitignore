@@ -1,0 +1,10 @@
+zappy_gui
+zappy_server
+zappy_ai
+srcTest
+.vscode
+build
+vgcore.*
+*.o
+*.out
+include
