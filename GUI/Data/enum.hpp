@@ -18,10 +18,14 @@ enum Ressources {
 };
 
 enum Orientation {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST
+    NORTH = 1,
+    EAST = 2,
+    SOUTH = 4,
+    WEST = 8,
+    NORTH_EAST = 16,
+    SOUTH_EAST = 32,
+    SOUTH_WEST = 64,
+    NORTH_WEST = 128
 };
 
 enum PlayerStatus {

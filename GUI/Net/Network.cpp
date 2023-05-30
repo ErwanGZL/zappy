@@ -7,7 +7,6 @@
 
 #include "Network.hpp"
 
-
 Network::Network(int ac, char **av)
 {
     _port = 4242;
