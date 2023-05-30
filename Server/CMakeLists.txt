@@ -10,14 +10,13 @@ add_subdirectory(libs)
 set(
 SOURCES
     src/main.c
-)
-
-set(
-INCLUDES
-    inc/
+    src/server.c
+    src/netctl.c
+    src/options.c
+    src/game/game.c
 )
 
 # Create an executable target
 add_executable(zappy_server ${SOURCES})
-target_include_directories(zappy_server PRIVATE ${INCLUDES})
+target_include_directories(zappy_server PRIVATE inc)
 target_link_libraries(zappy_server PRIVATE list)
