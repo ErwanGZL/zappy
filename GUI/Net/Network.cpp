@@ -59,11 +59,14 @@ std::string Network::getMessage()
         return message;
     }
     char buffer[BUFSIZ] = {0};
-    read(_socket, buffer, BUFSIZ);
-    _buffer += std::string(buffer);
-    std::string message = _buffer.substr(0, _buffer.find("\n"));
-    _buffer = _buffer.substr(_buffer.find("\n") + 1);
-    return message;
+    size_t size = read(_socket, buffer, BUFSIZ);
+    _buffer += std::string(buffer).substr(0, size);
+    if (_buffer.find("\n") != std::string::npos) {
+        std::string message = _buffer.substr(0, _buffer.find("\n"));
+        _buffer = _buffer.substr(_buffer.find("\n") + 1);
+        return message;
+    }
+    return "";
 }
 
 void Network::run()
@@ -78,7 +81,6 @@ int Network::handleMessages()
 {
     std::string message = getMessage();
     std::string data;
-    // std::cout << message << std::endl;
     if (message.find(" ") != std::string::npos)
         data = message.substr(message.find(" ") + 1);
 
