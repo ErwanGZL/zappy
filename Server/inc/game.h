@@ -46,19 +46,15 @@ typedef struct entity {
 } entity_t;
 
 typedef struct player {
-    int id;
-    int team_id;
     int fd;
+    team_name_t team_name;
     entity_t *entity;
-    struct player *next;
 } player_t;
 
 typedef struct team {
-    int id;
-    char *name;
+    team_name_t name;
     int max_players;
-    int slots_available;
-    struct team *next;
+    int nb_players;
 } team_t;
 
 //end of player_definition structures
@@ -73,4 +69,5 @@ typedef struct game {
     int nb_players;
 } game_t;
 
-int game();
+game_t *init_game(int width, int height);
+map_t *init_map(int width, int height);

@@ -15,6 +15,7 @@
 
 int main(int argc, char *argv[])
 {
+    init_game(10, 10);
     server_t *server = server_new(argc, argv);
     return 0;
 }
