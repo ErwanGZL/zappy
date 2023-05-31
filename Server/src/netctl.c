@@ -1,19 +1,25 @@
 #include "netctl.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 int netctl_accept(netctl_t *netctl)
 {
     socket_t *socket = calloc(1, sizeof(socket_t));
     socklen_t clilen = sizeof(socket->addr);
 
-    socket->fd = accept(netctl->entrypoint.fd, (sockaddr_in_t *)&socket->addr, &clilen);
+    socket->fd = accept(netctl->entrypoint.fd, (struct sockaddr *)&socket->addr, &clilen);
     if (socket->fd < 0)
     {
         perror("ERROR on accept");
         exit(EXIT_FAILURE);
     }
 
-    FD_SET(socket->fd, &netctl->readfds);
+    FD_SET(socket->fd, &netctl->watched_fd);
     list_add_elem_at_back(&netctl->clients, socket);
+
+    return socket->fd;
 }
 
 netctl_t *netctl_new(int port)
@@ -45,8 +51,8 @@ netctl_t *netctl_new(int port)
 
     listen(netctl->entrypoint.fd, 5);
 
-    FD_ZERO(&netctl->readfds);
-    FD_SET(netctl->entrypoint.fd, &netctl->readfds);
+    FD_ZERO(&netctl->watched_fd);
+    FD_SET(netctl->entrypoint.fd, &netctl->watched_fd);
 
     return netctl;
 }

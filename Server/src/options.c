@@ -21,6 +21,7 @@ void help()
 option_t *options_new(int argc, char *argv[])
 {
     option_t *options = calloc(1, sizeof(option_t));
+    options->freq = 100;
 
     static struct option long_options[] = {
         {"help", no_argument, 0, 'h'},
@@ -75,7 +76,6 @@ option_t *options_new(int argc, char *argv[])
         !options->width ||
         !options->height ||
         !options->clientsNb ||
-        !options->freq ||
         list_is_empty(options->teams))
     {
         fprintf(stderr, "Error: missing arguments\n");
