@@ -6,6 +6,7 @@
 */
 
 #include "server.h"
+#include "game.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +15,7 @@
 
 int main(int argc, char *argv[])
 {
+    game();
     server_t *server = server_new(argc, argv);
     return 0;
 }
