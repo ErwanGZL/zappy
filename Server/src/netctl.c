@@ -1,6 +1,6 @@
 #include "netctl.h"
 
-void netctl_accept(netctl_t *netctl)
+int netctl_accept(netctl_t *netctl)
 {
     socket_t *socket = calloc(1, sizeof(socket_t));
     socklen_t clilen = sizeof(socket->addr);
@@ -12,12 +12,14 @@ void netctl_accept(netctl_t *netctl)
         exit(EXIT_FAILURE);
     }
 
+    FD_SET(socket->fd, &netctl->readfds);
     list_add_elem_at_back(&netctl->clients, socket);
 }
 
 netctl_t *netctl_new(int port)
 {
     netctl_t *netctl = calloc(1, sizeof(netctl_t));
+
     netctl->entrypoint.fd = socket(AF_INET, SOCK_STREAM, 0);
     if (netctl->entrypoint.fd < 0)
     {
@@ -42,6 +44,9 @@ netctl_t *netctl_new(int port)
     }
 
     listen(netctl->entrypoint.fd, 5);
+
+    FD_ZERO(&netctl->readfds);
+    FD_SET(netctl->entrypoint.fd, &netctl->readfds);
 
     return netctl;
 }
