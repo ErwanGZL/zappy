@@ -25,6 +25,7 @@ class Data {
         void setMap(int x, int y, std::vector<int> ressources);
         void addTeam(std::string name);
         void setTimeUnit(int timeUnit);
+        int getTimeUnit();
         void addPlayer(int id, int x, int y, Orientation orientation, int level, std::string team);
         void addEgg (int id, int x, int y, std::string team);
         void removePlayer(int id);

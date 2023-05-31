@@ -122,3 +122,8 @@ std::vector<Player*> Data::getPlayersByCoords(int x, int y)
     }
     return players;
 }
+
+int Data::getTimeUnit()
+{
+    return _timeUnit;
+}

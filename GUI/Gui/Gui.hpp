@@ -12,6 +12,8 @@
 #include <thread>
 #include "Data.hpp"
 #include "Perlin.hpp"
+#include <climits>
+#include <cstdlib>
 
 struct playerSprite_s {
     sf::Sprite sprite;
@@ -42,17 +44,21 @@ class Gui {
         ~Gui();
         void run();
         void generateMap();
+        void animate();
 
     private:
         int _port;
         std::string _machine;
         sf::RenderWindow _window;
-        sf::View _view;
+        sf::View _viewGlobal;
         sf::Font _font;
         sf::Clock _clock;
 
-        std::vector<std::vector<tileData_s*>> _map;
+        sf::Texture _textureMap;
+
+        std::vector<tileData_s*> _map;
         sf::IntRect getRect(int x, int y, std::vector<std::vector<int>> map);
+        sf::IntRect getRectBorder(int x, int y, int *rotate);
 
         Data *_data;
 };
