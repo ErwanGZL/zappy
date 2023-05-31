@@ -2,6 +2,8 @@
 
 #include "list.h"
 
+typedef char* team_t;
+
 typedef struct
 {
     double freq;
