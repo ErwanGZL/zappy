@@ -16,5 +16,5 @@ class NetCTL():
     def send(self, data):
         self.socket.send(data)
 
-    def recv(self, size):
+    def recv(self, size) -> bytes:
         return self.socket.recv(size)
