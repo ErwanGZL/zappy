@@ -1,4 +1,6 @@
 #include "netctl.h"
+#include <stdio.h>
+#include <unistd.h>
 
 int netctl_accept(netctl_t *netctl)
 {
