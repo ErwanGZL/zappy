@@ -1,0 +1,19 @@
+#!/bin/python3
+
+import AI as zappy_ai
+import sys
+
+if __name__ == "__main__":
+    try:
+        if len(sys.argv) == 1:
+            server_port = int(sys.argv[1])
+        elif len(sys.argv) == 3:
+            server_addr = sys.argv[1]
+            server_port = int(sys.argv[2])
+        else:
+            raise Exception("Usage: ./zappy_ai [server_addr] server_port")
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+
+    zappy_ai.AI(server_port)
