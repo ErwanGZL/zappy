@@ -16,5 +16,7 @@
 int main(int argc, char *argv[])
 {
     server_t *server = server_new(argc, argv);
-    return 0;
+    int status = server_run(server);
+    server_destroy(server);
+    return status;
 }
