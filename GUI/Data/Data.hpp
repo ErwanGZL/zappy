@@ -30,6 +30,9 @@ class Data {
         void addEgg (int id, int x, int y, std::string team);
         void removePlayer(int id);
         void removeEgg(int id);
+        std::vector<Player*> getPlayers();
+        std::vector<Egg*> getEggs();
+        std::vector<Team*> getTeams();
         Player *getPlayerById(int id);
         Egg *getEggById(int id);
         std::vector<Player*> getPlayersByCoords(int x, int y);

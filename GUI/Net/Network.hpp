@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <vector>
+#include <math.h>
 
 #include "Data.hpp"
 

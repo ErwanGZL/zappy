@@ -127,3 +127,18 @@ int Data::getTimeUnit()
 {
     return _timeUnit;
 }
+
+std::vector<Player*> Data::getPlayers()
+{
+    return _players;
+}
+
+std::vector<Egg*> Data::getEggs()
+{
+    return _eggs;
+}
+
+std::vector<Team*> Data::getTeams()
+{
+    return _teams;
+}

@@ -44,12 +44,14 @@ int Network::teamName(std::string str)
 
 int Network::playerConnect(std::string str)
 {
+    std::string tmp = str;
     int id = std::stoi(str.substr(0, str.find(" ")));
-    int x = std::stoi(str.substr(str.find(" ") + 1));
-    int y = std::stoi(str.substr(str.find(" ") + 1));
-    std::string tmp = str.substr(str.find(" ") + 1);
+    tmp = tmp.substr(str.find(" ") + 1);
+    int x = std::stoi(str.substr(0, str.find(" ")));
+    tmp = tmp.substr(str.find(" ") + 1);
+    int y = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
-    Orientation orientation = static_cast<Orientation>(std::stoi(tmp.substr(0, tmp.find(" "))));
+    Orientation orientation = static_cast<Orientation>(pow(2, std::stoi(tmp.substr(0, tmp.find(" "))) - 1));
     tmp = tmp.substr(tmp.find(" ") + 1);
     int level = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
@@ -60,11 +62,18 @@ int Network::playerConnect(std::string str)
 
 int Network::playerPosition(std::string str)
 {
+    std::string tmp = str;
+    std::cout << str << std::endl;
     int id = std::stoi(str.substr(0, str.find(" ")));
-    int x = std::stoi(str.substr(str.find(" ") + 1));
-    int y = std::stoi(str.substr(str.find(" ") + 1));
+    tmp = tmp.substr(str.find(" ") + 1);
+    int x = std::stoi(str.substr(0, str.find(" ")));
+    tmp = tmp.substr(str.find(" ") + 1);
+    int y = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    Orientation orientation = static_cast<Orientation>(pow(2, std::stoi(tmp.substr(0, tmp.find(" "))) - 1));
     _data->getPlayerById(id)->setX(x);
     _data->getPlayerById(id)->setY(y);
+    _data->getPlayerById(id)->setOrientation(orientation);
     return 0;
 }
 

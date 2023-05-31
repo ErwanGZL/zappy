@@ -18,14 +18,12 @@
 struct playerSprite_s {
     sf::Sprite sprite;
     sf::Texture texture;
-    sf::Vector2f position;
     sf::IntRect rect;
     sf::Clock clock;
+    bool isMoving = false;
     int frame = 0;
     int nbFrame = 0;
     int id = 0;
-    std::string team;
-    Orientation orientation;
 };
 
 struct tileData_s {
@@ -44,6 +42,10 @@ class Gui {
         ~Gui();
         void run();
         void generateMap();
+        void generatePlayer();
+        void updateData();
+        void displayMap();
+        void displayPlayer();
         void animate();
 
     private:
@@ -52,11 +54,12 @@ class Gui {
         sf::RenderWindow _window;
         sf::View _viewGlobal;
         sf::Font _font;
-        sf::Clock _clock;
 
         sf::Texture _textureMap;
+        sf::Texture _texturePlayer;
 
         std::vector<tileData_s*> _map;
+        std::vector<playerSprite_s*> _players;
         sf::IntRect getRect(int x, int y, std::vector<std::vector<int>> map);
         sf::IntRect getRectBorder(int x, int y, int *rotate);
 
