@@ -24,6 +24,7 @@ struct playerSprite_s {
     int frame = 0;
     int nbFrame = 0;
     int id = 0;
+    int stockLeft = 0;
 };
 
 struct tileData_s {

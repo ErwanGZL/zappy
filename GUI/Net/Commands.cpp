@@ -45,13 +45,16 @@ int Network::teamName(std::string str)
 int Network::playerConnect(std::string str)
 {
     std::string tmp = str;
-    int id = std::stoi(str.substr(0, str.find(" ")));
-    tmp = tmp.substr(str.find(" ") + 1);
-    int x = std::stoi(str.substr(0, str.find(" ")));
-    tmp = tmp.substr(str.find(" ") + 1);
+    int id = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int x = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
     int y = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
-    Orientation orientation = static_cast<Orientation>(pow(2, std::stoi(tmp.substr(0, tmp.find(" "))) - 1));
+    int o = std::stoi(tmp.substr(0, tmp.find(" "))) - 1;
+    if (o == 0) o = 2;
+    else if (o == 2) o = 0;
+    Orientation orientation = static_cast<Orientation>(pow(2, o));
     tmp = tmp.substr(tmp.find(" ") + 1);
     int level = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
@@ -63,14 +66,16 @@ int Network::playerConnect(std::string str)
 int Network::playerPosition(std::string str)
 {
     std::string tmp = str;
-    std::cout << str << std::endl;
-    int id = std::stoi(str.substr(0, str.find(" ")));
-    tmp = tmp.substr(str.find(" ") + 1);
-    int x = std::stoi(str.substr(0, str.find(" ")));
-    tmp = tmp.substr(str.find(" ") + 1);
+    int id = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int x = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
     int y = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
-    Orientation orientation = static_cast<Orientation>(pow(2, std::stoi(tmp.substr(0, tmp.find(" "))) - 1));
+    int o = std::stoi(tmp.substr(0, tmp.find(" "))) - 1;
+    if (o == 0) o = 2;
+    else if (o == 2) o = 0;
+    Orientation orientation = static_cast<Orientation>(pow(2, o));
     _data->getPlayerById(id)->setX(x);
     _data->getPlayerById(id)->setY(y);
     _data->getPlayerById(id)->setOrientation(orientation);
@@ -153,7 +158,6 @@ int Network::endIncantation(std::string str)
     int y = std::stoi(str.substr(0, str.find(" ")));
     tmp = tmp.substr(str.find(" ") + 1);
     std::vector<Player*> players = _data->getPlayersByCoords(x, y);
-    std::cout << players.size() << std::endl;
     for (int i = 0; i < players.size(); i++) {
         players[i]->setStatus(NONE);
         players[i]->setLevel(players[i]->getLevel() + 1);
@@ -191,7 +195,7 @@ int Network::playerTake(std::string str)
 int Network::playerDie(std::string str)
 {
     int index = std::stoi(str.substr(0, str.find(" ")));
-    _data->getPlayerById(index)->setStatus(DEAD);
+    _data->removePlayer(index);
     return 0;
 }
 
