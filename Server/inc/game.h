@@ -1,8 +1,10 @@
 
 #pragma once
-#include "stdio.h"
 #include "list.h"
-#include "stdlib.h"
+#include "options.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 //macro that return the position of the tile in the map, if the position is out of the map, it will return the position of the tile on the other side of the map
 #define GET_POS(pos, max_pos) (pos.x = pos.x % max_pos.x, pos.y = pos.y % max_pos.y)

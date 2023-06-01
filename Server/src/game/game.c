@@ -13,6 +13,42 @@ minerals_t init_minerals()
     return minerals;
 }
 
+team_t **get_team(game_t *game, team_name_t team_name)
+{
+    for (list_t ptr = game->teams; ptr != NULL; ptr = ptr->next)
+        if ( strcmp(((team_t *) ptr->value)->name, team_name) == 0)
+            return ((team_t **) &ptr->value);
+    return NULL;
+}
+
+game_t *add_player(game_t *game, team_name_t team_name, int fd)
+{
+    player_t *player = calloc(1, sizeof(player_t));
+    player->fd = fd;
+    player->team_name = team_name;
+    player->entity = calloc(1, sizeof(entity_t));
+    player->entity->pos.x = rand() % game->map->width;
+    player->entity->pos.y = rand() % game->map->height;
+    player->entity->level = 1;
+    player->entity->minerals = init_minerals();
+    list_add_elem_at_back(&game->players, player);
+    team_t **ptr = get_team(game, team_name);
+    if (ptr != NULL)
+        (*ptr)->nb_players++;
+    game->nb_players++;
+    return game;
+}
+
+game_t *add_team(game_t *game, int max_players, team_name_t name)
+{
+    team_t *team = calloc(1, sizeof(team_t));
+    team->max_players = max_players;
+    team->name = name;
+    list_add_elem_at_back(&game->teams, team);
+    game->nb_teams++;
+    return game;
+}
+
 map_t *init_map(int width, int height)
 {
     map_t *map = calloc(1, sizeof(map_t));
