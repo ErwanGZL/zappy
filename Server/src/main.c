@@ -15,6 +15,8 @@
 
 int main(int argc, char *argv[])
 {
+    game_t *game = init_game(10, 10);
+    game = spawn_ressources(game);
     server_t *server = server_new(argc, argv);
     int status = server_run(server);
     server_destroy(server);
