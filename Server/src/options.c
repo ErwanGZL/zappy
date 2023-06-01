@@ -5,11 +5,26 @@
 #include <stdlib.h>
 #include <string.h>
 
+void help()
+{
+    printf("USAGE: ./zappy_server [OPTIONS]\n");
+    printf("OPTIONS: (R)equired (O)ptional\n");
+    printf(" R\t-p --port <port>\t\tPort number\n");
+    printf(" R\t-x --width <width>\t\tWorld width\n");
+    printf(" R\t-y --height <height>\t\tWorld height\n");
+    printf(" R\t-n --name [<name>,...]\t\tTeam names\n");
+    printf(" R\t-c --clientsNb <number>\t\tNumber of authorized clients per team\n");
+    printf(" R\t-f --freq <frequency>\t\tFrequency of the server\n");
+    printf(" O\t-h --help\t\t\tDisplay this help\n");
+}
+
 option_t *options_new(int argc, char *argv[])
 {
     option_t *options = calloc(1, sizeof(option_t));
+    options->freq = 100;
 
     static struct option long_options[] = {
+        {"help", no_argument, 0, 'h'},
         {"port", required_argument, 0, 'p'},
         {"width", required_argument, 0, 'x'},
         {"height", required_argument, 0, 'y'},
@@ -20,10 +35,13 @@ option_t *options_new(int argc, char *argv[])
 
     int option_index = 0;
     int opt = 0;
-    while ((opt = getopt_long(argc, argv, "p:x:y:n:c:f:", long_options, &option_index)) != -1)
+    while ((opt = getopt_long(argc, argv, "p:x:y:n:c:f:h", long_options, &option_index)) != -1)
     {
         switch (opt)
         {
+        case 'h':
+            help();
+            exit(0);
         case 'p':
             options->port = atoi(optarg);
             break;
@@ -58,10 +76,10 @@ option_t *options_new(int argc, char *argv[])
         !options->width ||
         !options->height ||
         !options->clientsNb ||
-        !options->freq ||
         list_is_empty(options->teams))
     {
         fprintf(stderr, "Error: missing arguments\n");
+        help();
         exit(84);
     }
 

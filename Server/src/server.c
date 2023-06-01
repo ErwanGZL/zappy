@@ -10,20 +10,36 @@ server_t *server_new(int argc, char *argv[])
 
 void server_select(server_t *server)
 {
-    fd_set readfds = server->netctl->readfds;
-    select(0, &readfds, NULL, NULL, NULL);
+    fd_set readfds = server->netctl->watched_fd;
+    int activity = select(FD_SETSIZE, &readfds, NULL, NULL, NULL);
+    printf("Activity: %d\n", activity);
     if (FD_ISSET(server->netctl->entrypoint.fd, &readfds))
     {
-        int fd = netctl_accept(server->netctl);
         printf("New connection\n");
+        int fd = netctl_accept(server->netctl);
         server_handshake(server, fd);
     }
-    for (list_t head = server->netctl->clients; head != NULL; head = head->next)
+    for (list_t head = server->netctl->clients; head != NULL;)
     {
         if (FD_ISSET(((socket_t *)head->value)->fd, &readfds))
         {
-            printf("New message\n");
+            char buffer[1024] = {0};
+            ssize_t rbytes = recv(((socket_t *)head->value)->fd, buffer, 1024, 0);
+            if (rbytes == 0)
+            {
+                printf("Client disconnected\n");
+                close(((socket_t *)head->value)->fd);
+                FD_CLR(((socket_t *)head->value)->fd, &server->netctl->watched_fd);
+                list_del_elem_at_front(&head);
+                continue;
+            }
+            else
+            {
+                printf("Received %ld bytes\n", rbytes);
+                printf("Received: %s\n", buffer);
+            }
         }
+        head = head->next;
     }
 }
 
@@ -37,8 +53,20 @@ void server_destroy(server_t *server)
 void server_handshake(server_t *server, int fd)
 {
     send(fd, "WELCOME\n", 8, 0);
-    char buffer[1024];
-    recv(fd, NULL, 0, 0);
+    char buffer[1024] = {0};
+    recv(fd, buffer, 1024, 0);
     printf("Handshake done\n");
     printf("Client is on team %s\n", buffer);
+    int clients_left = server->options->clientsNb - list_get_size(server->netctl->clients);
+    dprintf(fd, "%d\n" "%d %d\n", clients_left, server->options->width, server->options->height);
+}
+
+int server_run(server_t *server)
+{
+    while (1)
+    {
+        server_select(server);
+    }
+
+    return 0;
 }

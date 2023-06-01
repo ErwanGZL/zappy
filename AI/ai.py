@@ -1,18 +1,22 @@
-from . import netctl
-import sys
-
+import socket
 
 class AI():
-    def __init__(self, team_name, server_port, server_addr='localhost') -> None:
-        self.server_addr = (server_addr, server_port)
-        self.netctl = netctl.NetCTL()
+    def __init__(self, team_name, port, host='localhost') -> None:
+        self.team_name = team_name
+        self.servaddr = (host, port)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.pos_in_queue = 0
+        self.map_size = (0, 0)
         self.conn_hanshake()
 
     def conn_hanshake(self):
-        self.netctl.connect(self.server_addr[0], self.server_addr[1])
-        if self.netctl.recv(1024) != b'WELCOME\n':
-            raise Exception("Server didn't send WELCOME, received: " + self.netctl.recv(1024).decode())
-        self.netctl.send(b'\n')
+        self.socket.connect(self.servaddr)
+        r = self.socket.recv(1024)
+        if r == b"WELCOME\n":
+            print("Connection established")
+        else:
+            print("Connection failed")
+        self.socket.send(self.team_name.encode())
 
     def run(self):
         pass
