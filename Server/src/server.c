@@ -59,6 +59,11 @@ void server_handshake(server_t *server, int fd)
     printf("Client is on team %s\n", buffer);
     int clients_left = server->options->clientsNb - list_get_size(server->netctl->clients);
     dprintf(fd, "%d\n" "%d %d\n", clients_left, server->options->width, server->options->height);
+    if (clients_left == 0)
+    {
+        printf("No places left\n");
+        close(fd);
+    }
 }
 
 int server_run(server_t *server)

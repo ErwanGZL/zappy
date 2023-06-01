@@ -72,7 +72,7 @@ class AI():
 
             except socket.timeout:  # Timeout occurred, check the flag variable
                 if not self.running:
-                    break
+                    return
 
     def __del__(self):
         """
@@ -80,7 +80,8 @@ class AI():
         It closes the network thread and the socket.
         """
         self.running = False
-        self.ntw_thread.join()
+        if threading.current_thread() != self.ntw_thread:
+            self.ntw_thread.join()
         self.socket.close()
 
     def run(self):
