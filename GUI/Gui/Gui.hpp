@@ -20,11 +20,13 @@ struct playerSprite_s {
     sf::Texture texture;
     sf::IntRect rect;
     sf::Clock clock;
+    sf::Clock clockAnimate;
     bool isMoving = false;
     int frame = 0;
     int nbFrame = 0;
     int id = 0;
     int stockLeft = 0;
+    int left = 0;
 };
 
 struct tileData_s {

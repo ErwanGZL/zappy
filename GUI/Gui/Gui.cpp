@@ -220,6 +220,18 @@ void Gui::animate()
             }
         }
     }
+    for (int i = 0;i < _players.size();i++) {
+        if (_players[i]->nbFrame > 0) {
+            if (_players[i]->clockAnimate.getElapsedTime().asMilliseconds() > 1000 / _data->getTimeUnit() && _players[i]->isMoving) {
+                _players[i]->frame++;
+                if (_players[i]->frame >= _players[i]->nbFrame)
+                    _players[i]->frame = 0;
+                _players[i]->rect.left = _players[i]->left + _players[i]->frame * 16;
+                _players[i]->sprite.setTextureRect(_players[i]->rect);
+                _players[i]->clockAnimate.restart();
+            }
+        }
+    }
 }
 
 void Gui::displayMap()
@@ -290,29 +302,33 @@ void Gui::updateData()
         int elapsedTime = _players[i]->clock.getElapsedTime().asMilliseconds();
         int speed = _data->getTimeUnit() / 10;
 
-        if (elapsedTime > 1000 / _data->getTimeUnit()) {
+        if (elapsedTime > 10) {
             Orientation orientation = _data->getPlayerById(_players[i]->id)->getOrientation();
             if (!_players[i]->isMoving) break;
 
-            int top = (_map[(_players[i]->sprite.getPosition().y / 16) * _data->getWidth() + (_players[i]->sprite.getPosition().x / 16)]->id == 0) ? 16 * 15 : 16 * 10;
+            int top = (_map[_data->getPlayerById(_players[i]->id)->getX() + _data->getPlayerById(_players[i]->id)->getY() * _data->getWidth()]->id == 0) ? 16 * 15 : 16 * 10;
             _players[i]->rect.top = top;
             if (orientation == NORTH) {
                 _players[i]->rect.left = _players[i]->stockLeft + 16 * 2;
+                _players[i]->left = _players[i]->stockLeft + 16 * 2;
                 _players[i]->sprite.move(0, -speed);
                 if (_players[i]->sprite.getPosition().y < _data->getPlayerById(_players[i]->id)->getY() * 16)
                     _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
             } else if (orientation == SOUTH) {
                 _players[i]->rect.left = _players[i]->stockLeft + 0;
+                _players[i]->left = _players[i]->stockLeft + 0;
                 _players[i]->sprite.move(0, speed);
                 if (_players[i]->sprite.getPosition().y > _data->getPlayerById(_players[i]->id)->getY() * 16)
                     _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
             } else if (orientation == EAST) {
                 _players[i]->rect.left = _players[i]->stockLeft + 16 * 4;
+                _players[i]->left = _players[i]->stockLeft + 16 * 4;
                 _players[i]->sprite.move(speed, 0);
                 if (_players[i]->sprite.getPosition().x > _data->getPlayerById(_players[i]->id)->getX() * 16)
                     _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
             } else if (orientation == WEST) {
                 _players[i]->rect.left = _players[i]->stockLeft + 16 * 6;
+                _players[i]->left = _players[i]->stockLeft + 16 * 6;
                 _players[i]->sprite.move(-speed, 0);
                 if (_players[i]->sprite.getPosition().x < _data->getPlayerById(_players[i]->id)->getX() * 16)
                     _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
