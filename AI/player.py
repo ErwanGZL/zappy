@@ -95,13 +95,32 @@ class Inventory:
 ##class player:
 
 class Player:
+    level : int = 1
     def __init__(self):
         self.level = 1
         self.inventory = Inventory()
+    def look(self):
+        pass
+    def broadcast(self):
+        pass
+    def elevation(self):
+        pass
+    def fork(self):
+        pass
+    def left(self):
+        pass
+    def right(self):
+        pass
+    def forward(self):
+        pass
 
-p = Player()
-# p.inventory.print_inventory()
-p.inventory.add_ressource(Ressouces.FOOD, 10)
-# p.inventory.print_inventory()
-p.inventory.add_ressource(Ressouces.DERAUMERE, 5)
-p.inventory.print_inventory()
+for_level = [
+#nb player, linemate, deraumere, sibur, mendiane, phiras, thystame
+    [1, 1, 0, 0, 0, 0, 0],
+    [2, 1, 1, 1, 0, 0, 0],
+    [2, 2, 0, 1, 0, 2, 0],
+    [4, 1, 1, 2, 0, 1, 0],
+    [4, 1, 2, 1, 3, 0, 0],
+    [6, 1, 2, 3, 0, 1, 0],
+    [6, 2, 2, 2, 2, 2, 1],
+]
