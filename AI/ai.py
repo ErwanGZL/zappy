@@ -10,7 +10,8 @@ class AI():
         """
         # AI Data
         self.team_name = team_name
-        self.map_size: tuple[int, int] = (0, 0)
+        self.map_x = 0
+        self.map_y = 0
 
         # Network Data
         self.servaddr = (host, port)
@@ -39,24 +40,24 @@ class AI():
             self.socket.connect(self.servaddr)
         except ConnectionRefusedError:
             print("Error: Connection refused")
+            self.lock.release()
             return
 
         r = self.socket.recv(1024)  # Receive the welcome message
         if r != b"WELCOME\n":
             print("Error: Invalid welcome message")
+            print(r)
             return
 
         # Sending the team name to the server
         # and receiving the map size and the number of slots available
         self.socket.send(f"{self.team_name}\n".encode())
         r = self.socket.recv(1024)
-        self.slots_avl, self.map_size[0], self.map_size[1] = [
-            int(x) for x in r.split("\n").split(" ")]
+        self.slots_avl, self.map_x, self.map_y = [int(x) for x in r.split()]
 
         if self.slots_avl > 0:
             self.connected = True
-        print(
-            f"Connected to the server. Slots available: {self.slots_avl}, Map size: w={self.map_size[0]}, h={self.map_size[1]}")
+
         self.lock.release()
 
         self.socket.settimeout(0.5)
@@ -90,6 +91,8 @@ class AI():
         self.lock.acquire()  # wait for the connection handshake sequence to finish
         if not self.connected:
             return
+        print(
+            f"Connected to the server. Slots available: {self.slots_avl}, Map size: w={self.map_x}, h={self.map_y}")
         self.lock.release()
 
         # Client is now connected to the server
