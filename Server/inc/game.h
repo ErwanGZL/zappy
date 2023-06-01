@@ -1,11 +1,14 @@
 
 #pragma once
-#include "stdio.h"
 #include "list.h"
-#include "stdlib.h"
+#include "options.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 //macro that return the position of the tile in the map, if the position is out of the map, it will return the position of the tile on the other side of the map
 #define GET_POS(pos, max_pos) (pos.x = pos.x % max_pos.x, pos.y = pos.y % max_pos.y)
+#define SEND_POS(pos, max_pos) (pos.y = max_pos.y - pos.y - 1)
 
 //start map_definition structures
 typedef struct pos {
@@ -46,19 +49,15 @@ typedef struct entity {
 } entity_t;
 
 typedef struct player {
-    int id;
-    int team_id;
     int fd;
+    team_name_t team_name;
     entity_t *entity;
-    struct player *next;
 } player_t;
 
 typedef struct team {
-    int id;
-    char *name;
+    team_name_t name;
     int max_players;
-    int slots_available;
-    struct team *next;
+    int nb_players;
 } team_t;
 
 //end of player_definition structures
@@ -73,4 +72,9 @@ typedef struct game {
     int nb_players;
 } game_t;
 
-int game();
+game_t *init_game(int width, int height);
+map_t *init_map(int width, int height);
+minerals_t init_minerals();
+game_t *add_player(game_t *game, team_name_t team_name, int fd);
+game_t *add_team(game_t *game, int max_players, team_name_t name);
+team_t **get_team(game_t *game, team_name_t team_name);
