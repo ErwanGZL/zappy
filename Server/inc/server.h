@@ -10,6 +10,7 @@
 #include "list.h"
 #include "netctl.h"
 #include "options.h"
+#include "game.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,9 +20,11 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 
-typedef struct {
+typedef struct
+{
     option_t *options;
     netctl_t *netctl;
+    game_t *game;
 } server_t;
 
 server_t *server_new(int argc, char *argv[]);

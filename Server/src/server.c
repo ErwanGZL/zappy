@@ -5,6 +5,7 @@ server_t *server_new(int argc, char *argv[])
     server_t *server = calloc(1, sizeof(server_t));
     server->options = options_new(argc, argv);
     server->netctl = netctl_new(server->options->port);
+    server->game = init_game(server->options);
     return server;
 }
 
@@ -19,8 +20,9 @@ void server_select(server_t *server)
         int fd = netctl_accept(server->netctl);
         server_handshake(server, fd);
     }
-    for (list_t head = server->netctl->clients; head != NULL;)
+    for (list_t head = server->netctl->clients; head != NULL; head = head->next)
     {
+        list_dump(head, &socket_dump);
         if (FD_ISSET(((socket_t *)head->value)->fd, &readfds))
         {
             char buffer[1024] = {0};
@@ -28,10 +30,8 @@ void server_select(server_t *server)
             if (rbytes == 0)
             {
                 printf("Client disconnected\n");
-                close(((socket_t *)head->value)->fd);
-                FD_CLR(((socket_t *)head->value)->fd, &server->netctl->watched_fd);
-                list_del_elem_at_front(&head);
-                continue;
+                netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
+                list_dump(head, &socket_dump);
             }
             else
             {
@@ -39,7 +39,6 @@ void server_select(server_t *server)
                 printf("Received: %s\n", buffer);
             }
         }
-        head = head->next;
     }
 }
 
@@ -57,13 +56,23 @@ void server_handshake(server_t *server, int fd)
     recv(fd, buffer, 1024, 0);
     printf("Handshake done\n");
     printf("Client is on team %s\n", buffer);
-    int clients_left = server->options->clientsNb - list_get_size(server->netctl->clients);
-    dprintf(fd, "%d\n" "%d %d\n", clients_left, server->options->width, server->options->height);
-    if (clients_left == 0)
+    for (list_t head = server->game->teams; head != NULL; head = head->next)
     {
-        printf("No places left\n");
-        close(fd);
+        team_t *team = (team_t *)head->value;
+        if (strncmp(team->name, buffer, strlen(team->name)) == 0 && team->nb_players < team->max_players)
+        {
+            dprintf(fd, "%d\n"
+                        "%d %d\n",
+                    team->max_players - team->nb_players,
+                    server->options->width,
+                    server->options->height);
+            return;
+        }
     }
+    printf("Team not found\n");
+    dprintf(fd, "0\n"
+                "0 0\n");
+    netctl_disconnect(server->netctl, fd);
 }
 
 int server_run(server_t *server)
