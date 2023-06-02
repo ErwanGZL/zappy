@@ -21,6 +21,9 @@ typedef struct netctl_s {
     list_t clients;
 } netctl_t;
 
+void socket_dump(const void *value);
+
 netctl_t *netctl_new(int port);
 int netctl_accept(netctl_t *netctl);
+void netctl_disconnect(netctl_t *netctl, int fd);
 void netctl_destroy(netctl_t *netctl);

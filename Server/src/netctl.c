@@ -6,6 +6,21 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+void netctl_disconnect(netctl_t *netctl, int fd)
+{
+    for (list_t *head = &netctl->clients; head != NULL; head = &(*head)->next)
+    {
+        socket_t *socket = (socket_t *)(*head)->value;
+        if (socket->fd == fd)
+        {
+            close(socket->fd);
+            FD_CLR(socket->fd, &netctl->watched_fd);
+            list_del_elem_at_front(head);
+            return;
+        }
+    }
+}
+
 int netctl_accept(netctl_t *netctl)
 {
     socket_t *socket = calloc(1, sizeof(socket_t));
@@ -22,6 +37,12 @@ int netctl_accept(netctl_t *netctl)
     list_add_elem_at_back(&netctl->clients, socket);
 
     return socket->fd;
+}
+
+void socket_dump(const void *value)
+{
+    socket_t *socket = (socket_t *)value;
+    printf("Socket: fd=%d\n", socket->fd);
 }
 
 netctl_t *netctl_new(int port)
