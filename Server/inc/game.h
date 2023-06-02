@@ -72,7 +72,7 @@ typedef struct game {
     int nb_players;
 } game_t;
 
-game_t *init_game(int width, int height);
+game_t *init_game(option_t *opt);
 map_t *init_map(int width, int height);
 minerals_t init_minerals();
 game_t *add_player(game_t *game, team_name_t team_name, int fd);
