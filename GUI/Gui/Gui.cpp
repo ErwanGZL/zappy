@@ -62,33 +62,16 @@ void Gui::generateMap()
     std::vector<std::vector<int>> noiseMap = perlin.run();
     for (int i = 0; i < noiseMap.size() ; i++) {
         for (int j = 0; j < noiseMap[i].size(); j++) {
-            tileData_s *tile = new tileData_s;
-            tile->texture = _textureMap;
-            tile->rect = getRect(i, j, noiseMap);
-            tile->sprite.setTexture(tile->texture);
-            tile->sprite.setOrigin(8, 8);
-            tile->sprite.setTextureRect(tile->rect);
-            tile->sprite.setPosition(j * 16, i * 16);
-            tile->nbFrame = (noiseMap[i][j] == 0) ? 3 : 0;
-            tile->frame = 0;
-            tile->id = noiseMap[i][j];
+            TileGui *tile = new TileGui(i * 16, j * 16, noiseMap[j][i], &_textureMap, getRect(j, i, noiseMap), 0);
             _map.push_back(tile);
         }
     }
     for (int i = -width * 2; i < width * 4 ; i++) {
         for (int j =  -height * 2; j < height * 4; j++) {
             if (i < 0 || j < 0 || i >= width || j >= height) {
-                tileData_s *tile = new tileData_s;
                 int rotate = 0;
-                tile->texture = _textureMap;
-                tile->rect = getRectBorder(i, j, &rotate);
-                tile->sprite.setTexture(tile->texture);
-                tile->sprite.setTextureRect(tile->rect);
-                tile->sprite.setOrigin(8, 8);
-                tile->sprite.setPosition(i * 16, j * 16);
-                tile->sprite.setRotation(rotate);
-                tile->nbFrame = (tile->rect.top == 16 * 6) ? 3 : 0;
-                tile->frame = 0;
+                sf::IntRect rect = getRectBorder(i, j, &rotate);
+                TileGui *tile = new TileGui(i * 16, j * 16, -1, &_textureMap, rect, rotate);
                 _map.push_back(tile);
             }
         }
@@ -205,20 +188,10 @@ sf::IntRect Gui::getRect(int x, int y, std::vector<std::vector<int>> mappa)
     return (sf::IntRect(pos.x, pos.y, 16, 16));
 }
 
-
 void Gui::animate()
 {
     for (int i = 0; i < _map.size(); i++) {
-        if (_map[i]->nbFrame > 0) {
-            if (_map[i]->clock.getElapsedTime().asMilliseconds() > 1000 / _data->getTimeUnit()) {
-                _map[i]->frame++;
-                if (_map[i]->frame >= _map[i]->nbFrame)
-                    _map[i]->frame = 0;
-                _map[i]->rect.left = _map[i]->frame * 16;
-                _map[i]->sprite.setTextureRect(_map[i]->rect);
-                _map[i]->clock.restart();
-            }
-        }
+        _map[i]->animate(_data->getTimeUnit());
     }
     for (int i = 0;i < _players.size();i++) {
         if (_players[i]->nbFrame > 0) {
@@ -237,7 +210,7 @@ void Gui::animate()
 void Gui::displayMap()
 {
     for (int i = 0; i < _map.size(); i++) {
-        _window.draw(_map[i]->sprite);
+        _window.draw(_map[i]->getSprite());
     }
 }
 
@@ -265,7 +238,7 @@ void Gui::generatePlayer()
         playerSprite_s *player = new playerSprite_s;
         player->stockLeft = teamId * 8 * 16;
         player->sprite.setPosition(sf::Vector2f(_data->getPlayerById(ids[i])->getX() * 16, _data->getPlayerById(ids[i])->getY() * 16));
-        int top = (_map[(player->sprite.getPosition().y / 16) * _data->getWidth() + (player->sprite.getPosition().x / 16)]->id == 0) ? 16 * 15 : 16 * 10;
+        int top = stateTop(ids[i]);
         player->texture.loadFromFile("GUI/sprites/Sprites.png");
         player->rect = sf::IntRect(player->stockLeft, top, 16, 16);
         player->sprite.setTexture(player->texture);
@@ -290,6 +263,22 @@ void Gui::generatePlayer()
     }
 }
 
+int Gui::stateTop(int id)
+{
+    int top = 0;
+    Player *player = _data->getPlayerById(id);
+    PlayerStatus status = player->getStatus();
+    if (status == NONE)
+        top = (_map[player->getX() + player->getY() * _data->getWidth()]->getId() == 0) ? 16 * 15 : 16 * 10;
+    else if (status == INCANTATION)
+        top = 16 * 14;
+    else if (status == PUSHING)
+        top = 16 * 12;
+    else if (status == LAYING)
+        top = 16 * 13;
+    return (top);
+}
+
 void Gui::updateData()
 {
     generatePlayer();
@@ -304,34 +293,35 @@ void Gui::updateData()
 
         if (elapsedTime > 10) {
             Orientation orientation = _data->getPlayerById(_players[i]->id)->getOrientation();
-            if (!_players[i]->isMoving) break;
 
-            int top = (_map[_data->getPlayerById(_players[i]->id)->getX() + _data->getPlayerById(_players[i]->id)->getY() * _data->getWidth()]->id == 0) ? 16 * 15 : 16 * 10;
+            int top = stateTop(_players[i]->id);
             _players[i]->rect.top = top;
-            if (orientation == NORTH) {
-                _players[i]->rect.left = _players[i]->stockLeft + 16 * 2;
-                _players[i]->left = _players[i]->stockLeft + 16 * 2;
-                _players[i]->sprite.move(0, -speed);
-                if (_players[i]->sprite.getPosition().y < _data->getPlayerById(_players[i]->id)->getY() * 16)
-                    _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
-            } else if (orientation == SOUTH) {
-                _players[i]->rect.left = _players[i]->stockLeft + 0;
-                _players[i]->left = _players[i]->stockLeft + 0;
-                _players[i]->sprite.move(0, speed);
-                if (_players[i]->sprite.getPosition().y > _data->getPlayerById(_players[i]->id)->getY() * 16)
-                    _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
-            } else if (orientation == EAST) {
-                _players[i]->rect.left = _players[i]->stockLeft + 16 * 4;
-                _players[i]->left = _players[i]->stockLeft + 16 * 4;
-                _players[i]->sprite.move(speed, 0);
-                if (_players[i]->sprite.getPosition().x > _data->getPlayerById(_players[i]->id)->getX() * 16)
-                    _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
-            } else if (orientation == WEST) {
-                _players[i]->rect.left = _players[i]->stockLeft + 16 * 6;
-                _players[i]->left = _players[i]->stockLeft + 16 * 6;
-                _players[i]->sprite.move(-speed, 0);
-                if (_players[i]->sprite.getPosition().x < _data->getPlayerById(_players[i]->id)->getX() * 16)
-                    _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
+            if (_players[i]->isMoving) {
+                if (orientation == NORTH) {
+                    _players[i]->rect.left = _players[i]->stockLeft + 16 * 2;
+                    _players[i]->left = _players[i]->stockLeft + 16 * 2;
+                    _players[i]->sprite.move(0, -speed);
+                    if (_players[i]->sprite.getPosition().y < _data->getPlayerById(_players[i]->id)->getY() * 16)
+                        _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
+                } else if (orientation == SOUTH) {
+                    _players[i]->rect.left = _players[i]->stockLeft + 0;
+                    _players[i]->left = _players[i]->stockLeft + 0;
+                    _players[i]->sprite.move(0, speed);
+                    if (_players[i]->sprite.getPosition().y > _data->getPlayerById(_players[i]->id)->getY() * 16)
+                        _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
+                } else if (orientation == EAST) {
+                    _players[i]->rect.left = _players[i]->stockLeft + 16 * 4;
+                    _players[i]->left = _players[i]->stockLeft + 16 * 4;
+                    _players[i]->sprite.move(speed, 0);
+                    if (_players[i]->sprite.getPosition().x > _data->getPlayerById(_players[i]->id)->getX() * 16)
+                        _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
+                } else if (orientation == WEST) {
+                    _players[i]->rect.left = _players[i]->stockLeft + 16 * 6;
+                    _players[i]->left = _players[i]->stockLeft + 16 * 6;
+                    _players[i]->sprite.move(-speed, 0);
+                    if (_players[i]->sprite.getPosition().x < _data->getPlayerById(_players[i]->id)->getX() * 16)
+                        _players[i]->sprite.setPosition(_data->getPlayerById(_players[i]->id)->getX() * 16, _data->getPlayerById(_players[i]->id)->getY() * 16);
+                }
             }
             _players[i]->sprite.setTextureRect(_players[i]->rect);
             _players[i]->clock.restart();

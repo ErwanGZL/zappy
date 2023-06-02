@@ -100,3 +100,8 @@ void Player::setStatus(PlayerStatus status)
 {
     _status = status;
 }
+
+PlayerStatus Player::getStatus()
+{
+    return _status;
+}
