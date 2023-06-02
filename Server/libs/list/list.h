@@ -16,6 +16,7 @@
 typedef struct node_s {
     void            *value;
     struct node_s   *next;
+    struct node_s   *prev;
 }   node_t;
 
 typedef node_t *list_t;
