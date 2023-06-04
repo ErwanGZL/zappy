@@ -20,9 +20,8 @@ void server_select(server_t *server)
         int fd = netctl_accept(server->netctl);
         server_handshake(server, fd);
     }
-    for (list_t head = server->netctl->clients; head != NULL; head = head->next)
+    for (list_t head = server->netctl->clients; head != NULL;)
     {
-        list_dump(head, &socket_dump);
         if (FD_ISSET(((socket_t *)head->value)->fd, &readfds))
         {
             char buffer[1024] = {0};
@@ -31,7 +30,8 @@ void server_select(server_t *server)
             {
                 printf("Client disconnected\n");
                 netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
-                list_dump(head, &socket_dump);
+                head = server->netctl->clients;
+                continue;
             }
             else
             {
@@ -39,6 +39,7 @@ void server_select(server_t *server)
                 printf("Received: %s\n", buffer);
             }
         }
+        head = head->next;
     }
 }
 
@@ -66,6 +67,7 @@ void server_handshake(server_t *server, int fd)
                     team->max_players - team->nb_players,
                     server->options->width,
                     server->options->height);
+            team->nb_players++;
             return;
         }
     }
