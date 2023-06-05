@@ -14,7 +14,7 @@ TileGui::TileGui(int x, int y, int id, sf::Texture *texture, sf::IntRect rect, i
     _y = y;
     _spriteTile.setTexture(*texture);
     _spriteRessource.setTexture(*texture);
-    _spriteRessource.setOrigin(8, 8);
+    _spriteRessource.setOrigin(16, 16);
     _spriteRessource.setScale(0.5, 0.5);
     _spriteTile.setTextureRect(rect);
     _spriteTile.setPosition(x, y);
@@ -38,7 +38,7 @@ void TileGui::update()
         int nb = _data->getMap()[_y/16][_x/16]->getRessources()[i];
         if (nb > _ressourcesPos[i].size()) {
             for (int j = 0; j < nb; j++) {
-                sf::Vector2f pos = sf::Vector2f(_x + rand() % 16, _y + rand() % 16);
+                sf::Vector2f pos = sf::Vector2f(_x + rand() % 8, _y + rand() % 8);
                 _ressourcesPos[i].push_back(pos);
             }
         } else if (nb < _ressourcesPos[i].size()) {
