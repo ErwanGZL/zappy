@@ -9,12 +9,12 @@ team_t **get_team(game_t *game, team_name_t team_name)
     return NULL;
 }
 
-int *init_minerals()
+int *init_ressources()
 {
-    int *minerals = calloc(6, sizeof(int));
-    for (int i = 0; i < 6; i++)
-        minerals[i] = 0;
-    return minerals;
+    int *res = calloc(7, sizeof(int));
+    for (int i = 0; i < 7; i++)
+        res[i] = 0;
+    return res;
 }
 
 game_t *add_player(game_t *game, team_name_t team_name, int fd)
@@ -26,6 +26,7 @@ game_t *add_player(game_t *game, team_name_t team_name, int fd)
     player->entity->pos.x = rand() % game->map->width;
     player->entity->pos.y = rand() % game->map->height;
     player->entity->level = 1;
+    player->entity->orientation = (pos_t) {1,1};
     player->entity->food_left = 1260;
     player->entity->minerals = init_minerals();
     list_add_elem_at_back(&game->players, player);
@@ -55,8 +56,7 @@ map_t *init_map(int width, int height)
     for (int i = 0; i < height; i++) {
         map->tiles[i] = calloc(width, sizeof(map_tile_t));
         for (int a = 0 ; a < width ; a++) {
-            map->tiles[i][a].food = 0;
-            map->tiles[i][a].minerals = init_minerals();
+            map->tiles[i][a].ressources = init_ressources();
             map->tiles[i][a].player_id = -1;
         }
     }

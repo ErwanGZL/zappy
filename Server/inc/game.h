@@ -37,8 +37,7 @@ typedef struct pos {
 } pos_t;
 
 typedef struct map_tile {
-    int food;
-    int *minerals;
+    int *ressources;
     int player_id;
 } map_tile_t;
 
