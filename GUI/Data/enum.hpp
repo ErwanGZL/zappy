@@ -31,6 +31,6 @@ enum Orientation {
 enum PlayerStatus {
     NONE,
     INCANTATION,
-    DEAD,
-    LAYING
+    LAYING,
+    PUSHING,
 };

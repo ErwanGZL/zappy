@@ -25,6 +25,7 @@ Gui::Gui(Data *data)
     _window.setFramerateLimit(60);
     _viewGlobal = _window.getDefaultView();
     _textureMap.loadFromFile("GUI/sprites/map.png");
+    _texturePlayer.loadFromFile("GUI/sprites/Sprites.png");
 }
 
 Gui::~Gui()
@@ -33,9 +34,7 @@ Gui::~Gui()
 
 void Gui::run ()
 {
-    _clock.restart();
     generateMap();
-
     while (_window.isOpen()) {
         sf::Event event;
         while (_window.pollEvent(event)) {
@@ -43,10 +42,10 @@ void Gui::run ()
                 _window.close();
         }
         _window.clear(sf::Color::Black);
-        for (int i = 0; i < _map.size(); i++) {
-            _window.draw(_map[i]->sprite);
-        }
+        updateData();
         animate();
+        displayMap();
+        displayPlayer();
         _window.display();
     }
 }
@@ -64,32 +63,16 @@ void Gui::generateMap()
     std::vector<std::vector<int>> noiseMap = perlin.run();
     for (int i = 0; i < noiseMap.size() ; i++) {
         for (int j = 0; j < noiseMap[i].size(); j++) {
-            tileData_s *tile = new tileData_s;
-            tile->texture = _textureMap;
-            tile->rect = getRect(i, j, noiseMap);
-            tile->sprite.setTexture(tile->texture);
-            tile->sprite.setOrigin(8, 8);
-            tile->sprite.setTextureRect(tile->rect);
-            tile->sprite.setPosition(j * 16, i * 16);
-            tile->nbFrame = (noiseMap[i][j] == 0) ? 3 : 0;
-            tile->frame = 0;
+            TileGui *tile = new TileGui(j * 16, i * 16, noiseMap[i][j], &_textureMap, getRect(i, j, noiseMap), 0, _data);
             _map.push_back(tile);
         }
     }
     for (int i = -width * 2; i < width * 4 ; i++) {
         for (int j =  -height * 2; j < height * 4; j++) {
             if (i < 0 || j < 0 || i >= width || j >= height) {
-                tileData_s *tile = new tileData_s;
                 int rotate = 0;
-                tile->texture = _textureMap;
-                tile->rect = getRectBorder(i, j, &rotate);
-                tile->sprite.setTexture(tile->texture);
-                tile->sprite.setTextureRect(tile->rect);
-                tile->sprite.setOrigin(8, 8);
-                tile->sprite.setPosition(i * 16, j * 16);
-                tile->sprite.setRotation(rotate);
-                tile->nbFrame = (tile->rect.top == 16 * 6) ? 3 : 0;
-                tile->frame = 0;
+                sf::IntRect rect = getRectBorder(i, j, &rotate);
+                TileGui *tile = new TileGui(i * 16, j * 16, -1, &_textureMap, rect, rotate, _data);
                 _map.push_back(tile);
             }
         }
@@ -206,19 +189,78 @@ sf::IntRect Gui::getRect(int x, int y, std::vector<std::vector<int>> mappa)
     return (sf::IntRect(pos.x, pos.y, 16, 16));
 }
 
-
 void Gui::animate()
 {
     for (int i = 0; i < _map.size(); i++) {
-        if (_map[i]->nbFrame > 0) {
-            if (_map[i]->clock.getElapsedTime().asMilliseconds() > _data->getTimeUnit() / 1) {
-                _map[i]->frame++;
-                if (_map[i]->frame >= _map[i]->nbFrame)
-                    _map[i]->frame = 0;
-                _map[i]->rect.left = _map[i]->frame * 16;
-                _map[i]->sprite.setTextureRect(_map[i]->rect);
-                _map[i]->clock.restart();
-            }
+        _map[i]->animate(_data->getTimeUnit());
+    }
+    for (int i = 0;i < _players.size();i++) {
+        _players[i]->animate(_data->getTimeUnit());
+    }
+}
+
+void Gui::displayMap()
+{
+    for (int i = 0; i < _map.size(); i++) {
+        _map[i]->display(&_window);
+    }
+    for (int i = 0; i < _map.size(); i++) {
+        _map[i]->displayRessources(&_window);
+    }
+}
+
+
+void Gui::generatePlayer()
+{
+    std::vector<int> ids;
+    for (size_t j = 0;j < _data->getPlayers().size();j++) {
+        size_t i = 0;
+        for (; i < _players.size(); i++) {
+            if (_players[i]->getId() == _data->getPlayers()[j]->getId())
+                break;
         }
+        if (i == _players.size())
+            ids.push_back(_data->getPlayers()[j]->getId());
+    }
+
+    for (size_t i = 0;i < ids.size();i++) {
+        int teamId = 0;
+        for (; teamId < _data->getTeams().size(); teamId++) {
+            if (_data->getTeams()[teamId]->getName() == _data->getPlayerById(ids[i])->getTeamName())
+                break;
+        }
+        teamId %= 5;
+        PlayerGui *player = new PlayerGui(ids[i], &_texturePlayer, teamId, _data);
+        _players.push_back(player);
+    }
+
+    for (size_t i = 0;i < _players.size();i++) {
+        bool found = false;
+        for (size_t j = 0;j < _data->getPlayers().size();j++) {
+            if (_players[i]->getId() == _data->getPlayers()[j]->getId())
+                found = true;
+        }
+        if (!found) {
+            _players.erase(_players.begin() + i);
+            i--;
+        }
+    }
+}
+
+void Gui::updateData()
+{
+    generatePlayer();
+    for (size_t i = 0;i < _players.size();i++) {
+        _players[i]->update(_map[_players[i]->getX() / 16 + _players[i]->getY() / 16 * _data->getWidth()]->getId());
+    }
+    for (size_t i = 0;i < _map.size();i++) {
+        _map[i]->update();
+    }
+}
+
+void Gui::displayPlayer()
+{
+    for (size_t i = 0;i < _players.size();i++) {
+        _window.draw(_players[i]->getSprite());
     }
 }

@@ -24,14 +24,15 @@ int Network::mapSize(std::string str)
 int Network::tileContent(std::string str)
 {
     std::vector<int> ressources;
-    int x = std::stoi(str.substr(0, str.find(" ")));
-    int y = std::stoi(str.substr(str.find(" ") + 1));
-    std::string tmp = str.substr(str.find(" ") + 1);
+    std::string tmp = str;
+    int x = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
+    int y = std::stoi(tmp.substr(0, tmp.find(" ")));
     while (tmp.find(" ") != std::string::npos) {
-        ressources.push_back(std::stoi(tmp.substr(0, tmp.find(" "))));
         tmp = tmp.substr(tmp.find(" ") + 1);
+        ressources.push_back(std::stoi(tmp.substr(0, tmp.find(" "))));
     }
+    _data->setMap(x, y, ressources);
     return 0;
 }
 
@@ -44,12 +45,17 @@ int Network::teamName(std::string str)
 
 int Network::playerConnect(std::string str)
 {
-    int id = std::stoi(str.substr(0, str.find(" ")));
-    int x = std::stoi(str.substr(str.find(" ") + 1));
-    int y = std::stoi(str.substr(str.find(" ") + 1));
-    std::string tmp = str.substr(str.find(" ") + 1);
+    std::string tmp = str;
+    int id = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
-    Orientation orientation = static_cast<Orientation>(std::stoi(tmp.substr(0, tmp.find(" "))));
+    int x = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int y = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int o = std::stoi(tmp.substr(0, tmp.find(" "))) - 1;
+    if (o == 0) o = 2;
+    else if (o == 2) o = 0;
+    Orientation orientation = static_cast<Orientation>(pow(2, o));
     tmp = tmp.substr(tmp.find(" ") + 1);
     int level = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
@@ -60,11 +66,20 @@ int Network::playerConnect(std::string str)
 
 int Network::playerPosition(std::string str)
 {
-    int id = std::stoi(str.substr(0, str.find(" ")));
-    int x = std::stoi(str.substr(str.find(" ") + 1));
-    int y = std::stoi(str.substr(str.find(" ") + 1));
+    std::string tmp = str;
+    int id = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int x = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int y = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int o = std::stoi(tmp.substr(0, tmp.find(" "))) - 1;
+    if (o == 0) o = 2;
+    else if (o == 2) o = 0;
+    Orientation orientation = static_cast<Orientation>(pow(2, o));
     _data->getPlayerById(id)->setX(x);
     _data->getPlayerById(id)->setY(y);
+    _data->getPlayerById(id)->setOrientation(orientation);
     return 0;
 }
 
@@ -79,11 +94,11 @@ int Network::playerLevel(std::string str)
 int Network::playerInventory(std::string str)
 {
     std::vector<int> ressources;
+    std::string tmp = str;
     int id = std::stoi(str.substr(0, str.find(" ")));
-    std::string tmp = str.substr(str.find(" ") + 1);
     while (tmp.find(" ") != std::string::npos) {
-        ressources.push_back(std::stoi(tmp.substr(0, tmp.find(" "))));
         tmp = tmp.substr(tmp.find(" ") + 1);
+        ressources.push_back(std::stoi(tmp.substr(0, tmp.find(" "))));
     }
     _data->getPlayerById(id)->setRessources(ressources);
     return 0;
@@ -123,15 +138,14 @@ int Network::playerBroadcast(std::string str)
 int Network::startIncantation(std::string str)
 {
     std::string tmp = str;
-    int x = std::stoi(str.substr(0, str.find(" ")));
-    tmp = tmp.substr(str.find(" ") + 1);
-    int y = std::stoi(str.substr(0, str.find(" ")));
-    tmp = tmp.substr(str.find(" ") + 1);
-    int level = std::stoi(tmp.substr(0, tmp.find(" ")));
+    int x = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
+    int y = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int level = std::stoi(tmp.substr(0, tmp.find(" ")));
     while (tmp.find(" ") != std::string::npos) {
-        _data->getPlayerById(std::stoi(tmp.substr(0, tmp.find(" "))))->setStatus(INCANTATION);
         tmp = tmp.substr(tmp.find(" ") + 1);
+        _data->getPlayerById(std::stoi(tmp.substr(0, tmp.find(" "))))->setStatus(INCANTATION);
     }
     return 0;
 }
@@ -139,12 +153,11 @@ int Network::startIncantation(std::string str)
 int Network::endIncantation(std::string str)
 {
     std::string tmp = str;
-    int x = std::stoi(str.substr(0, str.find(" ")));
-    tmp = tmp.substr(str.find(" ") + 1);
-    int y = std::stoi(str.substr(0, str.find(" ")));
-    tmp = tmp.substr(str.find(" ") + 1);
+    int x = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int y = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
     std::vector<Player*> players = _data->getPlayersByCoords(x, y);
-    std::cout << players.size() << std::endl;
     for (int i = 0; i < players.size(); i++) {
         players[i]->setStatus(NONE);
         players[i]->setLevel(players[i]->getLevel() + 1);
@@ -182,7 +195,7 @@ int Network::playerTake(std::string str)
 int Network::playerDie(std::string str)
 {
     int index = std::stoi(str.substr(0, str.find(" ")));
-    _data->getPlayerById(index)->setStatus(DEAD);
+    _data->removePlayer(index);
     return 0;
 }
 

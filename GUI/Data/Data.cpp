@@ -22,7 +22,7 @@ void Data::createMap(int width, int height)
     for (int i = 0; i < height; i++) {
         std::vector<Tile*> line;
         for (int j = 0; j < width; j++) {
-            Tile *tile;
+            Tile *tile = new Tile();
             line.push_back(tile);
         }
         _map.push_back(line);
@@ -126,4 +126,19 @@ std::vector<Player*> Data::getPlayersByCoords(int x, int y)
 int Data::getTimeUnit()
 {
     return _timeUnit;
+}
+
+std::vector<Player*> Data::getPlayers()
+{
+    return _players;
+}
+
+std::vector<Egg*> Data::getEggs()
+{
+    return _eggs;
+}
+
+std::vector<Team*> Data::getTeams()
+{
+    return _teams;
 }

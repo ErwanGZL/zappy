@@ -24,6 +24,7 @@ class Player {
         void setTeamName(std::string teamName);
         void broadcast(std::string message);
         void setStatus(PlayerStatus status);
+        PlayerStatus getStatus();
 
         std::vector<int> getRessources();
         int getLevel();
