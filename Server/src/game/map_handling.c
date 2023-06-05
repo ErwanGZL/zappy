@@ -24,6 +24,7 @@ int get_ressource(game_t *game, int x, int y, int index)
     return game->map->tiles[y][x].minerals[index];
 }
 
+//function that get the number of ressources in the 8 tiles around the tile yx, avoiding out of bounds
 int get_neighbors_repartition(game_t *game, int y, int x, int index)
 {
     int res = 0;
@@ -50,18 +51,50 @@ int get_neighbors_repartition(game_t *game, int y, int x, int index)
     return res;
 }
 
+char *get_ressource_name(game_t *game, int x, int y)
+{
+    char *ressource_in;
+    int ressource = 0, before = 0;
+    static const char *mineral_tab[] = {"linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"};
+    if (game->map->tiles[y][x].food > 0) {
+        while (ressource < game->map->tiles[y][x].food) {
+            ressource_in = realloc(ressource_in, strlen(ressource_in) + sizeof(char) * (strlen("food") + 2));
+            if (before != 0)
+                strcat(ressource_in, " ");
+            strcat(ressource_in, "food");
+            ressource++;
+            before = 1;
+        }
+    }
+    for (int i = 0, ressource = 0 ; i < 6 ; i++) {
+        while (ressource < game->map->tiles[y][x].minerals[i]) {
+            ressource_in = realloc(ressource_in, strlen(ressource_in) + sizeof(char) * (strlen(mineral_tab[i]) + 2));
+            strcat(ressource_in, " ");
+            strcat(ressource_in, mineral_tab[i]);
+            ressource++;
+        }
+    }
+    return ressource_in;
+}
+
+char *look(game_t *game, int player_lvl, pos_t player_pos)
+{
+    
+}
+
 game_t *add_in_map(game_t *game, int index, int ressource_to_add)
 {
+    int randx = 0, randy = 0;
     for (int tolerance = 0 ; ressource_to_add > 0 ; tolerance++) {
-        for (int i = 0 ; i < game->map->height ; i++) {
-            for (int a = 0 ; a < game->map->width ; a++) {
-                if (get_neighbors_repartition(game, i, a, index) <= tolerance) {
-                    game->map->tiles[i][a].minerals[index] += 1;
-                    ressource_to_add--;
-                }
-                if (ressource_to_add == 0) {
-                    return game;
-                }
+        for (int i = 0 ; i < (game->map->height * game->map->width); i++) {
+            randx = rand() % game->map->width;
+            randy = rand() % game->map->height;
+            if (get_neighbors_repartition(game, randx, randy, index) <= tolerance) {
+                game->map->tiles[randy][randx].minerals[index] += 1;
+                ressource_to_add--;
+            }
+            if (ressource_to_add == 0) {
+                return game;
             }
         }
     }

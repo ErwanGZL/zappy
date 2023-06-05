@@ -55,7 +55,7 @@ typedef struct map {
 typedef struct entity {
     pos_t pos;
     int level;
-    //int orientation; pos_t orientation; ?
+    pos_t orientation;
     int *minerals;
     int food_left;
 } entity_t;
