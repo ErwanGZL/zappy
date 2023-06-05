@@ -28,3 +28,4 @@ server_t *server_new(int argc, char *argv[]);
 void server_select(server_t *server);
 void server_destroy(server_t *server);
 void server_handshake(server_t *server, int fd);
+int server_run(server_t *server);

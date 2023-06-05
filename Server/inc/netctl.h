@@ -10,13 +10,13 @@
 
 typedef struct sockaddr_in sockaddr_in_t;
 
-typedef struct {
+typedef struct socket_s {
     int fd;
     sockaddr_in_t addr;
 } socket_t;
 
-typedef struct {
-    fd_set readfds;
+typedef struct netctl_s {
+    fd_set watched_fd;
     socket_t entrypoint;
     list_t clients;
 } netctl_t;

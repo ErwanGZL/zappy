@@ -2,7 +2,7 @@
 
 #include "list.h"
 
-typedef char* team_t;
+typedef char* team_name_t;
 
 typedef struct
 {
