@@ -17,6 +17,14 @@ int *init_ressources()
     return res;
 }
 
+int *init_minerals()
+{
+    int *res = calloc(6, sizeof(int));
+    for (int i = 0; i < 6; i++)
+        res[i] = 0;
+    return res;
+}
+
 game_t *add_player(game_t *game, team_name_t team_name, int fd)
 {
     player_t *player = calloc(1, sizeof(player_t));
@@ -65,6 +73,7 @@ map_t *init_map(int width, int height)
 
 game_t *init_game(int width, int height)
 {
+    srand(time(NULL));
     game_t *game = calloc(1, sizeof(game_t));
     game->nb_players = 0;
     game->nb_teams = 0;

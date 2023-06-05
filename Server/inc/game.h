@@ -6,9 +6,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 //macro that return the position of the tile in the map, if the position is out of the map, it will return the position of the tile on the other side of the map
 #define GET_POS(pos, max_pos) (pos.x = pos.x % max_pos.x, pos.y = pos.y % max_pos.y)
+#define NORMALIZE(x, max_x) (x = x < 0 ? max_x + x : x % max_x)
 #define SEND_POS(pos, max_pos) (pos.y = max_pos.y - pos.y - 1)
 
 //minerals define
@@ -85,7 +87,7 @@ typedef struct game {
 
 game_t *init_game(int width, int height);
 map_t *init_map(int width, int height);
-int *init_minerals();
+int *init_ressources();
 game_t *add_player(game_t *game, team_name_t team_name, int fd);
 game_t *add_team(game_t *game, int max_players, team_name_t name);
 team_t **get_team(game_t *game, team_name_t team_name);
@@ -94,3 +96,10 @@ team_t **get_team(game_t *game, team_name_t team_name);
 game_t *spawn_ressources(game_t *game);
 int get_ressource(game_t *game, int x, int y, int index);
 int get_map_ressources(game_t *game, int index);
+char *get_ressource_name(game_t *game, char *ressource_in, int x, int y);
+
+//player commands functions
+char *look(game_t *game, player_t player);
+
+//debug functions
+void print_ressources(game_t *game);

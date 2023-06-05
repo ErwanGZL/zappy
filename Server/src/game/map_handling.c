@@ -51,39 +51,68 @@ int get_neighbors_repartition(game_t *game, int y, int x, int index)
     return res;
 }
 
-char *get_ressource_name(char *ressource_in, game_t *game, int x, int y)
+void print_ressources(game_t *game)
 {
-    int ressource = 0, before = 0;
+    for (int y = 0 ; y < game->map->height ; y++) {
+        for (int x = 0 ; x < game->map->width ; x++) {
+            for (int i = 0 ; i < 7 ; i++) {
+                printf("%d\n", game->map->tiles[y][x].ressources[i]);
+            }
+        }
+    }
+}
+
+char *get_ressource_name(game_t *game, char *ressource_in, int x, int y)
+{
+    int before = 0;
     static const char *mineral_tab[] = {"linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame", "food"};
+    printf("x: %d, y: %d\n", x, y);
     for (int i = 0, ressource = 0 ; i < 7 ; i++) {
         while (ressource < game->map->tiles[y][x].ressources[i]) {
             ressource_in = realloc(ressource_in, sizeof(char) * (strlen(ressource_in) + (strlen(mineral_tab[i]) + 2)));
-            strcat(ressource_in, " ");
+            if (before != 0)
+                strcat(ressource_in, " ");
             strcat(ressource_in, mineral_tab[i]);
             ressource++;
+            before = 1;
         }
     }
     return ressource_in;
 }
 
-char *get_ressource_line(game_t *game, )
-{
-
-}
-
 char *look(game_t *game, player_t player)
 {
-    char *ressources = calloc(1, sizeof(char) * 8);
+    char *ressources = calloc(1, sizeof(char) * 9);
     memcpy(ressources, "[player ", 8);
+    ressources = get_ressource_name(game, ressources, player.entity->pos.x, player.entity->pos.y);
     int x_mult = (player.entity->orientation.x != 0) ? ((player.entity->orientation.x > 0) ? 1 : -1) : 0;
     int y_mult = (player.entity->orientation.y != 0) ? ((player.entity->orientation.y > 0) ? 1 : -1) : 0;
-    int current_view_size = 0, start = 0, end = 0;
+    int current_view_size = 0, start_x = 0, start_y = 0;
     for (int i = 0 ; i < player.entity->level ; i++) {
         current_view_size = 3 + i * 2;
+        if (x_mult == 0) {
+            start_x = player.entity->pos.x + (y_mult * (i + 1));
+            start_y = player.entity->pos.y + (y_mult * (i + 1));
+        } else {
+            start_x = player.entity->pos.x + (x_mult * (i + 1));
+            start_y = player.entity->pos.y - (x_mult * (i + 1));
+        }
         for (int a = 0 ; a < current_view_size ; a++) {
-            
+            int new_x = start_x - (a * y_mult);
+            int new_y = start_y + (a * x_mult);
+                ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 2));
+                strcat(ressources, ",");
+                printf("Normalized x = %d, y = %d\n", NORMALIZE(new_x, game->map->width), NORMALIZE(new_y, game->map->height));
+            if (x_mult == 0) {
+                ressources = get_ressource_name(game, ressources, NORMALIZE(new_x, game->map->width), NORMALIZE(start_y, game->map->height));
+            } else {
+                ressources = get_ressource_name(game, ressources, NORMALIZE(start_x, game->map->width), NORMALIZE(new_y, game->map->height));
+            }
+            ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 2));
         }
     }
+    strcat(ressources, "]");
+    return ressources;
 }
 
 game_t *add_in_map(game_t *game, int index, int ressource_to_add)
@@ -93,7 +122,9 @@ game_t *add_in_map(game_t *game, int index, int ressource_to_add)
         for (int i = 0 ; i < (game->map->height * game->map->width); i++) {
             randx = rand() % game->map->width;
             randy = rand() % game->map->height;
+            printf("x = %d, y = %d, test = %d\n", randx, randy, get_neighbors_repartition(game, randx, randy, index));
             if (get_neighbors_repartition(game, randx, randy, index) <= tolerance) {
+                printf("here\n");
                 game->map->tiles[randy][randx].ressources[index] += 1;
                 ressource_to_add--;
             }
