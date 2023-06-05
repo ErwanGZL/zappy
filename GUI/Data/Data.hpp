@@ -7,6 +7,7 @@
 
 #pragma once
 #include <vector>
+#include <iostream>
 
 #include "Tile.hpp"
 #include "Team.hpp"

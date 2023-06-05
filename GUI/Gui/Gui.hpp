@@ -13,22 +13,9 @@
 #include "Data.hpp"
 #include "Perlin.hpp"
 #include "TileGui.hpp"
+#include "PlayerGui.hpp"
 #include <climits>
 #include <cstdlib>
-
-struct playerSprite_s {
-    sf::Sprite sprite;
-    sf::Texture texture;
-    sf::IntRect rect;
-    sf::Clock clock;
-    sf::Clock clockAnimate;
-    bool isMoving = false;
-    int frame = 0;
-    int nbFrame = 0;
-    int id = 0;
-    int stockLeft = 0;
-    int left = 0;
-};
 
 class Gui {
     public:
@@ -41,7 +28,6 @@ class Gui {
         void displayMap();
         void displayPlayer();
         void animate();
-        int stateTop(int id);
 
     private:
         int _port;
@@ -54,7 +40,7 @@ class Gui {
         sf::Texture _texturePlayer;
 
         std::vector<TileGui*> _map;
-        std::vector<playerSprite_s*> _players;
+        std::vector<PlayerGui*> _players;
         sf::IntRect getRect(int x, int y, std::vector<std::vector<int>> map);
         sf::IntRect getRectBorder(int x, int y, int *rotate);
 

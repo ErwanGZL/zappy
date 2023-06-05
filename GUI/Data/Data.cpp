@@ -22,7 +22,7 @@ void Data::createMap(int width, int height)
     for (int i = 0; i < height; i++) {
         std::vector<Tile*> line;
         for (int j = 0; j < width; j++) {
-            Tile *tile;
+            Tile *tile = new Tile();
             line.push_back(tile);
         }
         _map.push_back(line);

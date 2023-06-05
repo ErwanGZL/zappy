@@ -32,6 +32,7 @@ int Network::tileContent(std::string str)
         tmp = tmp.substr(tmp.find(" ") + 1);
         ressources.push_back(std::stoi(tmp.substr(0, tmp.find(" "))));
     }
+    _data->setMap(x, y, ressources);
     return 0;
 }
 
