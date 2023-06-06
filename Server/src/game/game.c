@@ -31,8 +31,8 @@ game_t *add_player(game_t *game, team_name_t team_name, int fd)
     player->fd = fd;
     player->team_name = team_name;
     player->entity = calloc(1, sizeof(entity_t));
-    player->entity->pos.x = rand() % game->map->width;
-    player->entity->pos.y = rand() % game->map->height;
+    player->entity->pos.x = rand() % game->map->size.x;
+    player->entity->pos.y = rand() % game->map->size.y;
     player->entity->level = 1;
     player->entity->orientation = (pos_t) {1,1};
     player->entity->food_left = 1260;
@@ -58,8 +58,8 @@ game_t *add_team(game_t *game, int max_players, team_name_t name)
 map_t *init_map(int width, int height)
 {
     map_t *map = calloc(1, sizeof(map_t));
-    map->width = width;
-    map->height = height;
+    map->size.x = width;
+    map->size.y = height;
     map->tiles = calloc(height, sizeof(map_tile_t *));
     for (int i = 0; i < height; i++) {
         map->tiles[i] = calloc(width, sizeof(map_tile_t));
@@ -81,4 +81,39 @@ game_t *init_game(int width, int height)
     game->players = NULL;
     game->teams = NULL;
     return game;
+}
+
+game_t *remove_player(game_t *game, int fd)
+{
+    int i = 0;
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next, i++) {
+        if (((player_t *) ptr->value)->fd == fd) {
+            team_t **ptr2 = get_team(game, ((player_t *) ptr->value)->team_name);
+            if (ptr2 != NULL)
+                (*ptr2)->nb_players--;
+            game->nb_players--;
+            list_del_elem_at_position(&game->players, i);
+            break;
+        }
+    }
+    return game;
+}
+
+void free_game(game_t *game)
+{
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
+        free(((player_t *) ptr->value)->entity->minerals);
+        free(((player_t *) ptr->value)->entity);
+        free(ptr->value);
+    }
+    for (list_t ptr = game->teams; ptr != NULL; ptr = ptr->next)
+        free(ptr->value);
+    for (int i = 0; i < game->map->size.y; i++) {
+        for (int a = 0; a < game->map->size.x; a++)
+            free(game->map->tiles[i][a].ressources);
+        free(game->map->tiles[i]);
+    }
+    free(game->map->tiles);
+    free(game->map);
+    free(game);
 }

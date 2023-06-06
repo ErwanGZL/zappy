@@ -10,7 +10,6 @@
 
 //macro that return the position of the tile in the map, if the position is out of the map, it will return the position of the tile on the other side of the map
 #define GET_POS(pos, max_pos) (pos.x = pos.x % max_pos.x, pos.y = pos.y % max_pos.y)
-#define NORMALIZE(x, max_x) (x = x < 0 ? max_x + x : x % max_x)
 #define SEND_POS(pos, max_pos) (pos.y = max_pos.y - pos.y - 1)
 
 //minerals define
@@ -44,8 +43,7 @@ typedef struct map_tile {
 } map_tile_t;
 
 typedef struct map {
-    int width;
-    int height;
+    pos_t size;
     map_tile_t **tiles;
 } map_t;
 
