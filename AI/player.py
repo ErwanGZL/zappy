@@ -7,9 +7,11 @@ class Orientation(Enum):
     LEFT = 4
 
 class Position():
-    def __init__(self, x : int, y : int):
+    def __init__(self, x : int, y : int, map_x : int, map_y : int):
         self.x = x
         self.y = y
+        self.map_x = map_x
+        self.map_y = map_y
     def __str__(self):
         return "x: " + str(self.x) + " y: " + str(self.y)
     def __eq__(self, other):
@@ -28,6 +30,18 @@ class Position():
         if self.y == 0:
             self.y = self.map_y - 1
         self.y -= 1
+    def go_down(self):
+        if self.y == self.map_y - 1:
+            self.y = 0
+        self.y += 1
+    def go_left(self):
+        if self.x == 0:
+            self.x = self.map_x - 1
+        self.x -= 1
+    def go_right(self):
+        if self.x == self.map_x - 1:
+            self.x = 0
+        self.x += 1
 
 class Ressouces(Enum):
     FOOD = 1
@@ -127,7 +141,7 @@ class Player:
     level : int = 1
     inventory : Inventory = None
     orientation : Orientation = None
-    def __init__(self):
+    def __init__(self, x, y):
         self.level = 1
         self.inventory = Inventory()
         self.orientation = Orientation.UP
