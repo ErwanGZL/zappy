@@ -16,6 +16,10 @@
 int main(int argc, char *argv[])
 {
     server_t *server = server_new(argc, argv);
+    game_t *a = init_game(server->options);
+    add_player(a, "test", 0);
+    char *test = get_inventory(getPlayerByFd(a, 0));
+    printf("%s\n", test);
     int status = server_run(server);
     server_destroy(server);
     return status;
