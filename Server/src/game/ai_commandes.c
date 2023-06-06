@@ -61,3 +61,16 @@ int team_unused_slots(team_t *team)
         return -1;
     return team->max_players - team->nb_players;
 }
+
+int check_death(game_t *game)
+{
+   for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
+        player_t *player = ptr->value;
+        if (player->entity->food_left <= 0) {
+            //send death message
+            //TODO: kill player
+            return 1;
+        }
+    }
+    return 0;
+}
