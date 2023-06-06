@@ -1,13 +1,16 @@
 import socket
 import threading
+import player
 
 
-class AI():
-    def __init__(self, team_name, port, host='localhost') -> None:
+class AI:
+    def __init__(self, team_name, port, host="localhost") -> None:
         """
         This function is the constructor of the AI class.
         It initializes the AI and connects to the server.
         """
+        self.player = None
+
         # AI Data
         self.team_name = team_name
         self.map_x = 0
@@ -20,10 +23,10 @@ class AI():
         self.slots_avl = 0
 
         # Shared Data: do not access directly unless you know what you are doing
-        self.lock = threading.Lock()    # Lock for accessing the shared data
-        self.connected = False          # Flag variable to check if connected to the server
-        self.running = True             # Flag variable to stop the network thread
-        self.buffer = ""                # Buffer for the received data
+        self.lock = threading.Lock()  # Lock for accessing the shared data
+        self.connected = False  # Flag variable to check if connected to the server
+        self.running = True  # Flag variable to stop the network thread
+        self.buffer = ""  # Buffer for the received data
         self.msg_avl = threading.Event()  # Event to notify that a message is available
 
         # Start the network thread
@@ -54,7 +57,8 @@ class AI():
             self.socket.send(f"{self.team_name}\n".encode())
             r = self.socket.recv(1024)
             self.slots_avl, self.map_x, self.map_y = [int(x) for x in r.split()]
-
+            #
+            self.player = player.Player(self.map_x, self.map_y)
             if self.slots_avl > 0:
                 self.connected = True
 
@@ -84,7 +88,7 @@ class AI():
             msg = self.buffer.split("\n", 1)[0]
             if msg == "":
                 return None
-            self.buffer = self.buffer[len(msg)+1:]
+            self.buffer = self.buffer[len(msg) + 1 :]
 
     def send_message(self, msg: str) -> None:
         """
@@ -127,7 +131,8 @@ class AI():
             if not self.connected:
                 return
             print(
-                f"Connected to the server. Slots available: {self.slots_avl}, Map size: w={self.map_x}, h={self.map_y}")
+                f"Connected to the server. Slots available: {self.slots_avl}, Map size: w={self.map_x}, h={self.map_y}"
+            )
 
         # Client is now connected to the server
         # TODO: Implement the AI logic here  |
