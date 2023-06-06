@@ -1,11 +1,56 @@
 #include "game.h"
 
-void move_up(game_t *game, int fd)
+void move_up(game_t *game, player_t *player)
 {
-    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
-        if (((player_t *) ptr->value)->fd == fd) {
-            ((player_t *) ptr->value)->entity->pos.y--;
-            GET_POS(((player_t *) ptr->value)->entity->pos, game->map->size);
-        }
+    if (player != NULL)
+        player->entity->pos.y = normalize(player->entity->pos.y - 1, game->map->size.y);
+}
+
+void turn_left(player_t *player)
+{
+    if (player == NULL)
+        return;
+    if (player->entity->orientation.x == 0 && player->entity->orientation.y == 1) {
+        player->entity->orientation.x = -1;
+        player->entity->orientation.y = 0;
+    } else if (player->entity->orientation.x == -1 && player->entity->orientation.y == 0) {
+        player->entity->orientation.x = 0;
+        player->entity->orientation.y = -1;
+    } else if (player->entity->orientation.x == 0 && player->entity->orientation.y == -1) {
+        player->entity->orientation.x = 1;
+        player->entity->orientation.y = 0;
+    } else if (player->entity->orientation.x == 1 && player->entity->orientation.y == 0) {
+        player->entity->orientation.x = 0;
+        player->entity->orientation.y = 1;
+    }
+}
+
+void turn_right(player_t *player)
+{
+    if (player == NULL)
+        return;
+    if (player->entity->orientation.x == 0 && player->entity->orientation.y == 1) {
+        player->entity->orientation.x = 1;
+        player->entity->orientation.y = 0;
+    } else if (player->entity->orientation.x == 1 && player->entity->orientation.y == 0) {
+        player->entity->orientation.x = 0;
+        player->entity->orientation.y = -1;
+    } else if (player->entity->orientation.x == 0 && player->entity->orientation.y == -1) {
+        player->entity->orientation.x = -1;
+        player->entity->orientation.y = 0;
+    } else if (player->entity->orientation.x == -1 && player->entity->orientation.y == 0) {
+        player->entity->orientation.x = 0;
+        player->entity->orientation.y = 1;
+    }
+}
+
+void turn(game_t *game, player_t *player, int direction)
+{
+    if (player == NULL)
+        return;
+    if (direction == 1) {
+        turn_left(player);
+    } else if (direction == 2) {
+        turn_right(player);
     }
 }

@@ -12,6 +12,8 @@
 #define GET_POS(pos, max_pos) (pos.x = pos.x % max_pos.x, pos.y = pos.y % max_pos.y)
 #define SEND_POS(pos, max_pos) (pos.y = max_pos.y - pos.y - 1)
 
+#define LEFT 1
+#define RIGHT 2
 //minerals define
 
 #define LINEMATE 0

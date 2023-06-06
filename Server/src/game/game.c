@@ -117,3 +117,11 @@ void free_game(game_t *game)
     free(game->map);
     free(game);
 }
+
+player_t *getPlayerByFd(game_t *game, int fd)
+{
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
+        if (((player_t *) ptr->value)->fd == fd)
+            return ((player_t *) ptr->value);
+    return NULL;
+}
