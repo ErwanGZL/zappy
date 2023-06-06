@@ -20,6 +20,7 @@ SOURCES
     src/list_get_elem_at_position.c
     src/list_get_size.c
     src/list_is_empty.c
+    src/list_sort.c
 )
 
 add_library(list STATIC ${SOURCES})
