@@ -138,16 +138,75 @@ class Inventory:
 ##class player:
 
 class Player:
-    level : int = 1
-    inventory : Inventory = None
-    orientation : Orientation = None
     def __init__(self, x, y):
         self.level = 1
         self.inventory = Inventory()
         self.orientation = Orientation.UP
         self.map = [[0 for i in range(x)] for j in range(y)]
-    def look(self):
+        self.pos = Position(0, 0, x, y)
+    def look(self, content : list):
         pass
+    def add_memory_up(self, content : list):
+        lvl = 1
+        while lvl <= self.level:
+            for i in range(self.pos.x - lvl, self.pos.x  + lvl + 1):
+                i = i % self.map_x
+                if (i < 0):
+                    i = self.map_x + i
+                vis = self.pos.x - lvl
+                vis = vis % self.map_x
+                if (vis < 0):
+                    vis = self.map_x + vis
+                content.append(self.map[vis][i])
+            lvl += 1
+    def add_memory_down(self, content : list):
+        lvl = 1
+        while lvl <= self.level:
+            for i in range(self.pos.x + lvl, self.pos.x - lvl - 1, -1):
+                i = i % self.map_x
+                if (i < 0):
+                    i = self.map_x + i
+                vis = self.pos.x + lvl
+                vis = vis % self.map_x
+                if (vis < 0):
+                    vis = self.map_x + vis
+                content.append(self.map[vis][i])
+            lvl += 1
+    def add_memory_left(self, content : list):
+        lvl = 1
+        while lvl <= self.level:
+            for i in range(self.pos.y - lvl, self.pos.y  + lvl + 1):
+                i = i % self.map_y
+                if (i < 0):
+                    i = self.map_y + i
+                vis = self.pos.y - lvl
+                vis = vis % self.map_y
+                if (vis < 0):
+                    vis = self.map_y + vis
+                content.append(self.map[i][vis])
+            lvl += 1
+    def add_memory_right(self, content : list):
+        lvl = 1
+        while lvl <= self.level:
+            for i in range(self.pos.y + lvl, self.pos.y - lvl - 1, -1):
+                i = i % self.map_y
+                if (i < 0):
+                    i = self.map_y + i
+                vis = self.pos.y + lvl
+                vis = vis % self.map_y
+                if (vis < 0):
+                    vis = self.map_y + vis
+                content.append(self.map[i][vis])
+            lvl += 1
+    def add_memory(self, content : list):
+        if self.orientation == Orientation.UP:
+            self.add_memory_up(content)
+        elif self.orientation == Orientation.DOWN:
+            self.add_memory_down(content)
+        elif self.orientation == Orientation.LEFT:
+            self.add_memory_left(content)
+        elif self.orientation == Orientation.RIGHT:
+            self.add_memory_right(content)
     def broadcast(self):
         pass
     def elevation(self):
@@ -155,10 +214,20 @@ class Player:
     def fork(self):
         pass
     def left(self):
+        self.orientation = (self.orientation - 1) % 4
         pass
     def right(self):
+        self.orientation = (self.orientation + 1) % 4
         pass
     def forward(self):
+        if self.orientation == Orientation.UP:
+            self.pos.go_up()
+        elif self.orientation == Orientation.DOWN:
+            self.pos.go_down()
+        elif self.orientation == Orientation.LEFT:
+            self.pos.go_left()
+        elif self.orientation == Orientation.RIGHT:
+            self.pos.go_right()
         pass
 
 for_level = [
