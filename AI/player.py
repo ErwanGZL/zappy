@@ -1,4 +1,6 @@
 from enum import Enum
+from ai import *
+
 
 class Orientation(Enum):
     UP = 1
@@ -6,42 +8,53 @@ class Orientation(Enum):
     DOWN = 3
     LEFT = 4
 
-class Position():
-    def __init__(self, x : int, y : int, map_x : int, map_y : int):
+
+class Position:
+    def __init__(self, x: int, y: int, map_x: int, map_y: int):
         self.x = x
         self.y = y
         self.map_x = map_x
         self.map_y = map_y
+
     def __str__(self):
         return "x: " + str(self.x) + " y: " + str(self.y)
+
     def __eq__(self, other):
         if isinstance(other, Position):
             return self.x == other.x and self.y == other.y
         else:
             return False
+
     def __ne__(self, other):
         return not self.__eq__(other)
+
     def get_pos(self):
         return (self.x, self.y)
-    def set_pos(self, x : int, y : int):
+
+    def set_pos(self, x: int, y: int):
         self.x = x
         self.y = y
+
     def go_up(self):
         if self.y == 0:
             self.y = self.map_y - 1
         self.y -= 1
+
     def go_down(self):
         if self.y == self.map_y - 1:
             self.y = 0
         self.y += 1
+
     def go_left(self):
         if self.x == 0:
             self.x = self.map_x - 1
         self.x -= 1
+
     def go_right(self):
         if self.x == self.map_x - 1:
             self.x = 0
         self.x += 1
+
 
 class Ressouces(Enum):
     FOOD = 1
@@ -52,6 +65,7 @@ class Ressouces(Enum):
     PHIRAS = 6
     THYSTAME = 7
 
+
 class Inventory:
     def __init__(self):
         self.food = 10
@@ -61,7 +75,8 @@ class Inventory:
         self.mendiane = 0
         self.phiras = 0
         self.thystame = 0
-    def add_ressource(self, ressource : Ressouces, amount : int):
+
+    def add_ressource(self, ressource: Ressouces, amount: int):
         if ressource == Ressouces.FOOD:
             self.food += amount
         elif ressource == Ressouces.LINEMATE:
@@ -78,7 +93,8 @@ class Inventory:
             self.thystame += amount
         else:
             raise Exception("Invalid ressource")
-    def remove_ressource(self, ressource : Ressouces, amount : int):
+
+    def remove_ressource(self, ressource: Ressouces, amount: int):
         if ressource == Ressouces.FOOD:
             if self.food < amount:
                 raise Exception("Not enough food")
@@ -109,7 +125,8 @@ class Inventory:
             self.thystame -= amount
         else:
             raise Exception("Invalid ressource")
-    def get_ressource(self, ressource : Ressouces):
+
+    def get_ressource(self, ressource: Ressouces):
         if ressource == Ressouces.FOOD:
             return self.food
         elif ressource == Ressouces.LINEMATE:
@@ -135,7 +152,10 @@ class Inventory:
         print("mendiane: " + str(self.mendiane))
         print("phiras: " + str(self.phiras))
         print("thystame: " + str(self.thystame))
+
+
 ##class player:
+
 
 class Player:
     def __init__(self, x, y):
@@ -144,61 +164,64 @@ class Player:
         self.orientation = Orientation.UP
         self.map = [[0 for i in range(x)] for j in range(y)]
         self.pos = Position(0, 0, x, y)
-    def look(self, content : list):
-        pass
-    def add_memory_up(self, content : list):
+
+    def add_memory_up(self, content: list):
         lvl = 1
         while lvl <= self.level:
-            for i in range(self.pos.x - lvl, self.pos.x  + lvl + 1):
+            for i in range(self.pos.x - lvl, self.pos.x + lvl + 1):
                 i = i % self.map_x
-                if (i < 0):
+                if i < 0:
                     i = self.map_x + i
                 vis = self.pos.x - lvl
                 vis = vis % self.map_x
-                if (vis < 0):
+                if vis < 0:
                     vis = self.map_x + vis
                 content.append(self.map[vis][i])
             lvl += 1
-    def add_memory_down(self, content : list):
+
+    def add_memory_down(self, content: list):
         lvl = 1
         while lvl <= self.level:
             for i in range(self.pos.x + lvl, self.pos.x - lvl - 1, -1):
                 i = i % self.map_x
-                if (i < 0):
+                if i < 0:
                     i = self.map_x + i
                 vis = self.pos.x + lvl
                 vis = vis % self.map_x
-                if (vis < 0):
+                if vis < 0:
                     vis = self.map_x + vis
                 content.append(self.map[vis][i])
             lvl += 1
-    def add_memory_left(self, content : list):
+
+    def add_memory_left(self, content: list):
         lvl = 1
         while lvl <= self.level:
-            for i in range(self.pos.y - lvl, self.pos.y  + lvl + 1):
+            for i in range(self.pos.y - lvl, self.pos.y + lvl + 1):
                 i = i % self.map_y
-                if (i < 0):
+                if i < 0:
                     i = self.map_y + i
                 vis = self.pos.y - lvl
                 vis = vis % self.map_y
-                if (vis < 0):
+                if vis < 0:
                     vis = self.map_y + vis
                 content.append(self.map[i][vis])
             lvl += 1
-    def add_memory_right(self, content : list):
+
+    def add_memory_right(self, content: list):
         lvl = 1
         while lvl <= self.level:
             for i in range(self.pos.y + lvl, self.pos.y - lvl - 1, -1):
                 i = i % self.map_y
-                if (i < 0):
+                if i < 0:
                     i = self.map_y + i
                 vis = self.pos.y + lvl
                 vis = vis % self.map_y
-                if (vis < 0):
+                if vis < 0:
                     vis = self.map_y + vis
                 content.append(self.map[i][vis])
             lvl += 1
-    def add_memory(self, content : list):
+
+    def add_memory(self, content: list):
         if self.orientation == Orientation.UP:
             self.add_memory_up(content)
         elif self.orientation == Orientation.DOWN:
@@ -207,18 +230,28 @@ class Player:
             self.add_memory_left(content)
         elif self.orientation == Orientation.RIGHT:
             self.add_memory_right(content)
+
+    def look(self, content: str):
+        content = content.split(",")
+        content = self.add_memory(content)
+
     def broadcast(self):
         pass
+
     def elevation(self):
         pass
+
     def fork(self):
         pass
+
     def left(self):
         self.orientation = (self.orientation - 1) % 4
         pass
+
     def right(self):
         self.orientation = (self.orientation + 1) % 4
         pass
+
     def forward(self):
         if self.orientation == Orientation.UP:
             self.pos.go_up()
@@ -230,8 +263,9 @@ class Player:
             self.pos.go_right()
         pass
 
+
 for_level = [
-#nb player, linemate, deraumere, sibur, mendiane, phiras, thystame
+    # nb player, linemate, deraumere, sibur, mendiane, phiras, thystame
     [1, 1, 0, 0, 0, 0, 0],
     [2, 1, 1, 1, 0, 0, 0],
     [2, 2, 0, 1, 0, 2, 0],
