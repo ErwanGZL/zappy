@@ -1,5 +1,8 @@
 #include "server.h"
 
+/**
+ * Initializes the server structure
+ */
 server_t *server_new(int argc, char *argv[])
 {
     server_t *server = calloc(1, sizeof(server_t));
@@ -9,6 +12,10 @@ server_t *server_new(int argc, char *argv[])
     return server;
 }
 
+/**
+ * Selects the sockets that are ready to be read
+ * handle new connection request and read data from clients
+ */
 void server_select(server_t *server)
 {
     fd_set readfds = server->netctl->watched_fd;
@@ -43,13 +50,9 @@ void server_select(server_t *server)
     }
 }
 
-void server_destroy(server_t *server)
-{
-    options_destroy(server->options);
-    netctl_destroy(server->netctl);
-    free(server);
-}
-
+/**
+ * Sends the welcome message to the client and waits for the team name
+ */
 void server_handshake(server_t *server, int fd)
 {
     send(fd, "WELCOME\n", 8, 0);
@@ -67,7 +70,7 @@ void server_handshake(server_t *server, int fd)
                     team->max_players - team->nb_players,
                     server->options->width,
                     server->options->height);
-            team->nb_players++;
+            add_player(server->game, team->name, fd);
             return;
         }
     }
@@ -77,6 +80,9 @@ void server_handshake(server_t *server, int fd)
     netctl_disconnect(server->netctl, fd);
 }
 
+/**
+ * Server main loop
+ */
 int server_run(server_t *server)
 {
     while (1)
@@ -85,4 +91,14 @@ int server_run(server_t *server)
     }
 
     return 0;
+}
+
+/**
+ * Frees the server structure
+ */
+void server_destroy(server_t *server)
+{
+    options_destroy(server->options);
+    netctl_destroy(server->netctl);
+    free(server);
 }
