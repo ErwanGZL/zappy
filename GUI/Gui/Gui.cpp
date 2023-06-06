@@ -26,6 +26,7 @@ Gui::Gui(Data *data)
     _viewGlobal = _window.getDefaultView();
     _textureMap.loadFromFile("GUI/sprites/map.png");
     _texturePlayer.loadFromFile("GUI/sprites/Sprites.png");
+    _infoTile = new InfoTile(_data);
 }
 
 Gui::~Gui()
@@ -40,12 +41,12 @@ void Gui::run ()
         while (_window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 _window.close();
+            _infoTile->setMouse(_window, event);
         }
         _window.clear(sf::Color::Black);
         updateData();
         animate();
-        displayMap();
-        displayPlayer();
+        display();
         _window.display();
     }
 }
@@ -67,8 +68,8 @@ void Gui::generateMap()
             _map.push_back(tile);
         }
     }
-    for (int i = -width * 2; i < width * 4 ; i++) {
-        for (int j =  -height * 2; j < height * 4; j++) {
+    for (int i = -width * 2 - 1; i < width * 4 ; i++) {
+        for (int j =  -height * 2 - 1; j < height * 4; j++) {
             if (i < 0 || j < 0 || i >= width || j >= height) {
                 int rotate = 0;
                 sf::IntRect rect = getRectBorder(i, j, &rotate);
@@ -199,16 +200,23 @@ void Gui::animate()
     }
 }
 
-void Gui::displayMap()
+void Gui::display()
 {
+    _window.setView(_viewGlobal);
     for (int i = 0; i < _map.size(); i++) {
         _map[i]->display(&_window);
     }
+    _window.setView(_viewGlobal);
     for (int i = 0; i < _map.size(); i++) {
         _map[i]->displayRessources(&_window);
     }
+    _window.setView(_viewGlobal);
+    for (size_t i = 0;i < _players.size();i++) {
+        _window.draw(_players[i]->getSprite());
+    }
+    _infoTile->draw(_window);
+    _window.setView(_viewGlobal);
 }
-
 
 void Gui::generatePlayer()
 {
@@ -256,11 +264,5 @@ void Gui::updateData()
     for (size_t i = 0;i < _map.size();i++) {
         _map[i]->update();
     }
-}
-
-void Gui::displayPlayer()
-{
-    for (size_t i = 0;i < _players.size();i++) {
-        _window.draw(_players[i]->getSprite());
-    }
+    _infoTile->update();
 }
