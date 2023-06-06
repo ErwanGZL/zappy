@@ -1,5 +1,11 @@
 from enum import Enum
 
+class Orientation(Enum):
+    UP = 1
+    RIGHT = 2
+    DOWN = 3
+    LEFT = 4
+
 class Position():
     def __init__(self, x : int, y : int):
         self.x = x
@@ -120,9 +126,12 @@ class Inventory:
 class Player:
     level : int = 1
     inventory : Inventory = None
+    orientation : Orientation = None
     def __init__(self):
         self.level = 1
         self.inventory = Inventory()
+        self.orientation = Orientation.UP
+        self.map = [[0 for i in range(x)] for j in range(y)]
     def look(self):
         pass
     def broadcast(self):
