@@ -21,6 +21,7 @@ set(
     Gui/Perlin.cpp
     Gui/TileGui.cpp
     Gui/PlayerGui.cpp
+    Gui/InfoTile.cpp
     Net/Network.cpp
     Net/Commands.cpp
     Data/Data.cpp
