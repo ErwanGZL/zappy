@@ -54,3 +54,10 @@ void turn(game_t *game, player_t *player, int direction)
         turn_right(player);
     }
 }
+
+int team_unused_slots(team_t *team)
+{
+    if (team == NULL)
+        return -1;
+    return team->max_players - team->nb_players;
+}

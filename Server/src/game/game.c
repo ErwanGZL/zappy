@@ -125,3 +125,11 @@ player_t *getPlayerByFd(game_t *game, int fd)
             return ((player_t *) ptr->value);
     return NULL;
 }
+
+team_t *getTeamByName(game_t *game, team_name_t name)
+{
+    for (list_t ptr = game->teams; ptr != NULL; ptr = ptr->next)
+        if (strcmp(((team_t *) ptr->value)->name, name) == 0)
+            return ((team_t *) ptr->value);
+    return NULL;
+}
