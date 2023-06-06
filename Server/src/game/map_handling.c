@@ -24,30 +24,12 @@ int get_ressource(game_t *game, int x, int y, int index)
     return game->map->tiles[y][x].ressources[index];
 }
 
-//function that get the number of ressources in the 8 tiles around the tile yx, avoiding out of bounds
-int get_neighbors_repartition(game_t *game, int y, int x, int index)
+int get_tile_ressource(game_t *game, int x, int y)
 {
     int res = 0;
-    res += game->map->tiles[y][x].ressources[index];
-    if (x != 0) {
-        res += game->map->tiles[y][x - 1].ressources[index];
-        if (y != 0)
-            res += game->map->tiles[y - 1][x - 1].ressources[index];
-        if (y != (game->map->height - 1))
-            res += game->map->tiles[y + 1][x - 1].ressources[index];
+    for (int i = 0; i < 7; i++) {
+        res += game->map->tiles[y][x].ressources[i];
     }
-    if (y != 0) {
-        res += game->map->tiles[y - 1][x].ressources[index];
-        if (x != (game->map->width - 1))
-            res += game->map->tiles[y - 1][x + 1].ressources[index];
-    }
-    if (y != (game->map->height - 1)) {
-        res += game->map->tiles[y + 1][x].ressources[index];
-        if (x != (game->map->width - 1))
-            res += game->map->tiles[y + 1][x + 1].ressources[index];
-    }
-    if (x != (game->map->width - 1))
-        res += game->map->tiles[y][x + 1].ressources[index];
     return res;
 }
 
@@ -55,9 +37,11 @@ void print_ressources(game_t *game)
 {
     for (int y = 0 ; y < game->map->height ; y++) {
         for (int x = 0 ; x < game->map->width ; x++) {
+            printf("x: %d, y: %d = ", x, y);
             for (int i = 0 ; i < 7 ; i++) {
-                printf("%d\n", game->map->tiles[y][x].ressources[i]);
+                printf("%d, ", game->map->tiles[y][x].ressources[i]);
             }
+            printf("\n");
         }
     }
 }
@@ -65,8 +49,7 @@ void print_ressources(game_t *game)
 char *get_ressource_name(game_t *game, char *ressource_in, int x, int y)
 {
     int before = 0;
-    static const char *mineral_tab[] = {"linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame", "food"};
-    printf("x: %d, y: %d\n", x, y);
+    static const char *mineral_tab[] = {"food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"};
     for (int i = 0, ressource = 0 ; i < 7 ; i++) {
         while (ressource < game->map->tiles[y][x].ressources[i]) {
             ressource_in = realloc(ressource_in, sizeof(char) * (strlen(ressource_in) + (strlen(mineral_tab[i]) + 2)));
@@ -102,7 +85,6 @@ char *look(game_t *game, player_t player)
             int new_y = start_y + (a * x_mult);
                 ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 2));
                 strcat(ressources, ",");
-                printf("Normalized x = %d, y = %d\n", NORMALIZE(new_x, game->map->width), NORMALIZE(new_y, game->map->height));
             if (x_mult == 0) {
                 ressources = get_ressource_name(game, ressources, NORMALIZE(new_x, game->map->width), NORMALIZE(start_y, game->map->height));
             } else {
@@ -119,12 +101,11 @@ game_t *add_in_map(game_t *game, int index, int ressource_to_add)
 {
     int randx = 0, randy = 0;
     for (int tolerance = 0 ; ressource_to_add > 0 ; tolerance++) {
-        for (int i = 0 ; i < (game->map->height * game->map->width); i++) {
+        for (int i = 0 ; i < (game->map->height * game->map->width) ; i++) {
             randx = rand() % game->map->width;
             randy = rand() % game->map->height;
-            printf("x = %d, y = %d, test = %d\n", randx, randy, get_neighbors_repartition(game, randx, randy, index));
-            if (get_neighbors_repartition(game, randx, randy, index) <= tolerance) {
-                printf("here\n");
+            // if (get_neighbors_repartition(game, randx, randy, index) <= tolerance) {
+            if (get_tile_ressource(game, randx, randy) <= tolerance) {
                 game->map->tiles[randy][randx].ressources[index] += 1;
                 ressource_to_add--;
             }
@@ -144,7 +125,7 @@ game_t *spawn_ressources(game_t *game)
 
     for (int i = 0; i < 7 ; i++) {
         ressources_available = get_map_ressources(game, i);
-        ressources_to_add = to_supp(game->map->width * game->map->height * density[i + 1] - ressources_available);
+        ressources_to_add = to_supp(game->map->width * game->map->height * density[i] - ressources_available);
         add_in_map(game, i, ressources_to_add);
     }
     return game;
