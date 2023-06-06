@@ -3,6 +3,10 @@
 
 #include "list.h"
 #include <time.h>
+#include <sys/time.h>
+#include <bits/types.h>
+
+typedef struct timeval timeval_t;
 
 typedef struct action_s {
     enum actions_e {
@@ -21,10 +25,19 @@ typedef struct action_s {
         ACTION_INCANTATION,
     } type;
     int issuer;
-    time_t time;
+    int cooldown;
 } action_t;
 
+/**
+ * Action functions
+*/
 action_t *action_new(int issuer, const char *cmd);
-bool accept_action(list_t action_list, action_t *action);
 bool action_exec(action_t *action);
-int action_cmp(const void *a, const void *b);
+int action_cmp_cooldown(const void *a, const void *b);
+
+/**
+ * Actions list functions
+*/
+bool actions_accept(list_t action_list, action_t *action);
+timeval_t *actions_get_next_timeout(list_t action_list, int frequency);
+void actions_apply_elapsed_time(list_t action_list, int elapsed_time);

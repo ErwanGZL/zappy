@@ -1,4 +1,6 @@
 #include "actions.h"
+#include <stdlib.h>
+#include <string.h>
 
 static const char *actions[] = {
     "Forward",
@@ -15,7 +17,7 @@ static const char *actions[] = {
     "Incantation",
     NULL};
 
-static const int time[] = {
+static const int cooldowns[] = {
     7,
     7,
     7,
@@ -39,7 +41,7 @@ action_t *action_new(int issuer, const char *cmd)
         if (strncmp(cmd, actions[i], strlen(actions[i])) == 0)
         {
             action->type = i + 1;
-            action->time = time[action->type];
+            action->cooldown = cooldowns[action->type];
         }
     }
     if (action->type == 0)
@@ -50,7 +52,18 @@ action_t *action_new(int issuer, const char *cmd)
     return action;
 }
 
-bool accept_action(list_t action_list, action_t *action)
+int action_cmp_cooldown(const void *a, const void *b)
+{
+    action_t *action_a = (action_t *)a;
+    action_t *action_b = (action_t *)b;
+    if (action_a->cooldown < action_b->cooldown)
+        return -1;
+    if (action_a->cooldown > action_b->cooldown)
+        return 1;
+    return 0;
+}
+
+bool actions_accept(list_t action_list, action_t *action)
 {
     int occ = 0;
     for (list_t head = action_list; head != NULL; head = head->next)
@@ -68,13 +81,23 @@ bool accept_action(list_t action_list, action_t *action)
     return false;
 }
 
-int action_cmp(const void *a, const void *b)
+timeval_t *actions_get_next_timeout(list_t action_list, int frequency)
 {
-    action_t *action_a = (action_t *)a;
-    action_t *action_b = (action_t *)b;
-    if (action_a->time < action_b->time)
-        return -1;
-    if (action_a->time > action_b->time)
-        return 1;
-    return 0;
+    if (action_list == NULL)
+        return NULL;
+
+    timeval_t *timeout = calloc(1, sizeof(timeval_t));
+    list_sort(&action_list, action_cmp_cooldown);
+    action_t *action = (action_t *)action_list->value;
+    timeout->tv_usec = (action->cooldown / frequency) * 1000000;
+    return timeout;
+}
+
+void actions_apply_elapsed_time(list_t action_list, int elapsed_time)
+{
+    for (list_t head = action_list; head != NULL; head = head->next)
+    {
+        action_t *action = (action_t *)head->value;
+        action->cooldown -= elapsed_time;
+    }
 }
