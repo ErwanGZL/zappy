@@ -14,6 +14,10 @@ bool list_del_elem_at_front(list_t *front_ptr)
         return false;
     list_t head = *front_ptr;
     list_t buff = head->next;
+    if (buff != NULL)
+        buff->prev = head->prev;
+    if (head->prev != NULL)
+        head->prev->next = buff;
     free(head);
     *front_ptr = buff;
     return true;

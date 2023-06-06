@@ -20,6 +20,7 @@ bool list_add_elem_at_back(list_t *front_ptr, void *elem)
         head = head->next;
     node->value = elem;
     node->next = NULL;
+    node->prev = head;
     head->next = node;
     return true;
 }

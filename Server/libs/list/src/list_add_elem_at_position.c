@@ -26,6 +26,7 @@ bool list_add_elem_at_position(
         return false;
     node->value = elem;
     node->next = head->next;
+    node->prev = head;
     head->next = node;
     return true;
 }
