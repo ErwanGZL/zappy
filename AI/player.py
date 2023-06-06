@@ -1,5 +1,28 @@
 from enum import Enum
 
+class Position():
+    def __init__(self, x : int, y : int):
+        self.x = x
+        self.y = y
+    def __str__(self):
+        return "x: " + str(self.x) + " y: " + str(self.y)
+    def __eq__(self, other):
+        if isinstance(other, Position):
+            return self.x == other.x and self.y == other.y
+        else:
+            return False
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    def get_pos(self):
+        return (self.x, self.y)
+    def set_pos(self, x : int, y : int):
+        self.x = x
+        self.y = y
+    def go_up(self):
+        if self.y == 0:
+            self.y = self.map_y - 1
+        self.y -= 1
+
 class Ressouces(Enum):
     FOOD = 1
     LINEMATE = 2
@@ -96,6 +119,7 @@ class Inventory:
 
 class Player:
     level : int = 1
+    inventory : Inventory = None
     def __init__(self):
         self.level = 1
         self.inventory = Inventory()
