@@ -35,14 +35,16 @@ void TileGui::update()
 {
     if (_id == -1) return;
     for (int i = 0; i < 7; i++) {
-        int nb = _data->getMap()[_y/16][_x/16]->getRessources()[i];
+        int nb = _data->getMap()[_y / 16][_x / 16]->getRessources()[i];
         if (nb > _ressourcesPos[i].size()) {
-            for (int j = 0; j < nb; j++) {
+            while (_ressourcesPos[i].size() < nb) {
                 sf::Vector2f pos = sf::Vector2f(_x + rand() % 8, _y + rand() % 8);
                 _ressourcesPos[i].push_back(pos);
             }
         } else if (nb < _ressourcesPos[i].size()) {
-            _ressourcesPos[i].erase(_ressourcesPos[i].begin() + nb, _ressourcesPos[i].end());
+            while (_ressourcesPos[i].size() > nb) {
+                _ressourcesPos[i].erase(_ressourcesPos[i].begin() + nb, _ressourcesPos[i].end());
+            }
         }
     }
 }

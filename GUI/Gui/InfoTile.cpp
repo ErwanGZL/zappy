@@ -34,7 +34,7 @@ InfoTile::~InfoTile()
 
 void InfoTile::update()
 {
-    std::string str = "Tile\nfood     \t" + std::to_string(_data->getMap()[_x][_y]->getRessources()[0]) +
+    std::string str = "Tile\nfood     \t" + std::to_string(_data->getMap()[_y][_x]->getRessources()[0]) +
     "\nlinemate \t" + std::to_string(_data->getMap()[_y][_x]->getRessources()[1]) +
     "\nderaumere\t" + std::to_string(_data->getMap()[_y][_x]->getRessources()[2]) +
     "\nsibur    \t" + std::to_string(_data->getMap()[_y][_x]->getRessources()[3]) +
@@ -77,6 +77,7 @@ void InfoTile::setMouse(sf::RenderWindow &window, sf::Event event)
             _y = (y + 8) / 16;
         }
     } else {
+        _isToggled = false;
         _overlay.setPosition(10000, 10000);
     }
 }

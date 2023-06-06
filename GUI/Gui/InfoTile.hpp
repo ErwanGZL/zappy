@@ -22,7 +22,7 @@ class InfoTile {
     protected:
     private:
         Data *_data;
-        bool _isToggled = true;
+        bool _isToggled = false;
         sf::RectangleShape _background;
         sf::RectangleShape _overlay;
         sf::Text _text;

@@ -21,9 +21,6 @@ void Tile::setRessources(std::vector<int> ressources)
     for (int i = 0; i < ressources.size(); i++) {
         _ressources.push_back(ressources[i]);
     }
-    // for (int i = 0; i < _ressources.size(); i++) {
-    //     std::cout << _ressources[i] << std::endl;
-    // }
 }
 
 std::vector<int> Tile::getRessources()
