@@ -100,3 +100,17 @@ char *get_inventory(player_t *player)
     strcat(inventory, "]");
     return inventory;
 }
+
+int take_object(game_t *game, player_t *player, int index)
+{
+    static const char *mineral_tab[] = {"linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"};
+    if (game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1] > 0) {
+        game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1]--;
+        player->entity->minerals[index]++;
+        printf("Player %d take %s\n", player->fd, mineral_tab[index]);
+        //send ok
+        return 0;
+    }
+    //send ko
+    return 1;
+}
