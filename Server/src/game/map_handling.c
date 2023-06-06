@@ -11,8 +11,8 @@ int to_supp(float nbr)
 int get_map_ressources(game_t *game,int index)
 {
     int res = 0;
-    for (int i = 0; i < game->map->height ; i++) {
-        for (int a = 0; a < game->map->width ; a++) {
+    for (int i = 0; i < game->map->size.y ; i++) {
+        for (int a = 0; a < game->map->size.x ; a++) {
             res += get_ressource(game, i, a, index);
         }
     }
@@ -35,8 +35,8 @@ int get_tile_ressource(game_t *game, int x, int y)
 
 void print_ressources(game_t *game)
 {
-    for (int y = 0 ; y < game->map->height ; y++) {
-        for (int x = 0 ; x < game->map->width ; x++) {
+    for (int y = 0 ; y < game->map->size.y ; y++) {
+        for (int x = 0 ; x < game->map->size.x ; x++) {
             printf("x: %d, y: %d = ", x, y);
             for (int i = 0 ; i < 7 ; i++) {
                 printf("%d, ", game->map->tiles[y][x].ressources[i]);
@@ -63,6 +63,14 @@ char *get_ressource_name(game_t *game, char *ressource_in, int x, int y)
     return ressource_in;
 }
 
+int normalize(int x, int x_max)
+{
+    x = x % x_max;
+    if (x < 0)
+        x = x_max + x;
+    return x;
+}
+
 char *look(game_t *game, player_t player)
 {
     char *ressources = calloc(1, sizeof(char) * 9);
@@ -86,9 +94,9 @@ char *look(game_t *game, player_t player)
                 ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 2));
                 strcat(ressources, ",");
             if (x_mult == 0) {
-                ressources = get_ressource_name(game, ressources, NORMALIZE(new_x, game->map->width), NORMALIZE(start_y, game->map->height));
+                ressources = get_ressource_name(game, ressources, normalize(new_x, game->map->size.x), normalize(start_y, game->map->size.y));
             } else {
-                ressources = get_ressource_name(game, ressources, NORMALIZE(start_x, game->map->width), NORMALIZE(new_y, game->map->height));
+                ressources = get_ressource_name(game, ressources, normalize(start_x, game->map->size.x), normalize(new_y, game->map->size.y));
             }
             ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 2));
         }
@@ -101,10 +109,9 @@ game_t *add_in_map(game_t *game, int index, int ressource_to_add)
 {
     int randx = 0, randy = 0;
     for (int tolerance = 0 ; ressource_to_add > 0 ; tolerance++) {
-        for (int i = 0 ; i < (game->map->height * game->map->width) ; i++) {
-            randx = rand() % game->map->width;
-            randy = rand() % game->map->height;
-            // if (get_neighbors_repartition(game, randx, randy, index) <= tolerance) {
+        for (int i = 0 ; i < (game->map->size.y * game->map->size.x) ; i++) {
+            randx = rand() % game->map->size.x;
+            randy = rand() % game->map->size.y;
             if (get_tile_ressource(game, randx, randy) <= tolerance) {
                 game->map->tiles[randy][randx].ressources[index] += 1;
                 ressource_to_add--;
@@ -125,7 +132,7 @@ game_t *spawn_ressources(game_t *game)
 
     for (int i = 0; i < 7 ; i++) {
         ressources_available = get_map_ressources(game, i);
-        ressources_to_add = to_supp(game->map->width * game->map->height * density[i] - ressources_available);
+        ressources_to_add = to_supp(game->map->size.x * game->map->size.y * density[i] - ressources_available);
         add_in_map(game, i, ressources_to_add);
     }
     return game;
