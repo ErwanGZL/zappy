@@ -104,7 +104,6 @@ game_t *add_in_map(game_t *game, int index, int ressource_to_add)
         for (int i = 0 ; i < (game->map->height * game->map->width) ; i++) {
             randx = rand() % game->map->width;
             randy = rand() % game->map->height;
-            // if (get_neighbors_repartition(game, randx, randy, index) <= tolerance) {
             if (get_tile_ressource(game, randx, randy) <= tolerance) {
                 game->map->tiles[randy][randx].ressources[index] += 1;
                 ressource_to_add--;
