@@ -13,6 +13,7 @@ set(
     src/server.c
     src/netctl.c
     src/options.c
+    src/actions.c
     src/game/game.c
     src/game/map_handling.c
     src/game/ai_commandes.c
