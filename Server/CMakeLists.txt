@@ -8,15 +8,16 @@ add_subdirectory(libs)
 
 # Add your source files
 set(
-SOURCES
+    SOURCES
     src/main.c
     src/server.c
     src/netctl.c
     src/options.c
     src/game/game.c
+    src/game/map_handling.c
 )
 
 # Create an executable target
 add_executable(zappy_server ${SOURCES})
 target_include_directories(zappy_server PRIVATE inc)
-target_link_libraries(zappy_server PRIVATE list)
+target_link_libraries(zappy_server PRIVATE list m)
