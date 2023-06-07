@@ -35,6 +35,7 @@ class Gui {
         std::string _machine;
         sf::RenderWindow _window;
         sf::View _viewGlobal;
+        sf::View _currentView;
         sf::Font _font;
 
         sf::Texture _textureMap;

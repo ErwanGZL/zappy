@@ -57,7 +57,7 @@ void PlayerGui::update(int tileId)
         _isMoving = false;
     }
     int elapsedTime = _clock.getElapsedTime().asMilliseconds();
-    int speed = _data->getTimeUnit() / 10;
+    float speed = _data->getTimeUnit() / 10.;
 
     if (elapsedTime > 10) {
         Orientation orientation = _data->getPlayerById(_id)->getOrientation();
@@ -91,6 +91,7 @@ void PlayerGui::update(int tileId)
                     _sprite.setPosition(_nextX, _nextY);
             }
         }
+        _rect.left = _left + (_frame * 16);
         _sprite.setTextureRect(_rect);
         _clock.restart();
     }
@@ -100,12 +101,12 @@ void PlayerGui::animate(int timeUnit)
 {
     if (_nbFrame > 0) {
         if (_clockAnimate.getElapsedTime().asMilliseconds() > 1000 / _data->getTimeUnit() && _isMoving) {
+            _rect.left = _left + (_frame * 16);
+            _sprite.setTextureRect(_rect);
+            _clockAnimate.restart();
             _frame++;
             if (_frame >= _nbFrame)
                 _frame = 0;
-            _rect.left = _left + _frame * 16;
-            _sprite.setTextureRect(_rect);
-            _clockAnimate.restart();
         }
     }
 }

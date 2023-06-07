@@ -36,8 +36,16 @@ void InfoPlayer::setMouse(sf::RenderWindow &window, sf::Event event, sf::View vi
                 _display = 0;
         }
     }
-    for (int i = 0;i < _teams.size();i++) {
-        _teams[i]->setMouse(window, event, view);
+    int i = 0;
+    for (;i < _teams.size();i++) {
+        if (_teams[i]->setMouse(window, event, view))
+            break;
+    }
+    if (i != _teams.size()) {
+        for (int j = 0;j < _teams.size();j++) {
+            if (j != i)
+                _teams[j]->unToggle();
+        }
     }
 }
 
@@ -59,5 +67,15 @@ void InfoPlayer::draw(sf::RenderWindow &window)
     }
     window.setView(_view);
     window.draw(_button);
+}
+
+sf::View InfoPlayer::getView(sf::View globalView, std::vector<PlayerGui *> player)
+{
+    for (int i = 0;i < _teams.size();i++) {
+        if (_teams[i]->getClicked() == 1) {
+            return (_teams[i]->getView(player));
+        }
+    }
+    return (globalView);
 }
 

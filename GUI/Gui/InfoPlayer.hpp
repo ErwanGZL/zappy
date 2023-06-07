@@ -8,6 +8,7 @@
 #pragma once
 #include "Data.hpp"
 #include "InfoTeam.hpp"
+#include "PlayerGui.hpp"
 #include <SFML/Graphics.hpp>
 
 
@@ -18,6 +19,7 @@ class InfoPlayer {
         void update();
         void draw(sf::RenderWindow &window);
         void setMouse(sf::RenderWindow &window, sf::Event event, sf::View view);
+        sf::View getView(sf::View globalView, std::vector<PlayerGui *> player);
     protected:
     private:
         Data *_data;
@@ -25,6 +27,7 @@ class InfoPlayer {
         sf::Sprite _sprite;
         std::vector<InfoTeam *> _teams;
         sf::View _view;
+        sf::View _viewZoom;
         sf::Texture _texture;
         int _display = 0;
 };

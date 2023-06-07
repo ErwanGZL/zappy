@@ -8,6 +8,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "Data.hpp"
+#include "PlayerGui.hpp"
 
 class InfoTeam {
     public:
@@ -15,11 +16,15 @@ class InfoTeam {
         ~InfoTeam();
         void update();
         void draw(sf::RenderWindow &window, int display);
-        void setMouse(sf::RenderWindow &window, sf::Event event, sf::View view);
+        bool setMouse(sf::RenderWindow &window, sf::Event event, sf::View view);
+        void unToggle() {_clicked = false;};
+        bool getClicked() {return _clicked;};
+        sf::View getView(std::vector<PlayerGui *> player);
 
     private:
         Data *_data;
         sf::RectangleShape _background;
+        sf::RectangleShape _hoover;
         sf::Text _text;
         sf::Font _font;
         sf::Texture _texture;
@@ -30,4 +35,8 @@ class InfoTeam {
         int _numberOfPlayers = 0;
         int _teamNumber = 0;
         sf::View _view;
+        int _display = 0;
+
+        bool _clicked = false;
+        int _index = 0;
 };

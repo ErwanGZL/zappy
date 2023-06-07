@@ -62,6 +62,7 @@ void Gui::generateMap()
     _viewGlobal.zoom(1./std::min(ratiox, ratioy));
     _viewGlobal.setCenter(width * 8 - 8, height * 8 - 8);
     _window.setView(_viewGlobal);
+    _currentView = _viewGlobal;
     Perlin perlin(width, height);
     std::vector<std::vector<int>> noiseMap = perlin.run();
     for (int i = 0; i < noiseMap.size() ; i++) {
@@ -204,22 +205,22 @@ void Gui::animate()
 
 void Gui::display()
 {
-    _window.setView(_viewGlobal);
+    _window.setView(_currentView);
     for (int i = 0; i < _map.size(); i++) {
         _map[i]->display(&_window);
     }
-    _window.setView(_viewGlobal);
+    _window.setView(_currentView);
     for (int i = 0; i < _map.size(); i++) {
         _map[i]->displayRessources(&_window);
     }
-    _window.setView(_viewGlobal);
+    _window.setView(_currentView);
     for (size_t i = 0;i < _players.size();i++) {
         _window.draw(_players[i]->getSprite());
     }
     _infoTile->draw(_window);
-    _window.setView(_viewGlobal);
+    _window.setView(_currentView);
     _infoPlayer->draw(_window);
-    _window.setView(_viewGlobal);
+    _window.setView(_currentView);
 }
 
 void Gui::generatePlayer()
@@ -261,6 +262,7 @@ void Gui::generatePlayer()
 
 void Gui::updateData()
 {
+    _currentView = _infoPlayer->getView(_viewGlobal, _players);
     generatePlayer();
     for (size_t i = 0;i < _players.size();i++) {
         _players[i]->update(_map[_players[i]->getX() / 16 + _players[i]->getY() / 16 * _data->getWidth()]->getId());
