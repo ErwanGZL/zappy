@@ -61,6 +61,8 @@ int Network::playerConnect(std::string str)
     tmp = tmp.substr(tmp.find(" ") + 1);
     std::string team = tmp.substr(0, tmp.find(" "));
     _data->addPlayer(id, x, y, orientation, level, team);
+    sendCommand("pin " + std::to_string(id));
+    sendCommand("plv " + std::to_string(id));
     return 0;
 }
 
@@ -95,7 +97,7 @@ int Network::playerInventory(std::string str)
 {
     std::vector<int> ressources;
     std::string tmp = str;
-    int id = std::stoi(str.substr(0, str.find(" ")));
+    int id = std::stoi(tmp.substr(0, tmp.find(" ")));
     while (tmp.find(" ") != std::string::npos) {
         tmp = tmp.substr(tmp.find(" ") + 1);
         ressources.push_back(std::stoi(tmp.substr(0, tmp.find(" "))));
