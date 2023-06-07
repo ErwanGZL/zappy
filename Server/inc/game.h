@@ -34,6 +34,9 @@
 
 //end of minerals define
 
+//mineral access define
+#define ress game->map->tiles[y][x].ressources
+
 //start map_definition structures
 typedef struct pos {
     int x;
@@ -120,3 +123,9 @@ int verif_incantation(game_t *game, player_t *player);
 //end of ai commandes functions
 
 player_t *getPlayerByFd(game_t *game, int fd);
+
+//gui commandes functions located in gui_commandes.c
+char *gui_map_size(game_t *game);
+char *gui_map_content(game_t *game);
+char *gui_tile_content(game_t *game, int x, int y);
+char *gui_team_names(game_t *game);

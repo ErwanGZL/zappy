@@ -17,6 +17,7 @@ set(
     src/game/game.c
     src/game/map_handling.c
     src/game/ai_commandes.c
+    src/game/gui_communication.c
 )
 
 # Create an executable target
