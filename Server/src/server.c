@@ -1,4 +1,5 @@
 #include "server.h"
+#include "actions.h"
 
 /**
  * Initializes the server structure
@@ -18,9 +19,30 @@ server_t *server_new(int argc, char *argv[])
  */
 void server_select(server_t *server)
 {
-    fd_set readfds = server->netctl->watched_fd;
-    int activity = select(FD_SETSIZE, &readfds, NULL, NULL, NULL);
-    printf("Activity: %d\n", activity);
+    size_t elapsed, dt;
+    int act;
+    fd_set readfds;
+    timeval_t *timeout;
+    struct timespec start = {0}, end = {0};
+
+    readfds = server->netctl->watched_fd;
+
+    timeout = actions_get_next_timeout(server->actions, server->options->freq);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+
+    act = select(FD_SETSIZE, &readfds, NULL, NULL, timeout);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+    free(timeout);
+
+    dt = (end.tv_nsec - start.tv_nsec) + ((end.tv_sec - start.tv_sec) * 1E9);
+    elapsed = dt * server->options->freq * 1E-9;
+    actions_apply_elapsed_time(server->actions, elapsed);
+    if (act < 0)
+    {
+        printf("Timeout\n");
+        return;
+    }
     if (FD_ISSET(server->netctl->entrypoint.fd, &readfds))
     {
         printf("New connection\n");
@@ -44,6 +66,7 @@ void server_select(server_t *server)
             {
                 printf("Received %ld bytes\n", rbytes);
                 printf("Received: %s\n", buffer);
+                actions_accept(&server->actions, action_new(((socket_t *)head->value)->fd, buffer));
             }
         }
         head = head->next;
@@ -88,6 +111,20 @@ int server_run(server_t *server)
     while (1)
     {
         server_select(server);
+        for (list_t *head = &server->actions; *head != NULL;)
+        {
+            action_t *action = (action_t *)(*head)->value;
+            printf("Action: %d\n", action->cooldown);
+            if (action->cooldown <= 0)
+            {
+                // action->callback(server->game, action);
+                free(action);
+                printf("Action done\n");
+                list_del_elem_at_front(head);
+                continue;
+            }
+            head = &(*head)->next;
+        }
     }
 
     return 0;

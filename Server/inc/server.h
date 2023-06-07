@@ -20,11 +20,12 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 
-typedef struct
+typedef struct server_s
 {
     option_t *options;
     netctl_t *netctl;
     game_t *game;
+    list_t actions;
 } server_t;
 
 server_t *server_new(int argc, char *argv[]);

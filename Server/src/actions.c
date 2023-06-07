@@ -1,6 +1,7 @@
 #include "actions.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 static const char *actions[] = {
     "Forward",
@@ -46,9 +47,13 @@ action_t *action_new(int issuer, const char *cmd)
     }
     if (action->type == 0)
     {
+        printf("Unknown command: %s\n", cmd);
         free(action);
         return NULL;
     }
+    printf("New action: %s\n", cmd);
+    printf("Action type: %d\n", action->type);
+    printf("Action cooldown: %d\n", action->cooldown);
     return action;
 }
 
@@ -63,10 +68,12 @@ int action_cmp_cooldown(const void *a, const void *b)
     return 0;
 }
 
-bool actions_accept(list_t action_list, action_t *action)
+bool actions_accept(list_t *action_list, action_t *action)
 {
+    if (action == NULL)
+        return false;
     int occ = 0;
-    for (list_t head = action_list; head != NULL; head = head->next)
+    for (list_t head = *action_list; head != NULL; head = head->next)
     {
         action_t *a = (action_t *)head->value;
         if (a->issuer == action->issuer)
@@ -74,9 +81,11 @@ bool actions_accept(list_t action_list, action_t *action)
     }
     if (occ < 10)
     {
-        list_add_elem_at_back(&action_list, action);
+        printf("Action accepted\n");
+        list_add_elem_at_back(action_list, action);
         return true;
     }
+    printf("Too many actions for client %d\n", action->issuer);
     free(action);
     return false;
 }
@@ -85,7 +94,6 @@ timeval_t *actions_get_next_timeout(list_t action_list, int frequency)
 {
     if (action_list == NULL)
         return NULL;
-
     timeval_t *timeout = calloc(1, sizeof(timeval_t));
     list_sort(&action_list, action_cmp_cooldown);
     action_t *action = (action_t *)action_list->value;
@@ -93,7 +101,7 @@ timeval_t *actions_get_next_timeout(list_t action_list, int frequency)
     return timeout;
 }
 
-void actions_apply_elapsed_time(list_t action_list, int elapsed_time)
+void actions_apply_elapsed_time(list_t action_list, size_t elapsed_time)
 {
     for (list_t head = action_list; head != NULL; head = head->next)
     {
