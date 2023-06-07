@@ -25,10 +25,15 @@ class InfoTeam {
         Data *_data;
         sf::RectangleShape _background;
         sf::RectangleShape _hoover;
+        sf::RectangleShape _backgroundPlayer;
+        sf::Text _textPlayer;
+        sf::Text _textPlayer2;
         sf::Text _text;
         sf::Font _font;
         sf::Texture _texture;
+        sf::Texture _texturePlayer;
         sf::Sprite _sprite;
+        sf::Sprite _spritePlayer;
         int _x = 0;
         int _y = 0;
         std::string _name;
