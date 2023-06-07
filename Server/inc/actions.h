@@ -38,6 +38,6 @@ int action_cmp_cooldown(const void *a, const void *b);
 /**
  * Actions list functions
 */
-bool actions_accept(list_t action_list, action_t *action);
+bool actions_accept(list_t *action_list, action_t *action);
 timeval_t *actions_get_next_timeout(list_t action_list, int frequency);
-void actions_apply_elapsed_time(list_t action_list, int elapsed_time);
+void actions_apply_elapsed_time(list_t action_list, size_t elapsed_time);
