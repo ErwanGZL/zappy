@@ -83,7 +83,6 @@ int Network::handleMessages()
     std::string data;
     if (message.find(" ") != std::string::npos)
         data = message.substr(message.find(" ") + 1);
-
     int returnCode = 0;
     if (message.find("WELCOME") == 0)
         returnCode = welcome(data);

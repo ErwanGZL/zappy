@@ -22,7 +22,7 @@ TileGui::TileGui(int x, int y, int id, sf::Texture *texture, sf::IntRect rect, i
     _spriteTile.setRotation(rotate);
     _rect = rect;
     _id = id;
-    _nbFrame = (rect.top == 16 * 6 || id == 0) ? 3 : 0;
+    _nbFrame = (rect.top == 16 * 6 || id == 0) ? 4 : 0;
     _frame = 0;
     _ressourcesPos = std::vector<std::vector<sf::Vector2f>>(8);
 }
