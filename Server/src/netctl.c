@@ -8,7 +8,7 @@
 
 void netctl_disconnect(netctl_t *netctl, int fd)
 {
-    for (list_t *head = &netctl->clients; head != NULL; head = &(*head)->next)
+    for (list_t *head = &netctl->clients; *head != NULL; head = &(*head)->next)
     {
         socket_t *socket = (socket_t *)(*head)->value;
         if (socket->fd == fd)

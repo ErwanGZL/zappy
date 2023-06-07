@@ -28,14 +28,6 @@ void server_select(server_t *server)
     readfds = server->netctl->watched_fd;
 
     timeout = actions_get_next_timeout(server->actions, server->options->freq);
-    if (timeout == NULL)
-    {
-        printf("No timeout\n");
-    }
-    else
-    {
-        printf("Timeout: %ld.%06ld\n", timeout->tv_sec, timeout->tv_usec);
-    }
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
     act = select(FD_SETSIZE, &readfds, NULL, NULL, timeout);
@@ -45,7 +37,6 @@ void server_select(server_t *server)
 
     dt = (end.tv_nsec - start.tv_nsec) + ((end.tv_sec - start.tv_sec) * 1E9);
     elapsed = dt * server->options->freq * 1E-9;
-    printf("Elapsed time: %ld actions\n", elapsed);
     actions_apply_elapsed_time(server->actions, elapsed);
     if (act < 0)
     {
@@ -120,6 +111,20 @@ int server_run(server_t *server)
     while (1)
     {
         server_select(server);
+        for (list_t *head = &server->actions; *head != NULL;)
+        {
+            action_t *action = (action_t *)(*head)->value;
+            printf("Action: %d\n", action->cooldown);
+            if (action->cooldown <= 0)
+            {
+                // action->callback(server->game, action);
+                free(action);
+                printf("Action done\n");
+                list_del_elem_at_front(head);
+                continue;
+            }
+            head = &(*head)->next;
+        }
     }
 
     return 0;

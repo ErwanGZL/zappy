@@ -5,6 +5,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <bits/types.h>
+#include "game.h"
 
 typedef struct timeval timeval_t;
 
@@ -26,6 +27,7 @@ typedef struct action_s {
     } type;
     int issuer;
     int cooldown;
+    void (*callback)(game_t *game, int issuer);
 } action_t;
 
 /**
