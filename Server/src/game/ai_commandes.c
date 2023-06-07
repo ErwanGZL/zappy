@@ -1,5 +1,18 @@
 #include "game.h"
 
+static const int for_level[7][8] = {
+    //nb player, level_needed, linemate, deraumere, sibur, mendiane, phiras, thystame
+        { 1, 1, 1, 0, 0, 0, 0, 0 },
+        { 2, 2, 1, 1, 1, 0, 0, 0 },
+        { 2, 3, 2, 0, 1, 0, 2, 0 },
+        { 4, 4, 1, 1, 2, 0, 1, 0 },
+        { 4, 5, 1, 2, 1, 3, 0, 0 },
+        { 6, 6, 1, 2, 3, 0, 1, 0 },
+        { 6, 7, 2, 2, 2, 2, 2, 1 }
+    };
+
+static const char *mineral_tab[] = {"linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"};
+
 void move_up(game_t *game, player_t *player)
 {
     if (player != NULL)
@@ -77,7 +90,6 @@ int check_death(game_t *game)
 
 char *get_inventory(player_t *player)
 {
-    static const char *mineral_tab[] = {"linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"};
     char *inventory = calloc(1, sizeof(char) * 5);
     char num_buffer[10];
     memset(num_buffer, 0, 10);
@@ -117,7 +129,6 @@ int take_object(game_t *game, player_t *player, int index)
 
 int drop_object(game_t *game, player_t *player, int index)
 {
-    static const char *mineral_tab[] = {"linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"};
     if (player->entity->minerals[index] > 0) {
         game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1]++;
         player->entity->minerals[index]--;
@@ -149,16 +160,6 @@ int check_players(game_t *game, player_t *player, int players_needed, int level_
 char *resolve_incantation(game_t *game, player_t *player)
 {
     int lvl = player->entity->level;
-    static const int for_level[7][8] = {
-    //nb player, level_needed, linemate, deraumere, sibur, mendiane, phiras, thystame
-        { 1, 1, 1, 0, 0, 0, 0, 0 },
-        { 2, 2, 1, 1, 1, 0, 0, 0 },
-        { 2, 3, 2, 0, 1, 0, 2, 0 },
-        { 4, 4, 1, 1, 2, 0, 1, 0 },
-        { 4, 5, 1, 2, 1, 3, 0, 0 },
-        { 6, 6, 1, 2, 3, 0, 1, 0 },
-        { 6, 7, 2, 2, 2, 2, 2, 1 }
-    };
     for (int i = 0; i < 6; i++) {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[i + 1] -= for_level[lvl][i + 2];
     }
@@ -182,16 +183,6 @@ char *resolve_incantation(game_t *game, player_t *player)
 int verif_incantation(game_t *game, player_t *player)
 {
     int lvl = player->entity->level;
-    static const int for_level[7][8] = {
-    //nb player, level_needed, linemate, deraumere, sibur, mendiane, phiras, thystame
-        { 1, 1, 1, 0, 0, 0, 0, 0 },
-        { 2, 2, 1, 1, 1, 0, 0, 0 },
-        { 2, 3, 2, 0, 1, 0, 2, 0 },
-        { 4, 4, 1, 1, 2, 0, 1, 0 },
-        { 4, 5, 1, 2, 1, 3, 0, 0 },
-        { 6, 6, 1, 2, 3, 0, 1, 0 },
-        { 6, 7, 2, 2, 2, 2, 2, 1 }
-    };
     if (check_players(game, player, for_level[lvl][0], for_level[lvl][1]) == 0)
         return 1;
     for (int i = 0; i < 6; i++) {
