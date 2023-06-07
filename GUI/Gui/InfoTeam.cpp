@@ -20,9 +20,9 @@ InfoTeam::InfoTeam(Data *data, sf::Texture texture, std::string name, int nb)
     _spritePlayer.setScale(1.5, 1.5);
     _font.loadFromFile("GUI/font/monogram.ttf");
     _text.setFont(_font);
-    _text.setString(name);
     _text.setCharacterSize(30);
     _text.setFillColor(sf::Color::White);
+    _text.setString(name);
     _textPlayer.setFont(_font);
     _textPlayer.setCharacterSize(30);
     _textPlayer.setFillColor(sf::Color::White);
