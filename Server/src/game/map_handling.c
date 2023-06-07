@@ -101,7 +101,7 @@ char *look(game_t *game, player_t player)
             ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 2));
         }
     }
-    strcat(ressources, "]");
+    strcat(ressources, "]\n");
     return ressources;
 }
 
