@@ -10,18 +10,31 @@
 InfoTeam::InfoTeam(Data *data, sf::Texture texture, std::string name, int nb)
 {
     _data = data;
+    _texturePlayer.loadFromFile("GUI/sprites/map.png");
     _texture = texture;
     _sprite.setTexture(_texture);
     _sprite.setScale(3, 3);
     _sprite.setTextureRect(sf::IntRect(8 * (nb % 5), 0, 8, 8));
     _sprite.setOrigin(8, 0);
+    _spritePlayer.setTexture(_texturePlayer);
+    _spritePlayer.setScale(1.5, 1.5);
     _font.loadFromFile("GUI/font/monogram.ttf");
     _text.setFont(_font);
     _text.setString(name);
     _text.setCharacterSize(30);
     _text.setFillColor(sf::Color::White);
-    _text.setPosition(0, 0);
+    _textPlayer.setFont(_font);
+    _textPlayer.setCharacterSize(30);
+    _textPlayer.setFillColor(sf::Color::White);
+    _textPlayer2.setFont(_font);
+    _textPlayer2.setCharacterSize(30);
+    _textPlayer2.setFillColor(sf::Color::White);
+    _textPlayer2.setOutlineThickness(1);
+    _textPlayer2.setOutlineColor(sf::Color::Black);
     _background.setFillColor(sf::Color(0, 0, 0, 200));
+    _backgroundPlayer.setFillColor(sf::Color(0, 0, 0, 200));
+    _backgroundPlayer.setSize(sf::Vector2f(200, 200));
+    _backgroundPlayer.setOrigin(100, 100);
     _name = name;
     _teamNumber = nb;
     _view.setSize(720, 480);
@@ -36,20 +49,42 @@ InfoTeam::~InfoTeam()
 
 void InfoTeam::update()
 {
+    std::vector<int> ressources = {0, 0, 0, 0, 0, 0, 0};
+    int level = 0;
     if (_index >= _numberOfPlayers) {
-        _index = 0;
         _clicked = false;
+        _index = -1;
     }
     _numberOfPlayers = 0;
     for (int i = 0;i < _data->getPlayers().size();i++) {
-        if (_data->getPlayers()[i]->getTeamName() == _name)
+        if (_data->getPlayers()[i]->getTeamName() == _name) {
             _numberOfPlayers++;
+            if (i == _index && _clicked) {
+                ressources = _data->getPlayers()[i]->getRessources();
+                level = _data->getPlayers()[i]->getLevel();
+            }
+        }
     }
     int width = (_numberOfPlayers * 30 + 10) + 5;
     if (width < _text.getLocalBounds().width + 20)
         width = _text.getLocalBounds().width + 20;
     _background.setSize(sf::Vector2f(width, 8 * 3 + 40));
     _background.setOrigin(_background.getSize().x, 0);
+
+    std::string str =
+    "   Food:      " + std::to_string(ressources[0]) +
+    "\n   Linemate:  " + std::to_string(ressources[1]) +
+    "\n   Deraumere: " + std::to_string(ressources[2]) +
+    "\n   Sibur:     " + std::to_string(ressources[3]) +
+    "\n   Mendiane:  " + std::to_string(ressources[4]) +
+    "\n   Phiras:    " + std::to_string(ressources[5]) +
+    "\n   Thystame:  " + std::to_string(ressources[6]);
+    _textPlayer.setString(str);
+    _textPlayer.setOrigin(_textPlayer.getLocalBounds().width / 2, _textPlayer.getLocalBounds().height / 2);
+
+    str = "LEVEL: " + std::to_string(level);
+    _textPlayer2.setString(str);
+    _textPlayer2.setOrigin(_textPlayer2.getLocalBounds().width / 2, _textPlayer2.getLocalBounds().height / 2);
 }
 
 void InfoTeam::draw(sf::RenderWindow &window, int display)
@@ -65,6 +100,18 @@ void InfoTeam::draw(sf::RenderWindow &window, int display)
         if (_clicked) {
             _hoover.setPosition(_background.getPosition().x - 5 - (_index * 30), _background.getPosition().y + 30 - 5);
             window.draw(_hoover);
+
+            _backgroundPlayer.setPosition(window.getView().getCenter().x, window.getView().getCenter().y + 140);
+            _textPlayer.setPosition(_backgroundPlayer.getPosition().x, _backgroundPlayer.getPosition().y);
+            _textPlayer2.setPosition(_backgroundPlayer.getPosition().x, _backgroundPlayer.getPosition().y - 100);
+            window.draw(_backgroundPlayer);
+            window.draw(_textPlayer);
+            window.draw(_textPlayer2);
+            for (int i = 0;i < 7; i++) {
+                _spritePlayer.setPosition(_backgroundPlayer.getPosition().x - 85, _backgroundPlayer.getPosition().y - 75 + (i * 25));
+                _spritePlayer.setTextureRect(sf::IntRect(16 * i, 16 * 7, 16, 16));
+                window.draw(_spritePlayer);
+            }
         }
         for (int i = 0;i < _numberOfPlayers;i++) {
             _sprite.setPosition(_background.getPosition().x - 10 - (i * 30), _background.getPosition().y + 30);
@@ -82,11 +129,12 @@ bool InfoTeam::setMouse(sf::RenderWindow &window, sf::Event event, sf::View view
             _sprite.setPosition(_background.getPosition().x - 10 - (i * 30), _background.getPosition().y + 30);
             if (_sprite.getGlobalBounds().contains(mouseWorld)) {
                 if (i == _index && _clicked) {
-                    _clicked = !_clicked;
+                    _clicked = false;
+                    _index = -1;
                 } else {
                     _clicked = true;
+                    _index = i;
                 }
-                _index = i;
                 return _clicked;
             }
         }
