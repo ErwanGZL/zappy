@@ -43,6 +43,7 @@ void Gui::run ()
             if (event.type == sf::Event::Closed)
                 _window.close();
             _infoTile->setMouse(_window, event);
+            _infoPlayer->setMouse(_window, event, _viewGlobal);
         }
         _window.clear(sf::Color::Black);
         updateData();

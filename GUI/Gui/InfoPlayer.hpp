@@ -26,4 +26,5 @@ class InfoPlayer {
         std::vector<InfoTeam *> _teams;
         sf::View _view;
         sf::Texture _texture;
+        int _display = 0;
 };
