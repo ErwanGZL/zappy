@@ -27,6 +27,7 @@ Gui::Gui(Data *data)
     _textureMap.loadFromFile("GUI/sprites/map.png");
     _texturePlayer.loadFromFile("GUI/sprites/Sprites.png");
     _infoTile = new InfoTile(_data);
+    _infoPlayer = new InfoPlayer(_data);
 }
 
 Gui::~Gui()
@@ -216,6 +217,8 @@ void Gui::display()
     }
     _infoTile->draw(_window);
     _window.setView(_viewGlobal);
+    _infoPlayer->draw(_window);
+    _window.setView(_viewGlobal);
 }
 
 void Gui::generatePlayer()
@@ -265,4 +268,5 @@ void Gui::updateData()
         _map[i]->update();
     }
     _infoTile->update();
+    _infoPlayer->update();
 }

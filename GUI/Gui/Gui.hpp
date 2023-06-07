@@ -15,6 +15,7 @@
 #include "TileGui.hpp"
 #include "PlayerGui.hpp"
 #include "InfoTile.hpp"
+#include "InfoPlayer.hpp"
 #include <climits>
 #include <cstdlib>
 
@@ -42,6 +43,7 @@ class Gui {
         std::vector<TileGui*> _map;
         std::vector<PlayerGui*> _players;
         InfoTile *_infoTile;
+        InfoPlayer *_infoPlayer;
         sf::IntRect getRect(int x, int y, std::vector<std::vector<int>> map);
         sf::IntRect getRectBorder(int x, int y, int *rotate);
 
