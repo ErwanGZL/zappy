@@ -35,8 +35,8 @@ static const int cooldowns[] = {
 /**
  * TODO: Callback needs to return a structure containing the response
 */
-static int (*callbacks[])(game_t *, action_t *) = {
-    &move_up, // change to &move_forward
+static const char *(*callbacks[])(game_t *, player_t *, const char *) = {
+    &move_forward,
     &turn_right,
     &turn_left,
     &look,
@@ -46,6 +46,7 @@ static int (*callbacks[])(game_t *, action_t *) = {
     NULL, // FORK
     NULL, // EJECT
     &take_object,
+    &drop_object,
     &resolve_incantation};
 
 action_t *action_new(int issuer, const char *cmd)

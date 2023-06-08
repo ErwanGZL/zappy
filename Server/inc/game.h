@@ -100,7 +100,7 @@ map_t *init_map(int width, int height);
 int *init_ressources();
 game_t *add_player(game_t *game, team_name_t team_name, int fd);
 game_t *add_team(game_t *game, int max_players, team_name_t name);
-team_t **get_team(game_t *game, team_name_t team_name);
+team_t *get_team(game_t *game, const char *team_name);
 int get_orientation(player_t * player);
 
 //ressource handling functions
@@ -109,23 +109,22 @@ int get_ressource(game_t *game, int x, int y, int index);
 int get_map_ressources(game_t *game, int index);
 char *get_ressource_name(game_t *game, char *ressource_in, int x, int y);
 
-//player commands functions
-char *look(game_t *game, player_t player);
 
 //debug functions
 void print_ressources(game_t *game);
 
 //ai commandes functions located in ai_commandes.c
-void move_up(game_t *game, player_t *player);
-void turn_left(player_t *player);
-void turn_right(player_t *player);
-void turn(player_t *player, int direction);
-int team_unused_slots(team_t *team);
+const char *look(game_t *game, player_t *player, const char *arg);
+const char *move_forward(game_t *game, player_t *player, const char *arg);
+const char *turn_left(game_t *game, player_t *player, const char *arg);
+const char *turn_right(game_t *game ,player_t *player, const char *arg);
+const char *team_unused_slots(game_t *game, player_t *player, const char *arg);
 int check_death(game_t *game);
-char *get_inventory(player_t *player);
-char *resolve_incantation(game_t *game, player_t *player);
-int verif_incantation(game_t *game, player_t *player);
-int take_object(game_t *game, player_t *player, int index);
+const char *get_inventory(game_t *game, player_t *player, const char *arg);
+const char *resolve_incantation(game_t *game, player_t *player, const char *arg);
+const char *verif_incantation(game_t *game, player_t *player, const char *arg);
+const char *take_object(game_t *game, player_t *player, const char *arg);
+const char *drop_object(game_t *game, player_t *player, const char *arg);
 //end of ai commandes functions
 
 player_t *getPlayerByFd(game_t *game, int fd);

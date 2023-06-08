@@ -2,11 +2,11 @@
 #include "game.h"
 #include <string.h>
 
-team_t **get_team(game_t *game, team_name_t team_name)
+team_t *get_team(game_t *game, const char *team_name)
 {
     for (list_t ptr = game->teams; ptr != NULL; ptr = ptr->next)
         if (strcmp(((team_t *)ptr->value)->name, team_name) == 0)
-            return ((team_t **)&ptr->value);
+            return ((team_t *)ptr->value);
     return NULL;
 }
 
@@ -39,9 +39,9 @@ game_t *add_player(game_t *game, team_name_t team_name, int fd)
     player->entity->food_left = 10;
     player->entity->minerals = init_minerals();
     list_add_elem_at_back(&game->players, player);
-    team_t **ptr = get_team(game, team_name);
+    team_t *ptr = get_team(game, team_name);
     if (ptr != NULL)
-        (*ptr)->nb_players++;
+        ptr->nb_players++;
     game->nb_players++;
     return game;
 }
@@ -98,9 +98,9 @@ game_t *remove_player(game_t *game, int fd)
     int i = 0;
     for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next, i++) {
         if (((player_t *) ptr->value)->fd == fd) {
-            team_t **ptr2 = get_team(game, ((player_t *) ptr->value)->team_name);
+            team_t *ptr2 = get_team(game, ((player_t *) ptr->value)->team_name);
             if (ptr2 != NULL)
-                (*ptr2)->nb_players--;
+                ptr2->nb_players--;
             game->nb_players--;
             list_del_elem_at_position(&game->players, i);
             break;
