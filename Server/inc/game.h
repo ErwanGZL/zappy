@@ -88,6 +88,7 @@ typedef struct game {
     list_t teams;
     int nb_teams;
     int nb_players;
+    int freq;
     char buffer[BUFSIZ / 2];
     char send_message[BUFSIZ];
 } game_t;
