@@ -87,6 +87,8 @@ typedef struct game {
     list_t teams;
     int nb_teams;
     int nb_players;
+    char buffer[BUFSIZ / 2];
+    char send_message[BUFSIZ];
 } game_t;
 
 //map handling functions

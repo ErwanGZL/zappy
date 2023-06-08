@@ -2,42 +2,39 @@
 
 char *gui_map_size(game_t *game)
 {
-    char *str = calloc(1, sizeof(char) * 11);
-    memset(str, 0, 11);
-    sprintf(str, "msz %d %d\n", game->map->size.x, game->map->size.y);
-    return str;
+    memset(game->send_message, 0, BUFSIZ);
+    sprintf(game->send_message, "msz %d %d\n", game->map->size.x, game->map->size.y);
+    return game->send_message;
 }
 
 char *gui_tile_content(game_t *game, int x, int y)
 {
-    char *str = calloc(1, sizeof(char) * 50);
-    memset(str, 0, 50);
-    sprintf(str, "bct %d %d %d %d %d %d %d %d %d\n", x, y, ress[0], ress[1], ress[2], ress[3], ress[4], ress[5], ress[6]);
-    return str;
+    memset(game->send_message, 0, BUFSIZ);
+    sprintf(game->send_message, "bct %d %d %d %d %d %d %d %d %d\n", x, y, ress[0], ress[1], ress[2], ress[3], ress[4], ress[5], ress[6]);
+    return game->send_message;
 }
 
 char *gui_map_content(game_t *game)
 {
-    char *str = calloc(1, sizeof(char) * BUFSIZ);
-    char buffer[BUFSIZ] = {0};
-    memset(str, 0, 100);
+    memset(game->buffer, 0, BUFSIZ / 2);
+    memset(game->send_message, 0, BUFSIZ);
     for (int y = 0; y < game->map->size.y; y++) {
         for (int x = 0; x < game->map->size.x; x++) {
-            memcpy(buffer, str, strlen(str));
-            sprintf(str, "%sbct %d %d %d %d %d %d %d %d %d\n", buffer, x, y, ress[0], ress[1], ress[2], ress[3], ress[4], ress[5], ress[6]);
+            memcpy(game->buffer, game->send_message, strlen(game->send_message));
+            sprintf(game->send_message, "%sbct %d %d %d %d %d %d %d %d %d\n", game->buffer, x, y, ress[0], ress[1], ress[2], ress[3], ress[4], ress[5], ress[6]);
+            memset(game->buffer, 0, BUFSIZ / 2);
         }
     }
-    return str;
+    return game->send_message;
 }
 
 char *gui_team_names(game_t *game)
 {
-    char *str = calloc(1, sizeof(char) * BUFSIZ);
-    char buffer[BUFSIZ] = {0};
-    memset(str, 0, 100);
+    memset(game->send_message, 0, BUFSIZ);
+    memset(game->buffer, 0, BUFSIZ / 2);
     for (list_t ptr = game->teams ; ptr != NULL ; ptr = ptr->next) {
-        memcpy(buffer, str, strlen(str));
-        sprintf(str, "%stna %s\n", buffer, ((team_t *) ptr->value)->name);
+        memcpy(game->buffer, game->send_message, strlen(game->send_message));
+        sprintf(game->send_message, "%stna %s\n", game->buffer, ((team_t *) ptr->value)->name);
     }
-    return str;
+    return game->send_message;
 }
