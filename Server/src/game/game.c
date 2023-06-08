@@ -87,6 +87,8 @@ game_t *init_game(option_t *opt)
         team_name_t name = (team_name_t)head->value;
         add_team(game, opt->clientsNb, name);
     }
+    memset(game->send_message, 0, BUFSIZ);
+    memset(game->buffer, 0, BUFSIZ / 2);
     return game;
 }
 
