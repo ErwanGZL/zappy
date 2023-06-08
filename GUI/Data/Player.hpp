@@ -33,6 +33,7 @@ class Player {
         int getY();
         Orientation getOrientation();
         std::string getTeamName();
+        std::string getMessage() {return _message;};
 
     private:
         std::vector<int> _ressources = {0, 0, 0, 0, 0, 0, 0};

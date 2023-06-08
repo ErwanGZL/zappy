@@ -123,4 +123,3 @@ void PlayerGui::draw(sf::RenderWindow *window)
         window->draw(_spriteBroadcast);
     }
 }
-

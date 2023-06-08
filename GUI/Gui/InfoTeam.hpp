@@ -26,8 +26,10 @@ class InfoTeam {
         sf::RectangleShape _background;
         sf::RectangleShape _hoover;
         sf::RectangleShape _backgroundPlayer;
+        sf::RectangleShape _backgroundText;
         sf::Text _textPlayer;
         sf::Text _textPlayer2;
+        sf::Text _textPlayer3;
         sf::Text _text;
         sf::Font _font;
         sf::Texture _texture;
@@ -44,4 +46,5 @@ class InfoTeam {
 
         bool _clicked = false;
         int _index = 0;
+        int _broadcast = 0;
 };
