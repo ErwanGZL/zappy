@@ -38,3 +38,33 @@ char *gui_team_names(game_t *game)
     }
     return game->send_message;
 }
+
+char *gui_player_connexion(game_t *game, player_t *player)
+{
+    memset(game->send_message, 0, BUFSIZ);
+    for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
+        sprintf(game->send_message, "pnw %d %d %d %d %d %s\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_orientation(player), player->entity->level, player->team_name);
+    }
+    return game->send_message;
+}
+
+char *gui_player_position(game_t *game, player_t *player)
+{
+    memset(game->send_message, 0, BUFSIZ);
+    sprintf(game->send_message, "ppo %d %d %d %d\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_orientation(player));
+    return game->send_message;
+}
+
+char *gui_player_level(game_t *game, player_t *player)
+{
+    memset(game->send_message, 0, BUFSIZ);
+    sprintf(game->send_message, "plv %d %d\n", player->fd, player->entity->level);
+    return game->send_message;
+}
+
+char *gui_player_inventory(game_t *game, player_t *player)
+{
+    memset(game->send_message, 0, BUFSIZ);
+    sprintf(game->send_message, "pin %d %d %d %d %d %d %d %d %d %d", player->fd, player->entity->pos.x, player->entity->pos.y, player->entity->food_left, ress_player[0], ress_player[1], ress_player[2], ress_player[3], ress_player[4], ress_player[5]);
+    return game->send_message;
+}
