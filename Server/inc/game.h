@@ -17,12 +17,14 @@
 #define RIGHT 2
 //minerals define
 
-#define LINEMATE 0
-#define DERAUMERE 1
-#define SIBUR 2
-#define MENDIANE 3
-#define PHIRAS 4
-#define THYSTAME 5
+typedef enum mineral_e {
+    LINEMATE,
+    DERAUMERE,
+    SIBUR,
+    MENDIANE,
+    PHIRAS,
+    THYSTAME
+} mineral_t;
 
 #define FOOD_DENSITY 0.5
 #define LINEMATE_DENSITY 0.3
@@ -33,6 +35,8 @@
 #define THYSTAME_DENSITY 0.05
 
 //end of minerals define
+
+typedef int fd_t;
 
 //mineral access define
 #define ress game->map->tiles[y][x].ressources

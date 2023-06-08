@@ -1,17 +1,22 @@
 #include "game.h"
 
 static const int for_level[7][8] = {
-    //nb player, level_needed, linemate, deraumere, sibur, mendiane, phiras, thystame
-        { 1, 1, 1, 0, 0, 0, 0, 0 },
-        { 2, 2, 1, 1, 1, 0, 0, 0 },
-        { 2, 3, 2, 0, 1, 0, 2, 0 },
-        { 4, 4, 1, 1, 2, 0, 1, 0 },
-        { 4, 5, 1, 2, 1, 3, 0, 0 },
-        { 6, 6, 1, 2, 3, 0, 1, 0 },
-        { 6, 7, 2, 2, 2, 2, 2, 1 }
-    };
+    // nb player, level_needed, linemate, deraumere, sibur, mendiane, phiras, thystame
+    {1, 1, 1, 0, 0, 0, 0, 0},
+    {2, 2, 1, 1, 1, 0, 0, 0},
+    {2, 3, 2, 0, 1, 0, 2, 0},
+    {4, 4, 1, 1, 2, 0, 1, 0},
+    {4, 5, 1, 2, 1, 3, 0, 0},
+    {6, 6, 1, 2, 3, 0, 1, 0},
+    {6, 7, 2, 2, 2, 2, 2, 1}};
 
-static const char *mineral_tab[] = {"linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"};
+static const char *mineral_tab[] = {
+    "linemate",
+    "deraumere",
+    "sibur",
+    "mendiane",
+    "phiras",
+    "thystame"};
 
 const char *move_forward(game_t *game, player_t *player, const char *arg)
 {
@@ -36,13 +41,19 @@ const char *turn_left(game_t *game, player_t *player, const char *arg)
     if (player->entity->orientation.x == 0 && player->entity->orientation.y == 1) {
         player->entity->orientation.x = -1;
         player->entity->orientation.y = 0;
-    } else if (player->entity->orientation.x == -1 && player->entity->orientation.y == 0) {
+    }
+    else if (player->entity->orientation.x == -1 && player->entity->orientation.y == 0)
+    {
         player->entity->orientation.x = 0;
         player->entity->orientation.y = -1;
-    } else if (player->entity->orientation.x == 0 && player->entity->orientation.y == -1) {
+    }
+    else if (player->entity->orientation.x == 0 && player->entity->orientation.y == -1)
+    {
         player->entity->orientation.x = 1;
         player->entity->orientation.y = 0;
-    } else if (player->entity->orientation.x == 1 && player->entity->orientation.y == 0) {
+    }
+    else if (player->entity->orientation.x == 1 && player->entity->orientation.y == 0)
+    {
         player->entity->orientation.x = 0;
         player->entity->orientation.y = 1;
     }
@@ -56,13 +67,19 @@ const char *turn_right(game_t *game ,player_t *player, const char *arg)
     if (player->entity->orientation.x == 0 && player->entity->orientation.y == 1) {
         player->entity->orientation.x = 1;
         player->entity->orientation.y = 0;
-    } else if (player->entity->orientation.x == 1 && player->entity->orientation.y == 0) {
+    }
+    else if (player->entity->orientation.x == 1 && player->entity->orientation.y == 0)
+    {
         player->entity->orientation.x = 0;
         player->entity->orientation.y = -1;
-    } else if (player->entity->orientation.x == 0 && player->entity->orientation.y == -1) {
+    }
+    else if (player->entity->orientation.x == 0 && player->entity->orientation.y == -1)
+    {
         player->entity->orientation.x = -1;
         player->entity->orientation.y = 0;
-    } else if (player->entity->orientation.x == -1 && player->entity->orientation.y == 0) {
+    }
+    else if (player->entity->orientation.x == -1 && player->entity->orientation.y == 0)
+    {
         player->entity->orientation.x = 0;
         player->entity->orientation.y = 1;
     }
@@ -81,11 +98,13 @@ const char *team_unused_slots(game_t *game, player_t *player, const char *arg)
 
 int check_death(game_t *game)
 {
-   for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
+    {
         player_t *player = ptr->value;
-        if (player->entity->food_left <= 0) {
-            //send death message
-            //TODO: kill player
+        if (player->entity->food_left <= 0)
+        {
+            // send death message
+            // TODO: kill player
             return 1;
         }
     }
@@ -99,7 +118,8 @@ const char *get_inventory(game_t *game, player_t *player, const char *arg)
     memset(num_buffer, 0, 10);
     strcat(inventory, "[");
     int before = 0;
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++)
+    {
         inventory = realloc(inventory, sizeof(char) * (strlen(inventory) + strlen(mineral_tab[i]) + 5));
         if (before == 1)
             strcat(inventory, " ");
@@ -153,15 +173,19 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
 int check_players(game_t *game, player_t *player, int players_needed, int level_required)
 {
     int nb_players = 0;
-    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
+    {
         player_t *player2 = ptr->value;
-        if (player2->entity->pos.x == player->entity->pos.x && player2->entity->pos.y == player->entity->pos.y) {
-            if (player2->entity->level != level_required) {
+        if (player2->entity->pos.x == player->entity->pos.x && player2->entity->pos.y == player->entity->pos.y)
+        {
+            if (player2->entity->level != level_required)
+            {
                 nb_players++;
             }
         }
     }
-    if (nb_players == players_needed) {
+    if (nb_players == players_needed)
+    {
         return 0;
     }
     return 1;
@@ -170,15 +194,19 @@ int check_players(game_t *game, player_t *player, int players_needed, int level_
 const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
 {
     int lvl = player->entity->level;
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++)
+    {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[i + 1] -= for_level[lvl][i + 2];
     }
     player->entity->level++;
     int leveled_up = 1;
-    for (list_t ptr = game->players; ptr != NULL && leveled_up <= for_level[lvl][1] ; ptr = ptr->next) {
+    for (list_t ptr = game->players; ptr != NULL && leveled_up <= for_level[lvl][1]; ptr = ptr->next)
+    {
         player_t *player2 = ptr->value;
-        if (player2->entity->pos.x == player->entity->pos.x && player2->entity->pos.y == player->entity->pos.y) {
-            if (player2->entity->level == lvl) {
+        if (player2->entity->pos.x == player->entity->pos.x && player2->entity->pos.y == player->entity->pos.y)
+        {
+            if (player2->entity->level == lvl)
+            {
                 player2->entity->level++;
                 leveled_up++;
             }
