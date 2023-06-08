@@ -36,6 +36,7 @@
 
 //mineral access define
 #define ress game->map->tiles[y][x].ressources
+#define ress_player player->entity->minerals
 
 //start map_definition structures
 typedef struct pos {
@@ -99,6 +100,7 @@ int *init_ressources();
 game_t *add_player(game_t *game, team_name_t team_name, int fd);
 game_t *add_team(game_t *game, int max_players, team_name_t name);
 team_t **get_team(game_t *game, team_name_t team_name);
+int get_orientation(player_t * player);
 
 //ressource handling functions
 game_t *spawn_ressources(game_t *game);
@@ -131,3 +133,7 @@ char *gui_map_size(game_t *game);
 char *gui_map_content(game_t *game);
 char *gui_tile_content(game_t *game, int x, int y);
 char *gui_team_names(game_t *game);
+char *gui_player_connexion(game_t *game, player_t *player);
+char *gui_player_position(game_t *game, player_t *player);
+char *gui_player_level(game_t *game, player_t *player);
+char *gui_player_inventory(game_t *game, player_t *player);

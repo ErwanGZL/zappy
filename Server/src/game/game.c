@@ -35,8 +35,8 @@ game_t *add_player(game_t *game, team_name_t team_name, int fd)
     player->entity->pos.x = rand() % game->map->size.x;
     player->entity->pos.y = rand() % game->map->size.y;
     player->entity->level = 1;
-    player->entity->orientation = (pos_t){1, 1};
-    player->entity->food_left = 1260;
+    player->entity->orientation = (pos_t){1, 0};
+    player->entity->food_left = 10;
     player->entity->minerals = init_minerals();
     list_add_elem_at_back(&game->players, player);
     team_t **ptr = get_team(game, team_name);
@@ -141,4 +141,18 @@ team_t *getTeamByName(game_t *game, team_name_t name)
         if (strcmp(((team_t *) ptr->value)->name, name) == 0)
             return ((team_t *) ptr->value);
     return NULL;
+}
+
+int get_orientation(player_t * player)
+{
+    pos_t orientation = player->entity->orientation;
+    if (orientation.y == -1)
+        return 1;
+    if (orientation.x == 1)
+        return 2;
+    if (orientation.y == 1)
+        return 3;
+    if (orientation.x == -1)
+        return 4;
+    return 0;
 }
