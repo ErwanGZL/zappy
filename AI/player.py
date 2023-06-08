@@ -1,5 +1,6 @@
 from enum import Enum
 from ai import *
+from typing import Tuple
 
 
 class Orientation(Enum):
@@ -153,6 +154,22 @@ class Inventory:
         print("phiras: " + str(self.phiras))
         print("thystame: " + str(self.thystame))
 
+    def set_ressource(self, item, amount):
+        if item == "food":
+            self.food = amount
+        elif item == "linemate":
+            self.linemate = amount
+        elif item == "deraumere":
+            self.deraumere = amount
+        elif item == "sibur":
+            self.sibur = amount
+        elif item == "mendiane":
+            self.mendiane = amount
+        elif item == "phiras":
+            self.phiras = amount
+        elif item == "thystame":
+            self.thystame = amount
+
 
 ##class player:
 
@@ -261,6 +278,24 @@ class Player:
             self.pos.go_left()
         elif self.orientation == Orientation.RIGHT:
             self.pos.go_right()
+        pass
+
+    def need_to_elevation(self) -> Tuple[int, int]:
+        pass
+
+    def go_to(self, obj: Tuple[int, int]):
+        pass
+
+    def update_inventory(self, content: str):
+        content = content.split(",")
+        result = []
+        for item in content:
+            parts = item.split(" ")
+            name = parts[0]
+            value = parts[1]
+            result.append((name, value))
+        for item in result:
+            self.inventory.set_ressource(item[0], item[1])
         pass
 
 
