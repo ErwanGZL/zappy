@@ -58,13 +58,25 @@ class Position:
 
 
 class Ressouces(Enum):
-    FOOD = 1
-    LINEMATE = 2
-    DERAUMERE = 3
-    SIBUR = 4
-    MENDIANE = 5
-    PHIRAS = 6
-    THYSTAME = 7
+    FOOD = 0
+    LINEMATE = 1
+    DERAUMERE = 2
+    SIBUR = 3
+    MENDIANE = 4
+    PHIRAS = 5
+    THYSTAME = 6
+
+
+for_level = [
+    # nb player, linemate, deraumere, sibur, mendiane, phiras, thystame
+    [1, 1, 0, 0, 0, 0, 0],
+    [2, 1, 1, 1, 0, 0, 0],
+    [2, 2, 0, 1, 0, 2, 0],
+    [4, 1, 1, 2, 0, 1, 0],
+    [4, 1, 2, 1, 3, 0, 0],
+    [6, 1, 2, 3, 0, 1, 0],
+    [6, 2, 2, 2, 2, 2, 1],
+]
 
 
 class Inventory:
@@ -186,6 +198,9 @@ class Player:
         lvl = 1
         while lvl <= self.level:
             for i in range(self.pos.x - lvl, self.pos.x + lvl + 1):
+                if content[0] == "":
+                    content.pop(0)
+                    continue
                 i = i % self.map_x
                 if i < 0:
                     i = self.map_x + i
@@ -193,13 +208,19 @@ class Player:
                 vis = vis % self.map_x
                 if vis < 0:
                     vis = self.map_x + vis
-                content.append(self.map[vis][i])
+                if self.map[i][vis] == "":
+                    self.map[i][vis] = content.pop(0)
+                else:
+                    " ".join([self.map[i][vis], content.pop(0)])
             lvl += 1
 
     def add_memory_down(self, content: list):
         lvl = 1
         while lvl <= self.level:
             for i in range(self.pos.x + lvl, self.pos.x - lvl - 1, -1):
+                if content[0] == "":
+                    content.pop(0)
+                    continue
                 i = i % self.map_x
                 if i < 0:
                     i = self.map_x + i
@@ -207,13 +228,19 @@ class Player:
                 vis = vis % self.map_x
                 if vis < 0:
                     vis = self.map_x + vis
-                content.append(self.map[vis][i])
+                if self.map[i][vis] == "":
+                    self.map[i][vis] = content.pop(0)
+                else:
+                    " ".join([self.map[i][vis], content.pop(0)])
             lvl += 1
 
     def add_memory_left(self, content: list):
         lvl = 1
         while lvl <= self.level:
             for i in range(self.pos.y - lvl, self.pos.y + lvl + 1):
+                if content[0] == "":
+                    content.pop(0)
+                    continue
                 i = i % self.map_y
                 if i < 0:
                     i = self.map_y + i
@@ -221,13 +248,19 @@ class Player:
                 vis = vis % self.map_y
                 if vis < 0:
                     vis = self.map_y + vis
-                content.append(self.map[i][vis])
+                if self.map[i][vis] == "":
+                    self.map[i][vis] = content.pop(0)
+                else:
+                    " ".join([self.map[i][vis], content.pop(0)])
             lvl += 1
 
     def add_memory_right(self, content: list):
         lvl = 1
         while lvl <= self.level:
             for i in range(self.pos.y + lvl, self.pos.y - lvl - 1, -1):
+                if content[0] == "":
+                    content.pop(0)
+                    continue
                 i = i % self.map_y
                 if i < 0:
                     i = self.map_y + i
@@ -235,7 +268,10 @@ class Player:
                 vis = vis % self.map_y
                 if vis < 0:
                     vis = self.map_y + vis
-                content.append(self.map[i][vis])
+                if self.map[i][vis] == "":
+                    self.map[i][vis] = content.pop(0)
+                else:
+                    " ".join([self.map[i][vis], content.pop(0)])
             lvl += 1
 
     def add_memory(self, content: list):
@@ -280,8 +316,18 @@ class Player:
             self.pos.go_right()
         pass
 
-    def need_to_elevation(self) -> Tuple[int, int]:
+    def find_object(self, obj: Ressouces):
+        # find the nearest object on the self.map
+
         pass
+
+    def need_to_elevation(self) -> Ressouces:
+        for i in Ressouces:
+            if i == Ressouces.FOOD:
+                continue
+            if self.inventory.get_ressource(i) < for_level[self.level][i.value]:
+                return i
+        return None
 
     def go_to(self, obj: Tuple[int, int]):
         pass
@@ -297,15 +343,3 @@ class Player:
         for item in result:
             self.inventory.set_ressource(item[0], item[1])
         pass
-
-
-for_level = [
-    # nb player, linemate, deraumere, sibur, mendiane, phiras, thystame
-    [1, 1, 0, 0, 0, 0, 0],
-    [2, 1, 1, 1, 0, 0, 0],
-    [2, 2, 0, 1, 0, 2, 0],
-    [4, 1, 1, 2, 0, 1, 0],
-    [4, 1, 2, 1, 3, 0, 0],
-    [6, 1, 2, 3, 0, 1, 0],
-    [6, 2, 2, 2, 2, 2, 1],
-]
