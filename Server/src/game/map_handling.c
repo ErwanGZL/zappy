@@ -71,40 +71,6 @@ int normalize(int x, int x_max)
     return x;
 }
 
-char *look(game_t *game, player_t player)
-{
-    char *ressources = calloc(1, sizeof(char) * 9);
-    memcpy(ressources, "[player ", 8);
-    ressources = get_ressource_name(game, ressources, player.entity->pos.x, player.entity->pos.y);
-    int x_mult = (player.entity->orientation.x != 0) ? ((player.entity->orientation.x > 0) ? 1 : -1) : 0;
-    int y_mult = (player.entity->orientation.y != 0) ? ((player.entity->orientation.y > 0) ? 1 : -1) : 0;
-    int current_view_size = 0, start_x = 0, start_y = 0;
-    for (int i = 0 ; i < player.entity->level ; i++) {
-        current_view_size = 3 + i * 2;
-        if (x_mult == 0) {
-            start_x = player.entity->pos.x + (y_mult * (i + 1));
-            start_y = player.entity->pos.y + (y_mult * (i + 1));
-        } else {
-            start_x = player.entity->pos.x + (x_mult * (i + 1));
-            start_y = player.entity->pos.y - (x_mult * (i + 1));
-        }
-        for (int a = 0 ; a < current_view_size ; a++) {
-            int new_x = start_x - (a * y_mult);
-            int new_y = start_y + (a * x_mult);
-                ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 2));
-                strcat(ressources, ",");
-            if (x_mult == 0) {
-                ressources = get_ressource_name(game, ressources, normalize(new_x, game->map->size.x), normalize(start_y, game->map->size.y));
-            } else {
-                ressources = get_ressource_name(game, ressources, normalize(start_x, game->map->size.x), normalize(new_y, game->map->size.y));
-            }
-            ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 2));
-        }
-    }
-    strcat(ressources, "]\n");
-    return ressources;
-}
-
 game_t *add_in_map(game_t *game, int index, int ressource_to_add)
 {
     int randx = 0, randy = 0;
