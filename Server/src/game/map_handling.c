@@ -52,7 +52,8 @@ char *get_ressource_name(game_t *game, char *ressource_in, int x, int y)
     static const char *mineral_tab[] = {"food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"};
     for (int i = 0, ressource = 0 ; i < 7 ; i++) {
         while (ressource < game->map->tiles[y][x].ressources[i]) {
-            ressource_in = realloc(ressource_in, sizeof(char) * (strlen(ressource_in) + (strlen(mineral_tab[i]) + 2)));
+            ressource_in = realloc(ressource_in, sizeof(char) * (strlen(ressource_in) +
+            (strlen(mineral_tab[i]) + 2)));
             if (before != 0)
                 strcat(ressource_in, " ");
             strcat(ressource_in, mineral_tab[i]);

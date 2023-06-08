@@ -117,7 +117,7 @@ int server_run(server_t *server)
             printf("Action: %d\n", action->cooldown);
             if (action->cooldown <= 0)
             {
-                player_t *p = getPlayerByFd(server->game, action->issuer);
+                player_t *p = get_player_by_fd(server->game, action->issuer);
                 // action->callback(server->game, p, action->arg);
                 free(action);
                 printf("Action done\n");

@@ -201,12 +201,24 @@ const char *verif_incantation(game_t *game, player_t *player, const char *arg)
     return "Elevation underway\n";
 }
 
+char *get_player_in_tile(game_t *game, char *ressources, int x, int y)
+{
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
+        player_t *player = ptr->value;
+        if (player->entity->pos.x == x && player->entity->pos.y == y) {
+            ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 8));
+            strcat(ressources, "player ");
+        }
+    }
+    return ressources;
+}
 
-//TODO : check if player is on the tile and add it in print
 const char *look(game_t *game, player_t *player, const char *arg)
 {
-    char *ressources = calloc(1, sizeof(char) * 9);
-    memcpy(ressources, "[player ", 8);
+    char *ressources = calloc(1, sizeof(char) * 2);
+    memset(ressources, 0, 2);
+    memcpy(ressources, "[", 1);
+    ressources = get_player_in_tile(game, ressources, player->entity->pos.x, player->entity->pos.y);
     ressources = get_ressource_name(game, ressources, player->entity->pos.x, player->entity->pos.y);
     int x_mult = (player->entity->orientation.x != 0) ? ((player->entity->orientation.x > 0) ? 1 : -1) : 0;
     int y_mult = (player->entity->orientation.y != 0) ? ((player->entity->orientation.y > 0) ? 1 : -1) : 0;
@@ -226,13 +238,16 @@ const char *look(game_t *game, player_t *player, const char *arg)
                 ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 2));
                 strcat(ressources, ",");
             if (x_mult == 0) {
+                ressources = get_player_in_tile(game, ressources, normalize(new_x, game->map->size.x), normalize(start_y, game->map->size.y));
                 ressources = get_ressource_name(game, ressources, normalize(new_x, game->map->size.x), normalize(start_y, game->map->size.y));
             } else {
+                ressources = get_player_in_tile(game, ressources, normalize(start_x, game->map->size.x), normalize(new_y, game->map->size.y));
                 ressources = get_ressource_name(game, ressources, normalize(start_x, game->map->size.x), normalize(new_y, game->map->size.y));
             }
             ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 2));
         }
     }
+    ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 3));
     strcat(ressources, "]\n");
     return ressources;
 }

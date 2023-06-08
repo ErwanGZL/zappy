@@ -42,9 +42,7 @@ char *gui_team_names(game_t *game)
 char *gui_player_connexion(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
-    for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
-        sprintf(game->send_message, "pnw %d %d %d %d %d %s\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_orientation(player), player->entity->level, player->team_name);
-    }
+    sprintf(game->send_message, "pnw %d %d %d %d %d %s\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_orientation(player), player->entity->level, player->team_name);
     return game->send_message;
 }
 
