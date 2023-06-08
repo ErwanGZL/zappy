@@ -117,7 +117,8 @@ int server_run(server_t *server)
             printf("Action: %d\n", action->cooldown);
             if (action->cooldown <= 0)
             {
-                // action->callback(server->game, action);
+                player_t *p = getPlayerByFd(server->game, action->issuer);
+                // action->callback(server->game, p, action->arg);
                 free(action);
                 printf("Action done\n");
                 list_del_elem_at_front(head);
