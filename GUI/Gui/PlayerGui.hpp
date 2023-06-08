@@ -18,6 +18,7 @@ class PlayerGui {
         ~PlayerGui();
         void update(int tileId);
         void animate(int timeUnit);
+        void draw(sf::RenderWindow *window);
         sf::Sprite getSprite() {return _sprite;};
         int getX() {return _nextX;};
         int getY() {return _nextY;};
@@ -26,6 +27,7 @@ class PlayerGui {
 
     private:
         sf::Sprite _sprite;
+        sf::Sprite _spriteBroadcast;
         sf::Texture *_texture;
         sf::IntRect _rect;
         sf::Clock _clock;

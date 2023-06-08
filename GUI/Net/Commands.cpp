@@ -82,6 +82,7 @@ int Network::playerPosition(std::string str)
     _data->getPlayerById(id)->setX(x);
     _data->getPlayerById(id)->setY(y);
     _data->getPlayerById(id)->setOrientation(orientation);
+    _data->getPlayerById(id)->setStatus(NONE);
     return 0;
 }
 
@@ -182,6 +183,7 @@ int Network::playerDrop(std::string str)
 {
     int index = std::stoi(str.substr(0, str.find(" ")));
     std::vector<int> ressources = _data->getPlayerById(index)->getRessources();
+    _data->getPlayerById(index)->setStatus(NONE);
     int ressource = std::stoi(str.substr(str.find(" ") + 1));
     ressources[ressource] -= 1;
     sendCommand("mct");
@@ -192,6 +194,7 @@ int Network::playerTake(std::string str)
 {
     int index = std::stoi(str.substr(0, str.find(" ")));
     std::vector<int> ressources = _data->getPlayerById(index)->getRessources();
+    _data->getPlayerById(index)->setStatus(NONE);
     int ressource = std::stoi(str.substr(str.find(" ") + 1));
     ressources[ressource] += 1;
     sendCommand("mct");

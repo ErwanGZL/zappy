@@ -15,7 +15,6 @@ PlayerGui::PlayerGui(int id, sf::Texture *texture, int teamId, Data *data)
     _id = id;
     _nextX = _data->getPlayerById(id)->getX() * 16;
     _nextY = _data->getPlayerById(id)->getY() * 16;
-    // _stockLeft = teamId * 8 * 16;
     _sprite.setTexture(*_texture);
     _sprite.setPosition(_nextX, _nextY);
     _sprite.setTextureRect(_rect);
@@ -24,6 +23,9 @@ PlayerGui::PlayerGui(int id, sf::Texture *texture, int teamId, Data *data)
     _frame = 0;
     _rect = sf::IntRect(0, 0, 16, 16);
     _rect = sf::IntRect(_teamId * 8 * 16, stateTop(), 16, 16);
+    _spriteBroadcast.setTexture(*_texture);
+    _spriteBroadcast.setTextureRect(sf::IntRect(0, 16 * 24, 16, 16));
+    _spriteBroadcast.setOrigin(8, 8);
 }
 
 PlayerGui::~PlayerGui()
@@ -43,6 +45,8 @@ int PlayerGui::stateTop()
         top = 16 * 12;
     else if (status == LAYING)
         top = 16 * 13;
+    else if (status == BROADCASTING)
+        top = (_tileId == 0) ? 16 * 15 : 16 * 10;
     return (top);
 }
 
@@ -108,6 +112,15 @@ void PlayerGui::animate(int timeUnit)
             if (_frame >= _nbFrame)
                 _frame = 0;
         }
+    }
+}
+
+void PlayerGui::draw(sf::RenderWindow *window)
+{
+    window->draw(_sprite);
+    if (_data->getPlayerById(_id) != NULL && _data->getPlayerById(_id)->getStatus() == BROADCASTING) {
+        _spriteBroadcast.setPosition(_sprite.getPosition().x, _sprite.getPosition().y - 16);
+        window->draw(_spriteBroadcast);
     }
 }
 

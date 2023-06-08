@@ -215,7 +215,7 @@ void Gui::display()
     }
     _window.setView(_currentView);
     for (size_t i = 0;i < _players.size();i++) {
-        _window.draw(_players[i]->getSprite());
+        _players[i]->draw(&_window);
     }
     _infoTile->draw(_window);
     _window.setView(_currentView);

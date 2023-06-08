@@ -42,7 +42,6 @@ class Player {
         int _y = 0;
         Orientation _orientation;
         std::string _teamName = "";
-        bool _broadcast = false;
         std::string _message = "";
         PlayerStatus _status = PlayerStatus::NONE;
 };
