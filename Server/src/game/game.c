@@ -128,15 +128,16 @@ void free_game(game_t *game)
     free(game);
 }
 
-player_t *getPlayerByFd(game_t *game, int fd)
+player_t *get_player_by_fd(game_t *game, int fd)
 {
-    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
         if (((player_t *) ptr->value)->fd == fd)
             return ((player_t *) ptr->value);
+    }
     return NULL;
 }
 
-team_t *getTeamByName(game_t *game, team_name_t name)
+team_t *get_team_by_name(game_t *game, team_name_t name)
 {
     for (list_t ptr = game->teams; ptr != NULL; ptr = ptr->next)
         if (strcmp(((team_t *) ptr->value)->name, name) == 0)

@@ -127,7 +127,7 @@ const char *take_object(game_t *game, player_t *player, const char *arg);
 const char *drop_object(game_t *game, player_t *player, const char *arg);
 //end of ai commandes functions
 
-player_t *getPlayerByFd(game_t *game, int fd);
+player_t *get_player_by_fd(game_t *game, int fd);
 
 //gui commandes functions located in gui_commandes.c
 char *gui_map_size(game_t *game);
