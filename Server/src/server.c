@@ -27,7 +27,7 @@ void server_select(server_t *server)
 
     readfds = server->netctl->watched_fd;
 
-    timeout = actions_get_next_timeout(server->actions, server->options->freq);
+    timeout = actions_get_next_timeout(server->actions, server->game->freq);
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
     act = select(FD_SETSIZE, &readfds, NULL, NULL, timeout);
@@ -36,7 +36,7 @@ void server_select(server_t *server)
     free(timeout);
 
     dt = (end.tv_nsec - start.tv_nsec) + ((end.tv_sec - start.tv_sec) * 1E9);
-    elapsed = dt * server->options->freq * 1E-9;
+    elapsed = dt * server->game->freq * 1E-9;
     actions_apply_elapsed_time(server->actions, elapsed);
     if (act < 0)
     {

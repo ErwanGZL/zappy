@@ -78,6 +78,7 @@ game_t *init_game(option_t *opt)
 {
     srand(time(NULL));
     game_t *game = calloc(1, sizeof(game_t));
+    game->freq = opt->freq;
     game->nb_players = 0;
     game->nb_teams = 0;
     game->map = init_map(opt->width, opt->height);
