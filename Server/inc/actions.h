@@ -25,16 +25,16 @@ typedef struct action_s {
         ACTION_SET,
         ACTION_INCANTATION,
     } type;
-    int issuer;
     int cooldown;
-    void (*callback)(game_t *game, int issuer);
+    int issuer;
+    char arg[1024];
+    void (*callback)(game_t *game, player_t *player, const char *arg);
 } action_t;
 
 /**
  * Action functions
 */
 action_t *action_new(int issuer, const char *cmd);
-bool action_exec(action_t *action);
 int action_cmp_cooldown(const void *a, const void *b);
 
 /**

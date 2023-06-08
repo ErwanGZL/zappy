@@ -9,12 +9,12 @@ static const char *actions[] = {
     "Left",
     "Look",
     "Inventory",
-    "Broadcast",
+    "Broadcast ",
     "Connect_nbr",
     "Fork",
     "Eject",
-    "Take",
-    "Set",
+    "Take ",
+    "Set ",
     "Incantation",
     NULL};
 
@@ -30,8 +30,23 @@ static const int cooldowns[] = {
     7,
     7,
     7,
-    300,
-};
+    300};
+
+/**
+ * TODO: Callback needs to return a structure containing the response
+*/
+static int (*callbacks[])(game_t *, action_t *) = {
+    &move_up, // change to &move_forward
+    &turn_right,
+    &turn_left,
+    &look,
+    &get_inventory,
+    NULL, // BROADCAST
+    &team_unused_slots,
+    NULL, // FORK
+    NULL, // EJECT
+    &take_object,
+    &resolve_incantation};
 
 action_t *action_new(int issuer, const char *cmd)
 {
@@ -43,6 +58,10 @@ action_t *action_new(int issuer, const char *cmd)
         {
             action->type = i + 1;
             action->cooldown = cooldowns[action->type];
+            action->callback = callbacks[action->type];
+            if (action->type == ACTION_BROADCAST || action->type == ACTION_TAKE || action->type == ACTION_SET)
+                strncpy(action->arg, cmd + strlen(actions[i]), strlen(cmd) - strlen(actions[i]) - 1);
+            printf("Action arg: %s\n", action->arg);
         }
     }
     if (action->type == 0)

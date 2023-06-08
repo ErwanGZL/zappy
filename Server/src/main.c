@@ -16,7 +16,6 @@
 int main(int argc, char *argv[])
 {
     server_t *server = server_new(argc, argv);
-    game_t *a = init_game(server->options);
     int status = server_run(server);
     server_destroy(server);
     return status;

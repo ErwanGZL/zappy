@@ -124,6 +124,7 @@ int check_death(game_t *game);
 char *get_inventory(player_t *player);
 char *resolve_incantation(game_t *game, player_t *player);
 int verif_incantation(game_t *game, player_t *player);
+int take_object(game_t *game, player_t *player, int index);
 //end of ai commandes functions
 
 player_t *getPlayerByFd(game_t *game, int fd);
