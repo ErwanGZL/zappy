@@ -98,6 +98,10 @@ int Network::playerInventory(std::string str)
     std::vector<int> ressources;
     std::string tmp = str;
     int id = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int x = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int y = std::stoi(tmp.substr(0, tmp.find(" ")));
     while (tmp.find(" ") != std::string::npos) {
         tmp = tmp.substr(tmp.find(" ") + 1);
         ressources.push_back(std::stoi(tmp.substr(0, tmp.find(" "))));

@@ -60,6 +60,9 @@ std::string Network::getMessage()
     }
     char buffer[BUFSIZ] = {0};
     size_t size = read(_socket, buffer, BUFSIZ);
+    if (size == 0) {
+        return "internal stop";
+    }
     _buffer += std::string(buffer).substr(0, size);
     if (_buffer.find("\n") != std::string::npos) {
         std::string message = _buffer.substr(0, _buffer.find("\n"));
@@ -134,8 +137,10 @@ int Network::handleMessages()
         returnCode = unknownCommand(data);
     else if (message.find("sbp") == 0)
         returnCode = commandParameter(data);
+    else if (message.find("internal stop") == 0)
+        return 1;
     else
-        std::cout << "Unknown command" << message << std::endl;
+        std::cout << "Unknown command" << message << "|" << std::endl;
     if (returnCode)
         return 1;
     return 0;
