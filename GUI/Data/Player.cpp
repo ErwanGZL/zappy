@@ -93,7 +93,7 @@ std::string Player::getTeamName()
 void Player::broadcast(std::string message)
 {
     _message = message;
-    _broadcast = true;
+    _status = PlayerStatus::BROADCASTING;
 }
 
 void Player::setStatus(PlayerStatus status)

@@ -33,4 +33,5 @@ enum PlayerStatus {
     INCANTATION,
     LAYING,
     PUSHING,
+    BROADCASTING
 };

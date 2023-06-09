@@ -33,6 +33,7 @@ class Player {
         int getY();
         Orientation getOrientation();
         std::string getTeamName();
+        std::string getMessage() {return _message;};
 
     private:
         std::vector<int> _ressources = {0, 0, 0, 0, 0, 0, 0};
@@ -42,7 +43,6 @@ class Player {
         int _y = 0;
         Orientation _orientation;
         std::string _teamName = "";
-        bool _broadcast = false;
         std::string _message = "";
         PlayerStatus _status = PlayerStatus::NONE;
 };

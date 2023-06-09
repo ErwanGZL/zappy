@@ -31,10 +31,14 @@ InfoTeam::InfoTeam(Data *data, sf::Texture texture, std::string name, int nb)
     _textPlayer2.setFillColor(sf::Color::White);
     _textPlayer2.setOutlineThickness(1);
     _textPlayer2.setOutlineColor(sf::Color::Black);
+    _textPlayer3.setFont(_font);
+    _textPlayer3.setCharacterSize(30);
+    _textPlayer3.setFillColor(sf::Color::White);
     _background.setFillColor(sf::Color(0, 0, 0, 200));
     _backgroundPlayer.setFillColor(sf::Color(0, 0, 0, 200));
     _backgroundPlayer.setSize(sf::Vector2f(200, 200));
     _backgroundPlayer.setOrigin(100, 100);
+    _backgroundText.setFillColor(sf::Color(0, 0, 0, 200));
     _name = name;
     _teamNumber = nb;
     _view.setSize(720, 480);
@@ -56,12 +60,15 @@ void InfoTeam::update()
         _index = -1;
     }
     _numberOfPlayers = 0;
+    _broadcast = 0;
     for (int i = 0;i < _data->getPlayers().size();i++) {
         if (_data->getPlayers()[i]->getTeamName() == _name) {
             _numberOfPlayers++;
             if (i == _index && _clicked) {
                 ressources = _data->getPlayers()[i]->getRessources();
                 level = _data->getPlayers()[i]->getLevel();
+                _textPlayer3.setString(_data->getPlayers()[i]->getMessage());
+                _broadcast = (_data->getPlayers()[i]->getStatus() == BROADCASTING) ? 1 : 0;
             }
         }
     }
@@ -107,6 +114,15 @@ void InfoTeam::draw(sf::RenderWindow &window, int display)
             window.draw(_backgroundPlayer);
             window.draw(_textPlayer);
             window.draw(_textPlayer2);
+            if (_broadcast == 1) {
+                _textPlayer3.setOrigin(_textPlayer3.getLocalBounds().width / 2, _textPlayer3.getLocalBounds().height / 2);
+                _textPlayer3.setPosition(_backgroundPlayer.getPosition().x, _backgroundPlayer.getPosition().y - 300);
+                _backgroundText.setSize(sf::Vector2f(_textPlayer3.getLocalBounds().width + 20, _textPlayer3.getLocalBounds().height + 20));
+                _backgroundText.setOrigin(_backgroundText.getSize().x / 2, _backgroundText.getSize().y / 2);
+                _backgroundText.setPosition(_backgroundPlayer.getPosition().x, _backgroundPlayer.getPosition().y - 280);
+                window.draw(_backgroundText);
+                window.draw(_textPlayer3);
+            }
             for (int i = 0;i < 7; i++) {
                 _spritePlayer.setPosition(_backgroundPlayer.getPosition().x - 85, _backgroundPlayer.getPosition().y - 75 + (i * 25));
                 _spritePlayer.setTextureRect(sf::IntRect(16 * i, 16 * 7, 16, 16));
