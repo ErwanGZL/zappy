@@ -280,18 +280,39 @@ const char *look(game_t *game, player_t *player, const char *arg)
     return ressources;
 }
 
+void destroy_egg(game_t *game, int x, int y, int *success)
+{
+    int pos = 0;
+    for (list_t ptr = game->eggs ; ptr != NULL ; ptr = ptr->next) {
+        egg_t *egg = ptr->value;
+        if (egg->pos.x == x && egg->pos.y == y) {
+            list_del_elem_at_position(game->eggs, pos);
+            *success = 1;
+        }
+        pos++;
+    }
+}
+
 const char *eject_player(game_t *game, player_t *player, const char *arg)
 {
     int x = player->entity->pos.x;
     int y = player->entity->pos.y;
-
+    int success = 0;
     for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
         player_t *player2 = ptr->value;
         if (player2->entity->pos.x == x && player2->entity->pos.y == y && player2 != player) {
             player2->entity->pos.x = normalize(player2->entity->pos.x + 1, game->map->size.x);
             player2->entity->pos.y = normalize(player2->entity->pos.y + 1, game->map->size.y);
-            dprintf(player2->fd, "eject: %d\n", get_from_orientation(player)); //send to player2 [eject: K\n] get_from_orientation(player);
-            //destroy eggs if there is one
+            dprintf(player2->fd, "eject: %d\n", get_from_orientation(player));
         }
     }
+    destroy_egg(game, player->entity->pos.x, player->entity->pos.y, &success);
+    if (success == 1)
+        return "ok\n";
+    return "ko\n";
+}
+
+const char *fork_player(game_t *game, player_t *player, const char *arg)
+{
+
 }

@@ -56,6 +56,19 @@ game_t *add_team(game_t *game, int max_players, team_name_t name)
     return game;
 }
 
+game_t *add_egg(game_t *game, team_name_t team_name)
+{
+    egg_t *egg = calloc(1, sizeof(egg_t));
+    egg->team_name = strdup(team_name);
+    egg->pos.x = rand() % game->map->size.x;
+    egg->pos.y = rand() % game->map->size.y;
+    egg->id = game->egg_nbr;
+    list_add_elem_at_back(&game->eggs, egg);
+    game->egg_nbr++;
+    return game;
+}
+
+
 map_t *init_map(int width, int height)
 {
     map_t *map = calloc(1, sizeof(map_t));
@@ -83,6 +96,7 @@ game_t *init_game(option_t *opt)
     game->nb_teams = 0;
     game->map = init_map(opt->width, opt->height);
     game->players = NULL;
+    game->eggs = NULL;
     for (list_t head = opt->teams; head != NULL; head = head->next)
     {
         team_name_t name = (team_name_t)head->value;

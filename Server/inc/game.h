@@ -90,12 +90,20 @@ typedef struct game {
     map_t *map;
     list_t players;
     list_t teams;
+    list_t eggs;
+    int egg_nbr;
     int nb_teams;
     int nb_players;
     int freq;
     char buffer[BUFSIZ / 2];
     char send_message[BUFSIZ];
 } game_t;
+
+typedef struct egg {
+    int id;
+    pos_t pos;
+    team_name_t team_name;
+} egg_t;
 
 //map handling functions
 int normalize(int x, int x_max);
@@ -131,6 +139,7 @@ const char *verif_incantation(game_t *game, player_t *player, const char *arg);
 const char *take_object(game_t *game, player_t *player, const char *arg);
 const char *drop_object(game_t *game, player_t *player, const char *arg);
 const char *eject_player(game_t *game, player_t *player, const char *arg);
+const char *fork_player(game_t *game, player_t *player, const char *arg);
 //end of ai commandes functions
 
 player_t *get_player_by_fd(game_t *game, int fd);
