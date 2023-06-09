@@ -90,12 +90,20 @@ typedef struct game {
     map_t *map;
     list_t players;
     list_t teams;
+    list_t eggs;
+    int egg_nbr;
     int nb_teams;
     int nb_players;
     int freq;
     char buffer[BUFSIZ / 2];
     char send_message[BUFSIZ];
 } game_t;
+
+typedef struct egg {
+    int id;
+    pos_t pos;
+    team_name_t team_name;
+} egg_t;
 
 //map handling functions
 int normalize(int x, int x_max);
@@ -104,7 +112,9 @@ map_t *init_map(int width, int height);
 int *init_ressources();
 game_t *add_player(game_t *game, team_name_t team_name, int fd);
 game_t *add_team(game_t *game, int max_players, team_name_t name);
-team_t *get_team(game_t *game, const char *team_name);
+team_t *get_team_by_name(game_t *game, const char *team_name);
+void destroy_egg(game_t *game, int x, int y, int *success);
+game_t *add_egg(game_t *game, team_name_t team_name);
 int get_orientation(player_t * player);
 int get_from_orientation(player_t * player);
 
@@ -131,6 +141,7 @@ const char *verif_incantation(game_t *game, player_t *player, const char *arg);
 const char *take_object(game_t *game, player_t *player, const char *arg);
 const char *drop_object(game_t *game, player_t *player, const char *arg);
 const char *eject_player(game_t *game, player_t *player, const char *arg);
+const char *fork_player(game_t *game, player_t *player, const char *arg);
 //end of ai commandes functions
 
 player_t *get_player_by_fd(game_t *game, int fd);
@@ -177,3 +188,4 @@ const char *gui_smg(game_t *game, const char *message);
 const char *gui_suc(game_t *game);
 // server command parameter
 const char *gui_sbp(game_t *game);
+// end of gui commandes functions

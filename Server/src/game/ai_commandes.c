@@ -88,7 +88,7 @@ const char *turn_right(game_t *game ,player_t *player, const char *arg)
 
 const char *team_unused_slots(game_t *game, player_t *player, const char *arg)
 {
-    team_t *team = get_team(game, arg);
+    team_t *team = get_team_by_name(game, arg);
     if (team == NULL)
         return "ko\n";
     memset(game->buffer, 0, BUFSIZ);
@@ -284,14 +284,25 @@ const char *eject_player(game_t *game, player_t *player, const char *arg)
 {
     int x = player->entity->pos.x;
     int y = player->entity->pos.y;
-
+    int success = 0;
     for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
         player_t *player2 = ptr->value;
         if (player2->entity->pos.x == x && player2->entity->pos.y == y && player2 != player) {
             player2->entity->pos.x = normalize(player2->entity->pos.x + 1, game->map->size.x);
             player2->entity->pos.y = normalize(player2->entity->pos.y + 1, game->map->size.y);
-            dprintf(player2->fd, "eject: %d\n", get_from_orientation(player)); //send to player2 [eject: K\n] get_from_orientation(player);
-            //destroy eggs if there is one
+            dprintf(player2->fd, "eject: %d\n", get_from_orientation(player));
         }
     }
+    destroy_egg(game, player->entity->pos.x, player->entity->pos.y, &success);
+    if (success == 1)
+        return "ok\n";
+    return "ko\n";
+}
+
+const char *fork_player(game_t *game, player_t *player, const char *arg)
+{
+    team_t *team = get_team_by_name(game, player->team_name);
+    add_egg(game, team->name);
+    team->max_players ++;
+    return "ok\n";
 }
