@@ -2,13 +2,14 @@
 #include "game.h"
 #include <string.h>
 
-team_t *get_team(game_t *game, const char *team_name)
+team_t *get_team_by_name(game_t *game, const char *team_name)
 {
     for (list_t ptr = game->teams; ptr != NULL; ptr = ptr->next)
         if (strcmp(((team_t *)ptr->value)->name, team_name) == 0)
             return ((team_t *)ptr->value);
     return NULL;
 }
+
 
 int *init_ressources()
 {
@@ -39,7 +40,7 @@ game_t *add_player(game_t *game, team_name_t team_name, int fd)
     player->entity->food_left = 10;
     player->entity->minerals = init_minerals();
     list_add_elem_at_back(&game->players, player);
-    team_t *ptr = get_team(game, team_name);
+    team_t *ptr = get_team_by_name(game, team_name);
     if (ptr != NULL)
         ptr->nb_players++;
     game->nb_players++;
@@ -67,7 +68,6 @@ game_t *add_egg(game_t *game, team_name_t team_name)
     game->egg_nbr++;
     return game;
 }
-
 
 map_t *init_map(int width, int height)
 {
@@ -112,7 +112,7 @@ game_t *remove_player(game_t *game, int fd)
     int i = 0;
     for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next, i++) {
         if (((player_t *) ptr->value)->fd == fd) {
-            team_t *ptr2 = get_team(game, ((player_t *) ptr->value)->team_name);
+            team_t *ptr2 = get_team_by_name(game, ((player_t *) ptr->value)->team_name);
             if (ptr2 != NULL)
                 ptr2->nb_players--;
             game->nb_players--;
@@ -151,14 +151,6 @@ player_t *get_player_by_fd(game_t *game, int fd)
     return NULL;
 }
 
-team_t *get_team_by_name(game_t *game, team_name_t name)
-{
-    for (list_t ptr = game->teams; ptr != NULL; ptr = ptr->next)
-        if (strcmp(((team_t *) ptr->value)->name, name) == 0)
-            return ((team_t *) ptr->value);
-    return NULL;
-}
-
 int get_orientation(player_t * player)
 {
     pos_t orientation = player->entity->orientation;
@@ -185,4 +177,17 @@ int get_from_orientation(player_t * player)
     if (orientation.x == -1)
         return 2;
     return 0;
+}
+
+void destroy_egg(game_t *game, int x, int y, int *success)
+{
+    int pos = 0;
+    for (list_t ptr = game->eggs ; ptr != NULL ; ptr = ptr->next) {
+        egg_t *egg = ptr->value;
+        if (egg->pos.x == x && egg->pos.y == y) {
+            list_del_elem_at_position(&game->eggs, pos);
+            *success = 1;
+        }
+        pos++;
+    }
 }

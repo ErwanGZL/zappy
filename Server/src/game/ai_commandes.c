@@ -88,7 +88,7 @@ const char *turn_right(game_t *game ,player_t *player, const char *arg)
 
 const char *team_unused_slots(game_t *game, player_t *player, const char *arg)
 {
-    team_t *team = get_team(game, arg);
+    team_t *team = get_team_by_name(game, arg);
     if (team == NULL)
         return "ko\n";
     memset(game->buffer, 0, BUFSIZ);
@@ -280,19 +280,6 @@ const char *look(game_t *game, player_t *player, const char *arg)
     return ressources;
 }
 
-void destroy_egg(game_t *game, int x, int y, int *success)
-{
-    int pos = 0;
-    for (list_t ptr = game->eggs ; ptr != NULL ; ptr = ptr->next) {
-        egg_t *egg = ptr->value;
-        if (egg->pos.x == x && egg->pos.y == y) {
-            list_del_elem_at_position(game->eggs, pos);
-            *success = 1;
-        }
-        pos++;
-    }
-}
-
 const char *eject_player(game_t *game, player_t *player, const char *arg)
 {
     int x = player->entity->pos.x;
@@ -314,5 +301,8 @@ const char *eject_player(game_t *game, player_t *player, const char *arg)
 
 const char *fork_player(game_t *game, player_t *player, const char *arg)
 {
-
+    team_t *team = get_team_by_name(game, player->team_name);
+    add_egg(game, team->name);
+    team->max_players ++;
+    return "ok\n";
 }
