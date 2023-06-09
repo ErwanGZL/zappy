@@ -177,3 +177,6 @@ const char *gui_smg(game_t *game, const char *message);
 const char *gui_suc(game_t *game);
 // server command parameter
 const char *gui_sbp(game_t *game);
+
+void gui_send_all(game_t *game, const char *msg);
+void gui_request_process(game_t *game, player_t *sender, const char *body);

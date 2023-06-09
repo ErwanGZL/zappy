@@ -65,8 +65,12 @@ void server_select(server_t *server)
             else
             {
                 printf("Received %ld bytes\n", rbytes);
-                printf("Received: %s\n", buffer);
-                actions_accept(&server->actions, action_new(((socket_t *)head->value)->fd, buffer));
+                printf("%s\n", buffer);
+                player_t *player = get_player_by_fd(server->game, ((socket_t *)head->value)->fd);
+                if (strcmp(player->team_name, "GRAPHIC") == 0)
+                    gui_request_process(server->game, player, buffer);
+                else
+                    actions_accept(&server->actions, action_new(((socket_t *)head->value)->fd, buffer));
             }
         }
         head = head->next;

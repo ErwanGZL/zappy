@@ -1,5 +1,8 @@
 #include "game.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 char *gui_map_size(game_t *game)
 {
     memset(game->send_message, 0, BUFSIZ);
@@ -221,4 +224,85 @@ const char *gui_sbp(game_t *game)
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "sbp\n");
     return game->send_message;
+}
+
+void gui_send_all(game_t *game, const char *msg)
+{
+    for (list_t head = game->players; head != NULL; head = head->next) {
+        player_t *player = head->value;
+        if (strcmp(player->team_name, "GRAPHIC") == 0)
+            send(player->fd, msg, strlen(msg), 0);
+    }
+}
+
+void gui_request_process(game_t *game, player_t *sender, const char *body)
+{
+    bool send_all = false;
+    int x = 0, y = 0, n = 0, t = 0;
+    char buffer[1024] = {0};
+    strcpy(buffer, body);
+    fd_t fd = sender->fd;
+    if (strncmp(body, "msz", strlen("msz")) == 0) // map size
+    {
+        gui_map_size(game);
+    }
+    else if (strncmp(body, "bct", strlen("bct")) == 0) // tile content
+    {
+        strtok(buffer, " ");
+        x = atoi(strtok(NULL, " "));
+        y = atoi(strtok(NULL, " "));
+        gui_tile_content(game, x, y);
+    }
+    else if (strncmp(body, "mct", strlen("mct")) == 0) // map content
+    {
+        gui_map_content(game);
+    }
+    else if (strncmp(body, "tna", strlen("tna")) == 0) // team names
+    {
+        gui_team_names(game);
+    }
+    else if (strncmp(body, "ppo", strlen("ppo")) == 0) // player position
+    {
+        strtok(buffer, " ");
+        n = atoi(strtok(NULL, " "));
+        gui_player_position(game, get_player_by_fd(game, n));
+    }
+    else if (strncmp(body, "plv", strlen("plv")) == 0) // player level
+    {
+        strtok(buffer, " ");
+        n = atoi(strtok(NULL, " "));
+        gui_player_level(game, get_player_by_fd(game, n));
+    }
+    else if (strncmp(body, "pin", strlen("pin")) == 0) // player inventory
+    {
+        strtok(buffer, " ");
+        n = atoi(strtok(NULL, " "));
+        gui_player_inventory(game, get_player_by_fd(game, n));
+    }
+    else if (strncmp(body, "sgt", strlen("sgt")) == 0) // time unit
+    {
+        gui_sgt(game);
+    }
+    else if (strncmp(body, "sst", strlen("sst")) == 0) // time unit
+    {
+        strtok(buffer, " ");
+        t = atoi(strtok(NULL, " "));
+        if (t < 1) {
+            dprintf(fd, "sbp\n");
+            return;
+        }
+        game->freq = t;
+        gui_sst(game);
+        send_all = true;
+    }
+    else
+    {
+        dprintf(fd, "suc\n");
+        return;
+    }
+
+    if (send_all)
+        gui_send_all(game, game->send_message);
+    else
+        dprintf(fd, game->send_message);
 }
