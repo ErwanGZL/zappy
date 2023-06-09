@@ -167,7 +167,7 @@ int Network::endIncantation(std::string str)
     std::vector<Player*> players = _data->getPlayersByCoords(x, y);
     for (int i = 0; i < players.size(); i++) {
         players[i]->setStatus(NONE);
-        players[i]->setLevel(players[i]->getLevel() + 1);
+        sendCommand("plv " + std::to_string(players[i]->getId()));
     }
     return 0;
 }
