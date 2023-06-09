@@ -279,3 +279,19 @@ const char *look(game_t *game, player_t *player, const char *arg)
     strcat(ressources, "]\n");
     return ressources;
 }
+
+const char *eject_player(game_t *game, player_t *player, const char *arg)
+{
+    int x = player->entity->pos.x;
+    int y = player->entity->pos.y;
+
+    for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
+        player_t *player2 = ptr->value;
+        if (player2->entity->pos.x == x && player2->entity->pos.y == y && player2 != player) {
+            player2->entity->pos.x = normalize(player2->entity->pos.x + 1, game->map->size.x);
+            player2->entity->pos.y = normalize(player2->entity->pos.y + 1, game->map->size.y);
+            dprintf(player2->fd, "eject: %d\n", player->entity->orientation); //send to player2 [eject: K\n] get_from_orientation(player);
+            //destroy eggs if there is one
+        }
+    }
+}

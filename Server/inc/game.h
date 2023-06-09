@@ -106,6 +106,7 @@ game_t *add_player(game_t *game, team_name_t team_name, int fd);
 game_t *add_team(game_t *game, int max_players, team_name_t name);
 team_t *get_team(game_t *game, const char *team_name);
 int get_orientation(player_t * player);
+int get_from_orientation(player_t * player);
 
 //ressource handling functions
 game_t *spawn_ressources(game_t *game);
@@ -129,6 +130,7 @@ const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
 const char *verif_incantation(game_t *game, player_t *player, const char *arg);
 const char *take_object(game_t *game, player_t *player, const char *arg);
 const char *drop_object(game_t *game, player_t *player, const char *arg);
+const char *eject_player(game_t *game, player_t *player, const char *arg);
 //end of ai commandes functions
 
 player_t *get_player_by_fd(game_t *game, int fd);
@@ -142,3 +144,36 @@ char *gui_player_connexion(game_t *game, player_t *player);
 char *gui_player_position(game_t *game, player_t *player);
 char *gui_player_level(game_t *game, player_t *player);
 char *gui_player_inventory(game_t *game, player_t *player);
+const char *gui_pex(game_t *game, player_t *target);
+// player broadcast
+const char *gui_pbc(game_t *game, fd_t from, const char *message);
+// player incantation
+const char *gui_pic(game_t *game, player_t *first, player_t *casters[]);
+// player incantation end
+const char *gui_pie(game_t *game, player_t *player, int result);
+// player fork
+const char *gui_pfk(game_t *game, player_t *player);
+// player drop ressource
+const char *gui_pdr(game_t *game, player_t *player, mineral_t resource);
+// player take ressource
+const char *gui_pgt(game_t *game, player_t *player, mineral_t resource);
+// player death
+const char *gui_pdi(game_t *game, player_t *player);
+// player egg laying
+const char *gui_enw(game_t *game, player_t *player, int egg_id);
+// player connection to egg
+const char *gui_ebo(game_t *game, int egg_id);
+// egg death
+const char *gui_edi(game_t *game, int egg_id);
+// time unit request
+const char *gui_sgt(game_t *game);
+// time unit modification
+const char *gui_sst(game_t *game);
+// end of game
+const char *gui_seg(game_t *game, const char *team_name);
+// server message
+const char *gui_smg(game_t *game, const char *message);
+// server unknown command
+const char *gui_suc(game_t *game);
+// server command parameter
+const char *gui_sbp(game_t *game);

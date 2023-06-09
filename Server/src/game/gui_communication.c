@@ -98,7 +98,7 @@ const char *gui_pic(game_t *game, player_t *first, player_t *casters[])
             first->fd);
     for (int i = 0; casters[i] != NULL; i++)
         sprintf(game->send_message, "%s %d", game->send_message, casters[i]->fd);
-    sprintf(game->send_message, "%s\n", game->send_message);
+    strcat(game->send_message, "\n");
     return game->send_message;
 }
 
