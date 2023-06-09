@@ -158,3 +158,17 @@ int get_orientation(player_t * player)
         return 4;
     return 0;
 }
+
+int get_from_orientation(player_t * player)
+{
+    pos_t orientation = player->entity->orientation;
+    if (orientation.y == -1)
+        return 3;
+    if (orientation.x == 1)
+        return 4;
+    if (orientation.y == 1)
+        return 1;
+    if (orientation.x == -1)
+        return 2;
+    return 0;
+}
