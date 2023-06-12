@@ -190,4 +190,5 @@ void destroy_egg(game_t *game, int x, int y, int *success)
         }
         pos++;
     }
+    //to do : remove place from team
 }
