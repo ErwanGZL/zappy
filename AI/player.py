@@ -1,6 +1,7 @@
 from enum import Enum
 from . import ai
 from typing import Tuple
+import subprocess
 
 
 class Orientation(Enum):
@@ -191,6 +192,10 @@ class Player:
         self.level = 1
         self.inventory = Inventory()
         self.orientation = Orientation.UP
+        self.slot = 0
+        self.player_conected = 6
+        self.command = []
+        self.look_content = []
         self.map = [[0 for i in range(x)] for j in range(y)]
         self.pos = Position(0, 0, x, y)
 
@@ -342,4 +347,30 @@ class Player:
             result.append((name, value))
         for item in result:
             self.inventory.set_ressource(item[0], item[1])
+        pass
+
+    def command_interpreter(self, answer: list):
+        for i in answer:
+            command = i.split("|")
+            if command[0] == "Connect_nbr":
+                self.player_conected = int(command[1])
+            elif command[0] == "Look":
+                self.look_content = list(command[1])
+
+    def logic(self, answer: list = []) -> list:
+        self.command_interpreter(answer)
+        self.command.append("Connect_nbr")
+        if self.player_conected < 6:
+            subprocess.call(
+                [
+                    "./zappy_ia",
+                    "-p",
+                    self.servaddr[1],
+                    "-n",
+                    self.team_name,
+                    "-h",
+                    self.servaddr[0],
+                ]
+            )
+            return self.command
         pass
