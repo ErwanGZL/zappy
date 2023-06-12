@@ -69,7 +69,7 @@ char *gui_player_level(game_t *game, player_t *player)
 char *gui_player_inventory(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
-    sprintf(game->send_message, "pin %d %d %d %d %d %d %d %d %d %d", player->fd, player->entity->pos.x, player->entity->pos.y, player->entity->food_left, ress_player[0], ress_player[1], ress_player[2], ress_player[3], ress_player[4], ress_player[5]);
+    sprintf(game->send_message, "pin %d %d %d %d %d %d %d %d %d %d\n", player->fd, player->entity->pos.x, player->entity->pos.y, player->entity->food_left, ress_player[0], ress_player[1], ress_player[2], ress_player[3], ress_player[4], ress_player[5]);
     return game->send_message;
 }
 
