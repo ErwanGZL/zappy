@@ -359,7 +359,8 @@ class Player:
 
     def logic(self, answer: list = []) -> list:
         self.command_interpreter(answer)
-        if answer == []:
+        self.command.append("Connect_nbr")
+        if self.player_conected < 6:
             subprocess.call(
                 [
                     "./zappy_ia",
@@ -371,6 +372,5 @@ class Player:
                     self.servaddr[0],
                 ]
             )
-            self.command.append("Connect_nbr")
             return self.command
         pass
