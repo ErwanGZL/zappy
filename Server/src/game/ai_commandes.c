@@ -88,7 +88,7 @@ const char *turn_right(game_t *game ,player_t *player, const char *arg)
 
 const char *team_unused_slots(game_t *game, player_t *player, const char *arg)
 {
-    team_t *team = get_team(game, arg);
+    team_t *team = get_team_by_name(game, arg);
     if (team == NULL)
         return "ko\n";
     memset(game->buffer, 0, BUFSIZ);
@@ -284,14 +284,120 @@ const char *eject_player(game_t *game, player_t *player, const char *arg)
 {
     int x = player->entity->pos.x;
     int y = player->entity->pos.y;
-
+    int success = 0;
     for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
         player_t *player2 = ptr->value;
         if (player2->entity->pos.x == x && player2->entity->pos.y == y && player2 != player) {
             player2->entity->pos.x = normalize(player2->entity->pos.x + 1, game->map->size.x);
             player2->entity->pos.y = normalize(player2->entity->pos.y + 1, game->map->size.y);
-            dprintf(player2->fd, "eject: %d\n", get_from_orientation(player)); //send to player2 [eject: K\n] get_from_orientation(player);
-            //destroy eggs if there is one
+            dprintf(player2->fd, "eject: %d\n", get_from_orientation(player));
+            success = 1;
         }
     }
+    destroy_egg(game, player->entity->pos.x, player->entity->pos.y, &success);
+    if (success == 1)
+        return "ok\n";
+    return "ko\n";
+}
+
+const char *fork_player(game_t *game, player_t *player, const char *arg)
+{
+    team_t *team = get_team_by_name(game, player->team_name);
+    add_egg(game, team->name);
+    team->max_players ++;
+    return "ok\n";
+}
+
+void send_broadcast_message(const char *message, int dest_fd, int tile_from)
+{
+    dprintf(dest_fd, "message %d, %s\n", tile_from, message);
+}
+
+int convert_provenance(int provenance, pos_t orientation)
+{
+    printf("before convert: %d\n", provenance);
+    if (provenance == 0)
+        return 0;
+    int to_add = 0;
+    if (orientation.x == 1) {
+        to_add = 2;
+    }
+    if (orientation.x == -1) {
+        to_add = 6;
+    }
+    if (orientation.y == 1) {
+        to_add = 4;
+    }
+    int new_provenance = (provenance + to_add) % 9;
+    if (new_provenance == 0)
+        new_provenance = 1;
+    return new_provenance;
+}
+
+pos_t check_better_pos(pos_t curr, pos_t new, pos_t sender)
+{
+    int total_curr = abs(curr.x - sender.x) + abs(curr.y - sender.y);
+    int total_new = abs(new.x - sender.x) + abs(new.y - sender.y);
+    printf("total_curr: %d, total_new: %d\n", total_curr, total_new);
+    if (total_curr < total_new)
+        return curr;
+    return new;
+}
+
+int get_impact_point(pos_t receiver, pos_t sender)
+{
+    printf("receiver = %d, %d\nsender = %d, %d\n", receiver.x, receiver.y, sender.x, sender.y);
+    if (receiver.y > sender.y) {
+        if (receiver.x < sender.x)
+            return 8;
+        else if (receiver.x > sender.x)
+            return 2;
+        else
+            return 1;
+    }
+    if (receiver.y == sender.y) {
+        if (receiver.x < sender.x)
+            return 7;
+        else if (receiver.x > sender.x)
+            return 3;
+        else
+            return 0;
+    }
+    if (receiver.y < sender.y) {
+        if (receiver.x < sender.x)
+            return 6;
+        else if (receiver.x > sender.x)
+            return 4;
+        else
+            return 5;
+    }
+    return -1;
+}
+
+int find_provenance(game_t *game, player_t *sender, player_t *receiver)
+{
+    pos_t base = receiver->entity->pos;
+    pos_t max = game->map->size;
+    pos_t all_pos[5] = {
+        {base.x, base.y},
+        {base.x, base.y - max.y},
+        {base.x, base.y + max.y},
+        {base.x - max.x, base.y},
+        {base.x + max.x, base.y}};
+    pos_t better = {base.x, base.y};
+    for (int i = 1 ; i < 5 ; i++) {
+        pos_t buff = {all_pos[i].x, all_pos[i].y};
+        better = check_better_pos(better, buff, sender->entity->pos);
+    }
+    printf("better: %d %d\n", better.x, better.y);
+    return convert_provenance(get_impact_point(better, sender->entity->pos), receiver->entity->orientation);
+}
+
+const char *broadcast(game_t *game, player_t *player, const char *arg)
+{
+    for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
+        player_t *player2 = ptr->value;
+        send_broadcast_message(arg, player2->fd, find_provenance(game, player, player2));
+    }
+    return "ok\n";
 }

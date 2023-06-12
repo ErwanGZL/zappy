@@ -90,12 +90,20 @@ typedef struct game {
     map_t *map;
     list_t players;
     list_t teams;
+    list_t eggs;
+    int egg_nbr;
     int nb_teams;
     int nb_players;
     int freq;
     char buffer[BUFSIZ / 2];
     char send_message[BUFSIZ];
 } game_t;
+
+typedef struct egg {
+    int id;
+    pos_t pos;
+    team_name_t team_name;
+} egg_t;
 
 //map handling functions
 int normalize(int x, int x_max);
@@ -104,7 +112,9 @@ map_t *init_map(int width, int height);
 int *init_ressources();
 game_t *add_player(game_t *game, team_name_t team_name, int fd);
 game_t *add_team(game_t *game, int max_players, team_name_t name);
-team_t *get_team(game_t *game, const char *team_name);
+team_t *get_team_by_name(game_t *game, const char *team_name);
+void destroy_egg(game_t *game, int x, int y, int *success);
+game_t *add_egg(game_t *game, team_name_t team_name);
 int get_orientation(player_t * player);
 int get_from_orientation(player_t * player);
 
@@ -131,6 +141,7 @@ const char *verif_incantation(game_t *game, player_t *player, const char *arg);
 const char *take_object(game_t *game, player_t *player, const char *arg);
 const char *drop_object(game_t *game, player_t *player, const char *arg);
 const char *eject_player(game_t *game, player_t *player, const char *arg);
+const char *fork_player(game_t *game, player_t *player, const char *arg);
 //end of ai commandes functions
 
 player_t *get_player_by_fd(game_t *game, int fd);
@@ -180,3 +191,13 @@ const char *gui_sbp(game_t *game);
 
 void gui_send_all(game_t *game, const char *msg);
 void gui_request_process(game_t *game, player_t *sender, const char *body);
+// end of gui commandes functions
+
+//broadcast functions
+void send_broadcast_message(const char *message, int dest_fd, int tile_from);
+int convert_provenance(int provenance, pos_t orientation);
+pos_t check_better_pos(pos_t curr, pos_t new, pos_t sender);
+int get_impact_point(pos_t receiver, pos_t sender);
+int find_provenance(game_t *game, player_t *sender, player_t *receiver);
+const char *broadcast(game_t *game, player_t *player, const char *arg);
+//end of broadcast functions
