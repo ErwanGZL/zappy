@@ -136,7 +136,7 @@ class AI:
         recieved = []
         send = []
 
-        while True:
+        while self.running:
             # Wait for a message from the server
             for i in range(len(send)):
                 str_recieved = self.wait_for_message()
