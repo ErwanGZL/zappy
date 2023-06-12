@@ -28,6 +28,7 @@ Gui::Gui(Data *data)
     _texturePlayer.loadFromFile("GUI/sprites/Sprites.png");
     _infoTile = new InfoTile(_data);
     _infoPlayer = new InfoPlayer(_data);
+    _egg = new EggGui(_data, &_texturePlayer);
 }
 
 Gui::~Gui()
@@ -213,6 +214,8 @@ void Gui::display()
     for (int i = 0; i < _map.size(); i++) {
         _map[i]->displayRessources(&_window);
     }
+    _window.setView(_currentView);
+    _egg->draw(&_window);
     _window.setView(_currentView);
     for (size_t i = 0;i < _players.size();i++) {
         _players[i]->draw(&_window);

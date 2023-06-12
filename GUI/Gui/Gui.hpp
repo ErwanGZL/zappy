@@ -14,6 +14,7 @@
 #include "Perlin.hpp"
 #include "TileGui.hpp"
 #include "PlayerGui.hpp"
+#include "EggGui.hpp"
 #include "InfoTile.hpp"
 #include "InfoPlayer.hpp"
 #include <climits>
@@ -43,6 +44,7 @@ class Gui {
 
         std::vector<TileGui*> _map;
         std::vector<PlayerGui*> _players;
+        EggGui *_egg;
         InfoTile *_infoTile;
         InfoPlayer *_infoPlayer;
         sf::IntRect getRect(int x, int y, std::vector<std::vector<int>> map);
