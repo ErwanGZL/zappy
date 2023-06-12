@@ -84,6 +84,7 @@ int Network::handleMessages()
 {
     std::string message = getMessage();
     std::string data;
+    std::cout << "Message received: " << message << std::endl;
     if (message.find(" ") != std::string::npos)
         data = message.substr(message.find(" ") + 1);
     int returnCode = 0;
@@ -121,9 +122,10 @@ int Network::handleMessages()
         returnCode = playerDie(data);
     else if (message.find("enw") == 0)
         returnCode = eggLay(data);
-    else if (message.find("eht") == 0)
+    else if (message.find("eht") == 0) {
         returnCode = eggConnect(data);
-    else if (message.find("edi") == 0)
+        std::cout << "Egg connected--------------" << std::endl;
+    } else if (message.find("edi") == 0)
         returnCode = eggDie(data);
     else if (message.find("sgt") == 0)
         returnCode = timeUnitRequest(data);
@@ -137,6 +139,8 @@ int Network::handleMessages()
         returnCode = unknownCommand(data);
     else if (message.find("sbp") == 0)
         returnCode = commandParameter(data);
+    else if (message.find("ebo") == 0)
+        returnCode = eggConnect(data);
     else if (message.find("internal stop") == 0)
         return 1;
     else

@@ -210,23 +210,20 @@ int Network::playerDie(std::string str)
 
 int Network::eggLay(std::string str)
 {
-    int e = std::stoi(str.substr(0, str.find(" ")));
-    int n = std::stoi(str.substr(str.find(" ") + 1));
-    str = str.substr(str.find(" ") + 1);
-    int x = std::stoi(str.substr(0, str.find(" ")));
-    str = str.substr(str.find(" ") + 1);
-    int y = std::stoi(str.substr(0, str.find(" ")));
-    _data->addEgg(e, x, y, _data->getPlayerById(n)->getTeamName());
+    std::string tmp = str;
+    int e = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int n = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int x = std::stoi(tmp.substr(0, tmp.find(" ")));
+    tmp = tmp.substr(tmp.find(" ") + 1);
+    int y = std::stoi(tmp.substr(0, tmp.find(" ")));
+    _data->addEgg(e, x, y, "team");
     return 0;
 }
 
 int Network::eggConnect(std::string str)
 {
-    int e = std::stoi(str.substr(0, str.find(" ")));
-    Egg *egg = _data->getEggById(e);
-    _data->addPlayer(egg->getId(), egg->getX(), egg->getY(), NORTH, 1, egg->getTeamName());
-    delete egg;
-    _data->removeEgg(e);
     return 0;
 }
 
