@@ -87,6 +87,16 @@ void server_handshake(server_t *server, int fd)
     recv(fd, buffer, 1024, 0);
     printf("Handshake done\n");
     printf("Client is on team %s\n", buffer);
+    if (strcmp(buffer, "GRAPHIC") == 0)
+    {
+        dprintf(fd, "%d\n"
+                    "%d %d\n",
+                0,
+                server->options->width,
+                server->options->height);
+        add_player(server->game, "GRAPHIC", fd);
+        return;
+    }
     for (list_t head = server->game->teams; head != NULL; head = head->next)
     {
         team_t *team = (team_t *)head->value;

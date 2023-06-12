@@ -231,7 +231,7 @@ void gui_send_all(game_t *game, const char *msg)
     for (list_t head = game->players; head != NULL; head = head->next) {
         player_t *player = head->value;
         if (strcmp(player->team_name, "GRAPHIC") == 0)
-            send(player->fd, msg, strlen(msg), 0);
+            dprintf(player->fd, msg);
     }
 }
 
