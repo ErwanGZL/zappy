@@ -189,3 +189,12 @@ const char *gui_suc(game_t *game);
 // server command parameter
 const char *gui_sbp(game_t *game);
 // end of gui commandes functions
+
+//broadcast functions
+void send_broadcast_message(const char *message, int dest_fd, int tile_from);
+int convert_provenance(int provenance, pos_t orientation);
+pos_t check_better_pos(pos_t curr, pos_t new, pos_t sender);
+int get_impact_point(pos_t receiver, pos_t sender);
+int find_provenance(game_t *game, player_t *sender, player_t *receiver);
+const char *broadcast(game_t *game, player_t *player, const char *arg);
+//end of broadcast functions

@@ -188,6 +188,7 @@ void destroy_egg(game_t *game, int x, int y, int *success)
             list_del_elem_at_position(&game->eggs, pos);
             *success = 1;
         }
+        //remove a place in the team
         pos++;
     }
 }

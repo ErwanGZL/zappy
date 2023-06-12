@@ -1,5 +1,5 @@
 from enum import Enum
-from ai import *
+from . import ai
 from typing import Tuple
 import subprocess
 
