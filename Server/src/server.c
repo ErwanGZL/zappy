@@ -87,8 +87,9 @@ void server_handshake(server_t *server, int fd)
     recv(fd, buffer, 1024, 0);
     printf("Handshake done\n");
     printf("Client is on team %s\n", buffer);
-    if (strcmp(buffer, "GRAPHIC") == 0)
+    if (strncmp(buffer, "GRAPHIC", 7) == 0)
     {
+        printf("Graphic client connected\n");
         dprintf(fd, "%d\n"
                     "%d %d\n",
                 0,
@@ -107,6 +108,7 @@ void server_handshake(server_t *server, int fd)
                     team->max_players - team->nb_players,
                     server->options->width,
                     server->options->height);
+            printf("Player added %d\n", fd);
             add_player(server->game, team->name, fd);
             return;
         }
