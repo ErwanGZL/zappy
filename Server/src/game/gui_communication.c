@@ -238,6 +238,7 @@ const char *gui_sbp(game_t *game)
 
 void gui_send_all(game_t *game, const char *msg)
 {
+    printf("%s\n", msg);
     for (list_t head = game->players; head != NULL; head = head->next) {
         player_t *player = head->value;
         if (strcmp(player->team_name, "GRAPHIC") == 0)
