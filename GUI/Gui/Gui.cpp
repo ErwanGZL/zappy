@@ -37,8 +37,12 @@ Gui::~Gui()
 
 void Gui::run ()
 {
-    generateMap();
+    bool generated = false;
     while (_window.isOpen()) {
+        if (_data->getWidth() != -1 && _data->getHeight() != -1 && generated == false) {
+            generateMap();
+            generated = true;
+        }
         sf::Event event;
         while (_window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
@@ -196,6 +200,8 @@ sf::IntRect Gui::getRect(int x, int y, std::vector<std::vector<int>> mappa)
 
 void Gui::animate()
 {
+    if (_data->getTimeUnit() == 0)
+        return;
     for (int i = 0; i < _map.size(); i++) {
         _map[i]->animate(_data->getTimeUnit());
     }
