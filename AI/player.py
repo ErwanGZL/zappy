@@ -385,7 +385,7 @@ class Player:
             elif command[0] == "Take":
                 self.ressource_to_take = command[1]
 
-    def logic(self, answer: list = []) -> list:
+    def logic(self, answer: list, direction: int, message_brod: str) -> list:
         self.command_interpreter(answer)
         self.command.append("Connect_nbr")
         if self.player_conected < 6:
