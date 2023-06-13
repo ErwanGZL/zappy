@@ -58,6 +58,7 @@ void server_select(server_t *server)
             if (rbytes == 0)
             {
                 printf("Client disconnected\n");
+                remove_player(server->game, ((socket_t *)head->value)->fd);
                 netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
                 head = server->netctl->clients;
                 continue;
@@ -115,6 +116,7 @@ void server_handshake(server_t *server, int fd)
     printf("Team not found\n");
     dprintf(fd, "0\n"
                 "0 0\n");
+    remove_player(server->game, fd);
     netctl_disconnect(server->netctl, fd);
 }
 
