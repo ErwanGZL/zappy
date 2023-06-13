@@ -43,8 +43,8 @@ class Data {
         std::vector<Team*> _teams;
         std::vector<Player*> _players;
         std::vector<Egg*> _eggs;
-        int _width = 0;
-        int _height = 0;
+        int _width = -1;
+        int _height = -1;
         int _timeUnit = 0;
 
 };

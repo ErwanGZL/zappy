@@ -17,17 +17,14 @@ const char *gui_tile_content(game_t *game, int x, int y)
     return game->send_message;
 }
 
-const char *gui_map_content(game_t *game)
+const char *gui_map_content(game_t *game, int fd)
 {
-    memset(game->buffer, 0, BUFSIZ / 2);
-    memset(game->send_message, 0, BUFSIZ);
     for (int y = 0; y < game->map->size.y; y++)
     {
         for (int x = 0; x < game->map->size.x; x++)
         {
-            memcpy(game->buffer, game->send_message, strlen(game->send_message));
-            sprintf(game->send_message, "%sbct %d %d %d %d %d %d %d %d %d\n", game->buffer, x, y, ress[0], ress[1], ress[2], ress[3], ress[4], ress[5], ress[6]);
-            memset(game->buffer, 0, BUFSIZ / 2);
+            gui_tile_content(game, x, y);
+            dprintf(fd, game->send_message);
         }
     }
     return game->send_message;
@@ -48,14 +45,14 @@ const char *gui_team_names(game_t *game)
 const char *gui_player_connexion(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
-    sprintf(game->send_message, "pnw %d %d %d %d %d %s\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_orientation(player), player->entity->level, player->team_name);
+    sprintf(game->send_message, "pnw %d %d %d %d %d %s\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_from_orientation(player), player->entity->level, player->team_name);
     return game->send_message;
 }
 
 const char *gui_player_position(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
-    sprintf(game->send_message, "ppo %d %d %d %d\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_orientation(player));
+    sprintf(game->send_message, "ppo %d %d %d %d\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_from_orientation(player));
     return game->send_message;
 }
 
@@ -229,6 +226,18 @@ const char *gui_sbp(game_t *game)
     return game->send_message;
 }
 
+
+void gui_send_at_connexion(game_t *game, int fd)
+{
+    gui_map_size(game);
+    dprintf(fd, game->send_message);
+    gui_sgt(game);
+    dprintf(fd, game->send_message);
+    gui_map_content(game, fd);
+    gui_team_names(game);
+    dprintf(fd, game->send_message);
+}
+
 //TODO
 //all requests and unknown command and command parameter
 //expulsion ???
@@ -238,6 +247,7 @@ const char *gui_sbp(game_t *game)
 
 void gui_send_all(game_t *game, const char *msg)
 {
+    printf("%s\n", msg);
     for (list_t head = game->players; head != NULL; head = head->next) {
         player_t *player = head->value;
         if (strcmp(player->team_name, "GRAPHIC") == 0)
@@ -265,7 +275,8 @@ void gui_request_process(game_t *game, player_t *sender, const char *body)
     }
     else if (strncmp(body, "mct", strlen("mct")) == 0) // map content
     {
-        gui_map_content(game);
+        gui_map_content(game, fd);
+        return;
     }
     else if (strncmp(body, "tna", strlen("tna")) == 0) // team names
     {

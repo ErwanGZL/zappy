@@ -45,6 +45,7 @@ Network::Network(int ac, char **av)
         exit(84);
     }
     _data = new Data();
+    _buffer = "";
 }
 
 Network::~Network()
@@ -53,21 +54,18 @@ Network::~Network()
 
 std::string Network::getMessage()
 {
-    if (_buffer.find("\n") != std::string::npos) {
-        std::string message = _buffer.substr(0, _buffer.find("\n"));
-        _buffer = _buffer.substr(_buffer.find("\n") + 1);
-        return message;
-    }
-    char buffer[BUFSIZ] = {0};
-    size_t size = read(_socket, buffer, BUFSIZ);
-    if (size == 0) {
-        return "internal stop";
-    }
-    _buffer += std::string(buffer).substr(0, size);
-    if (_buffer.find("\n") != std::string::npos) {
-        std::string message = _buffer.substr(0, _buffer.find("\n"));
-        _buffer = _buffer.substr(_buffer.find("\n") + 1);
-        return message;
+    while (true) {
+        if (_buffer.find("\n") != std::string::npos) {
+            std::string message = _buffer.substr(0, _buffer.find("\n"));
+            _buffer = _buffer.substr(_buffer.find("\n") + 1);
+            return message;
+        }
+        char buffer[BUFSIZ] = {0};
+        size_t size = read(_socket, buffer, BUFSIZ);
+        if (size == 0) {
+            return "internal stop";
+        }
+        _buffer += std::string(buffer).substr(0, size);
     }
     return "";
 }
@@ -82,9 +80,10 @@ void Network::run()
 
 int Network::handleMessages()
 {
+    std::cout << "end read" << std::endl;
     std::string message = getMessage();
     std::string data;
-    std::cout << "Message received: " << message << std::endl;
+    std::cout << "Message received: |" << message << "|" << std::endl;
     if (message.find(" ") != std::string::npos)
         data = message.substr(message.find(" ") + 1);
     int returnCode = 0;
@@ -122,10 +121,9 @@ int Network::handleMessages()
         returnCode = playerDie(data);
     else if (message.find("enw") == 0)
         returnCode = eggLay(data);
-    else if (message.find("eht") == 0) {
+    else if (message.find("eht") == 0)
         returnCode = eggConnect(data);
-        std::cout << "Egg connected--------------" << std::endl;
-    } else if (message.find("edi") == 0)
+    else if (message.find("edi") == 0)
         returnCode = eggDie(data);
     else if (message.find("sgt") == 0)
         returnCode = timeUnitRequest(data);
@@ -144,9 +142,10 @@ int Network::handleMessages()
     else if (message.find("internal stop") == 0)
         return 1;
     else
-        std::cout << "Unknown command" << message << "|" << std::endl;
+        std::cout << "Unknown command : |" << message << "|" << std::endl;
     if (returnCode)
         return 1;
+    std::cout << "Return code: " << returnCode << std::endl;
     return 0;
 }
 

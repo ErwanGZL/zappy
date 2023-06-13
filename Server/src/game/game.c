@@ -104,6 +104,9 @@ game_t *init_game(option_t *opt)
     }
     memset(game->send_message, 0, BUFSIZ);
     memset(game->buffer, 0, BUFSIZ / 2);
+    game->alloc_buffer = calloc(1, 10);
+    memset(game->alloc_buffer, 0, 10);
+    game = spawn_ressources(game);
     return game;
 }
 
