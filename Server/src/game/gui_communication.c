@@ -48,14 +48,14 @@ const char *gui_team_names(game_t *game)
 const char *gui_player_connexion(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
-    sprintf(game->send_message, "pnw %d %d %d %d %d %s\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_orientation(player), player->entity->level, player->team_name);
+    sprintf(game->send_message, "pnw %d %d %d %d %d %s\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_from_orientation(player), player->entity->level, player->team_name);
     return game->send_message;
 }
 
 const char *gui_player_position(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
-    sprintf(game->send_message, "ppo %d %d %d %d\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_orientation(player));
+    sprintf(game->send_message, "ppo %d %d %d %d\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_from_orientation(player));
     return game->send_message;
 }
 
@@ -227,6 +227,19 @@ const char *gui_sbp(game_t *game)
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "sbp\n");
     return game->send_message;
+}
+
+
+void gui_send_at_connexion(game_t *game)
+{
+    gui_map_size(game);
+    gui_send_all(game, game->send_message);
+    gui_sgt(game);
+    gui_send_all(game, game->send_message);
+    gui_map_content(game);
+    gui_send_all(game, game->send_message);
+    gui_team_names(game);
+    gui_send_all(game, game->send_message);
 }
 
 //TODO

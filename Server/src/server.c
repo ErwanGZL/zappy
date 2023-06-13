@@ -91,8 +91,7 @@ void server_handshake(server_t *server, int fd)
     {
         printf("Graphic client connected\n");
         add_player(server->game, "GRAPHIC", fd);
-        gui_map_size(server->game);
-        gui_send_all(server->game, server->game->send_message);
+        gui_send_at_connexion(server->game);
         return;
     }
     for (list_t head = server->game->teams; head != NULL; head = head->next)
