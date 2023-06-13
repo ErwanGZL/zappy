@@ -133,7 +133,6 @@ int server_run(server_t *server)
         for (list_t *head = &server->actions; *head != NULL;)
         {
             action_t *action = (action_t *)(*head)->value;
-            printf("Action: %d\n", action->cooldown);
             if (action->cooldown <= 0)
             {
                 // player_t *p = get_player_by_fd(server->game, action->issuer);
