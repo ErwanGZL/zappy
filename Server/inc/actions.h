@@ -11,7 +11,6 @@ typedef struct timeval timeval_t;
 
 typedef struct action_s {
     enum actions_e {
-        ACTION_NONE,
         ACTION_FORWARD,
         ACTION_LEFT,
         ACTION_RIGHT,

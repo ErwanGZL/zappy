@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdio.h>
 
+static void accumulate_cooldown(list_t action_list, action_t *action);
+
 static const char *actions[] = {
     "Forward",
     "Right",
@@ -19,22 +21,23 @@ static const char *actions[] = {
     NULL};
 
 static const int cooldowns[] = {
-    7,
-    7,
-    7,
-    7,
-    1,
-    7,
-    0,
-    42,
-    7,
-    7,
-    7,
-    300};
+    7,  // Forward
+    7,  // Right
+    7,  // Left
+    7,  // Look
+    1,  // Inventory
+    7,  // Broadcast
+    0,  // Connect_nbr
+    42, // Fork
+    7,  // Eject
+    7,  // Take
+    7,  // Set
+    300 // Incantation
+};
 
 /**
  * TODO: Callback needs to return a structure containing the response
-*/
+ */
 static const char *(*callbacks[])(game_t *, player_t *, const char *) = {
     &move_forward,
     &turn_right,
@@ -48,7 +51,10 @@ static const char *(*callbacks[])(game_t *, player_t *, const char *) = {
     &take_object,
     &drop_object,
     &resolve_incantation};
-// TODO : certaines actions doivent etre traités quand on récupére l'action du joueur, au tout débu du cd; ex: incantation fork;
+
+/**
+ * TODO: certaines actions doivent etre traités quand on récupére l'action du joueur, au tout débu du cd; ex: incantation fork;
+ */
 action_t *action_new(int issuer, const char *cmd)
 {
     action_t *action = calloc(1, sizeof(action_t));
@@ -57,24 +63,18 @@ action_t *action_new(int issuer, const char *cmd)
     {
         if (strncmp(cmd, actions[i], strlen(actions[i])) == 0)
         {
-            action->type = i + 1;
+            action->type = i;
             action->cooldown = cooldowns[action->type];
             action->callback = callbacks[action->type];
             if (action->type == ACTION_BROADCAST || action->type == ACTION_TAKE || action->type == ACTION_SET)
                 strncpy(action->arg, cmd + strlen(actions[i]), strlen(cmd) - strlen(actions[i]) - 1);
-            printf("Action arg: %s\n", action->arg);
+            return action;
         }
     }
-    if (action->type == 0)
-    {
-        printf("Unknown command: %s\n", cmd);
-        free(action);
-        return NULL;
-    }
-    printf("New action: %s\n", cmd);
-    printf("Action type: %d\n", action->type);
-    printf("Action cooldown: %d\n", action->cooldown);
-    return action;
+    printf("Unknown command: %s\n", cmd);
+    free(action);
+    return NULL;
+
 }
 
 int action_cmp_cooldown(const void *a, const void *b)
@@ -101,7 +101,9 @@ bool actions_accept(list_t *action_list, action_t *action)
     }
     if (occ < 10)
     {
-        printf("Action accepted\n");
+        accumulate_cooldown(*action_list, action);
+        printf("New action\n");
+        printf("Action cooldown: %d\n", action->cooldown);
         list_add_elem_at_back(action_list, action);
         return true;
     }
@@ -128,4 +130,16 @@ void actions_apply_elapsed_time(list_t action_list, size_t elapsed_time)
         action_t *action = (action_t *)head->value;
         action->cooldown -= elapsed_time;
     }
+}
+
+static void accumulate_cooldown(list_t action_list, action_t *action)
+{
+    int max_cooldown = 0;
+    for (list_t head = action_list; head != NULL; head = head->next)
+    {
+        action_t *a = (action_t *)head->value;
+        if (a->issuer == action->issuer)
+            max_cooldown = a->cooldown > max_cooldown ? a->cooldown : max_cooldown;
+    }
+    action->cooldown += max_cooldown;
 }
