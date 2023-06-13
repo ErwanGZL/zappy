@@ -11,7 +11,7 @@
 
 //macro that return the position of the tile in the map, if the position is out of the map, it will return the position of the tile on the other side of the map
 #define GET_POS(pos, max_pos) (pos.x = pos.x % max_pos.x, pos.y = pos.y % max_pos.y)
-#define SEND_POS(pos, max_pos) (pos.y = max_pos.y - pos.y - 1)
+#define SEND_POS(pos, max_pos) (pos = max_pos - pos - 1)
 
 #define LEFT 1
 #define RIGHT 2
@@ -147,47 +147,47 @@ const char *fork_player(game_t *game, player_t *player, const char *arg);
 player_t *get_player_by_fd(game_t *game, int fd);
 
 //gui commandes functions located in gui_commandes.c
-char *gui_map_size(game_t *game);
-char *gui_map_content(game_t *game);
-char *gui_tile_content(game_t *game, int x, int y);
-char *gui_team_names(game_t *game);
-char *gui_player_connexion(game_t *game, player_t *player);
-char *gui_player_position(game_t *game, player_t *player);
-char *gui_player_level(game_t *game, player_t *player);
-char *gui_player_inventory(game_t *game, player_t *player);
-const char *gui_pex(game_t *game, player_t *target);
+void gui_map_size(game_t *game);
+void gui_map_content(game_t *game);
+void gui_tile_content(game_t *game, int x, int y);
+void gui_team_names(game_t *game);
+void gui_player_connexion(game_t *game, player_t *player);
+void gui_player_position(game_t *game, player_t *player);
+void gui_player_level(game_t *game, player_t *player);
+void gui_player_inventory(game_t *game, player_t *player);
+void gui_pex(game_t *game, player_t *target);
 // player broadcast
-const char *gui_pbc(game_t *game, fd_t from, const char *message);
+void gui_pbc(game_t *game, fd_t from, const char *message);
 // player incantation
-const char *gui_pic(game_t *game, player_t *first, player_t *casters[]);
+void gui_pic(game_t *game, player_t *first, player_t *casters[]);
 // player incantation end
-const char *gui_pie(game_t *game, player_t *player, int result);
+void gui_pie(game_t *game, player_t *player, int result);
 // player fork
-const char *gui_pfk(game_t *game, player_t *player);
+void gui_pfk(game_t *game, player_t *player);
 // player drop ressource
-const char *gui_pdr(game_t *game, player_t *player, mineral_t resource);
+void gui_pdr(game_t *game, player_t *player, mineral_t resource);
 // player take ressource
-const char *gui_pgt(game_t *game, player_t *player, mineral_t resource);
+void gui_pgt(game_t *game, player_t *player, mineral_t resource);
 // player death
-const char *gui_pdi(game_t *game, player_t *player);
+void gui_pdi(game_t *game, player_t *player);
 // player egg laying
-const char *gui_enw(game_t *game, player_t *player, int egg_id);
+void gui_enw(game_t *game, player_t *player, int egg_id);
 // player connection to egg
-const char *gui_ebo(game_t *game, int egg_id);
+void gui_ebo(game_t *game, int egg_id);
 // egg death
-const char *gui_edi(game_t *game, int egg_id);
+void gui_edi(game_t *game, int egg_id);
 // time unit request
-const char *gui_sgt(game_t *game);
+void gui_sgt(game_t *game);
 // time unit modification
-const char *gui_sst(game_t *game);
+void gui_sst(game_t *game);
 // end of game
-const char *gui_seg(game_t *game, const char *team_name);
+void gui_seg(game_t *game, const char *team_name);
 // server message
-const char *gui_smg(game_t *game, const char *message);
+void gui_smg(game_t *game, const char *message);
 // server unknown command
-const char *gui_suc(game_t *game);
+void gui_suc(game_t *game);
 // server command parameter
-const char *gui_sbp(game_t *game);
+void gui_sbp(game_t *game);
 // end of gui commandes functions
 
 //broadcast functions

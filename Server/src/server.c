@@ -94,6 +94,8 @@ void server_handshake(server_t *server, int fd)
                     server->options->width,
                     server->options->height);
             add_player(server->game, team->name, fd);
+            //gui communication
+            gui_player_connexion(server->game, get_player_by_fd(server->game, fd));
             return;
         }
     }
@@ -127,7 +129,6 @@ int server_run(server_t *server)
             head = &(*head)->next;
         }
     }
-
     return 0;
 }
 

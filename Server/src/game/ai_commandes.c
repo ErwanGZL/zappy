@@ -96,6 +96,15 @@ const char *team_unused_slots(game_t *game, player_t *player, const char *arg)
     return game->buffer;
 }
 
+void decrease_food_left(game_t *game)
+{
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
+    {
+        player_t *player = ptr->value;
+        player->entity->food_left -= 1;
+    }
+}
+
 int check_death(game_t *game)
 {
     for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
@@ -105,6 +114,8 @@ int check_death(game_t *game)
         {
             // send death message
             // TODO: kill player
+            //gui communication
+            gui_pdi(game, player);
             return 1;
         }
     }
@@ -153,6 +164,8 @@ const char *take_object(game_t *game, player_t *player, const char *arg)
         game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1]--;
         player->entity->minerals[index]++;
         printf("Player %d take %s\n", player->fd, mineral_tab[index]);
+        //gui communication
+        gui_pgt(game, player, index);
         return "ok\n";
     }
     return "ko\n";
@@ -165,6 +178,8 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
         game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1]++;
         player->entity->minerals[index]--;
         printf("Player %d dropped %s\n", player->fd, mineral_tab[index]);
+        //gui communication
+        gui_pdr(game, player, index);
         return "ok\n";
     }
     return "ko\n";
@@ -212,6 +227,8 @@ const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
             }
         }
     }
+    //gui communication
+    gui_pie(game, player, player->entity->level);
     memset(game->buffer, 0, BUFSIZ);
     sprintf(game->buffer, "Current level: %d\n", player->entity->level);
     return game->buffer;
@@ -305,6 +322,8 @@ const char *fork_player(game_t *game, player_t *player, const char *arg)
     team_t *team = get_team_by_name(game, player->team_name);
     add_egg(game, team->name);
     team->max_players ++;
+    //gui communication
+    gui_enw(game, player, ((egg_t *) list_get_elem_at_back(game->eggs))->id);
     return "ok\n";
 }
 
@@ -399,5 +418,7 @@ const char *broadcast(game_t *game, player_t *player, const char *arg)
         player_t *player2 = ptr->value;
         send_broadcast_message(arg, player2->fd, find_provenance(game, player, player2));
     }
+    //gui communication
+    gui_pbc(game, player->fd, arg);
     return "ok\n";
 }

@@ -41,10 +41,10 @@ static const char *(*callbacks[])(game_t *, player_t *, const char *) = {
     &turn_left,
     &look,
     &get_inventory,
-    NULL, // BROADCAST
+    &broadcast,
     &team_unused_slots,
-    NULL, // FORK
-    NULL, // EJECT
+    &fork_player,
+    &eject_player,
     &take_object,
     &drop_object,
     &resolve_incantation};

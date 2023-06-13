@@ -185,10 +185,12 @@ void destroy_egg(game_t *game, int x, int y, int *success)
     for (list_t ptr = game->eggs ; ptr != NULL ; ptr = ptr->next) {
         egg_t *egg = ptr->value;
         if (egg->pos.x == x && egg->pos.y == y) {
+            //gui communication
+            gui_edi(game, ((egg_t *) list_get_elem_at_position(game->eggs, pos))->id);
             list_del_elem_at_position(&game->eggs, pos);
             *success = 1;
+            //remove a place in the team
         }
-        //remove a place in the team
         pos++;
     }
 }
