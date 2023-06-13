@@ -97,6 +97,7 @@ typedef struct game {
     int freq;
     char buffer[BUFSIZ / 2];
     char send_message[BUFSIZ];
+    char *alloc_buffer;
 } game_t;
 
 typedef struct egg {
@@ -148,7 +149,7 @@ player_t *get_player_by_fd(game_t *game, int fd);
 
 //gui commandes functions located in gui_commandes.c
 const char *gui_map_size(game_t *game);
-const char *gui_map_content(game_t *game);
+const char *gui_map_content(game_t *game, int fd);
 const char *gui_tile_content(game_t *game, int x, int y);
 const char *gui_team_names(game_t *game);
 const char *gui_player_connexion(game_t *game, player_t *player);
@@ -189,7 +190,7 @@ const char *gui_suc(game_t *game);
 // server command parameter
 const char *gui_sbp(game_t *game);
 
-void gui_send_at_connexion(game_t *game);
+void gui_send_at_connexion(game_t *game, int fd);
 
 void gui_send_all(game_t *game, const char *msg);
 void gui_request_process(game_t *game, player_t *sender, const char *body);
