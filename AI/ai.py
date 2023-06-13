@@ -1,6 +1,6 @@
 import socket
 import threading
-import player
+from . import player
 
 
 class AI:
@@ -86,9 +86,8 @@ class AI:
         """
         with self.lock:
             msg = self.buffer.split("\n", 1)[0]
-            if msg == "":
-                return None
             self.buffer = self.buffer[len(msg) + 1 :]
+            return msg
 
     def send_message(self, msg: str) -> None:
         """
@@ -134,7 +133,18 @@ class AI:
                 f"Connected to the server. Slots available: {self.slots_avl}, Map size: w={self.map_x}, h={self.map_y}"
             )
 
-        # Client is now connected to the server
-        # TODO: Implement the AI logic here  |
-        #                                    v
+        recieved = []
+        send = []
+
+        while self.running:
+            # Wait for a message from the server
+            for i in range(len(send)):
+                str_recieved = self.wait_for_message()
+                recieved.append(send[i].split("\n", 1)[0] + "|" + str_recieved)
+
+            # Process the message
+            send = self.player.logic(recieved)
+            for i in range(len(send)):
+                self.send_message(send[i])
+            recieved = []
         pass

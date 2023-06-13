@@ -147,47 +147,50 @@ const char *fork_player(game_t *game, player_t *player, const char *arg);
 player_t *get_player_by_fd(game_t *game, int fd);
 
 //gui commandes functions located in gui_commandes.c
-void gui_map_size(game_t *game);
-void gui_map_content(game_t *game);
-void gui_tile_content(game_t *game, int x, int y);
-void gui_team_names(game_t *game);
-void gui_player_connexion(game_t *game, player_t *player);
-void gui_player_position(game_t *game, player_t *player);
-void gui_player_level(game_t *game, player_t *player);
-void gui_player_inventory(game_t *game, player_t *player);
-void gui_pex(game_t *game, player_t *target);
+const char *gui_map_size(game_t *game);
+const char *gui_map_content(game_t *game);
+const char *gui_tile_content(game_t *game, int x, int y);
+const char *gui_team_names(game_t *game);
+const char *gui_player_connexion(game_t *game, player_t *player);
+const char *gui_player_position(game_t *game, player_t *player);
+const char *gui_player_level(game_t *game, player_t *player);
+const char *gui_player_inventory(game_t *game, player_t *player);
+const char *gui_pex(game_t *game, player_t *target);
 // player broadcast
-void gui_pbc(game_t *game, fd_t from, const char *message);
+const char *gui_pbc(game_t *game, fd_t from, const char *message);
 // player incantation
-void gui_pic(game_t *game, player_t *first, player_t *casters[]);
+const char *gui_pic(game_t *game, player_t *first, player_t *casters[]);
 // player incantation end
-void gui_pie(game_t *game, player_t *player, int result);
+const char *gui_pie(game_t *game, player_t *player, int result);
 // player fork
-void gui_pfk(game_t *game, player_t *player);
+const char *gui_pfk(game_t *game, player_t *player);
 // player drop ressource
-void gui_pdr(game_t *game, player_t *player, mineral_t resource);
+const char *gui_pdr(game_t *game, player_t *player, mineral_t resource);
 // player take ressource
-void gui_pgt(game_t *game, player_t *player, mineral_t resource);
+const char *gui_pgt(game_t *game, player_t *player, mineral_t resource);
 // player death
-void gui_pdi(game_t *game, player_t *player);
+const char *gui_pdi(game_t *game, player_t *player);
 // player egg laying
-void gui_enw(game_t *game, player_t *player, int egg_id);
+const char *gui_enw(game_t *game, player_t *player, int egg_id);
 // player connection to egg
-void gui_ebo(game_t *game, int egg_id);
+const char *gui_ebo(game_t *game, int egg_id);
 // egg death
-void gui_edi(game_t *game, int egg_id);
+const char *gui_edi(game_t *game, int egg_id);
 // time unit request
-void gui_sgt(game_t *game);
+const char *gui_sgt(game_t *game);
 // time unit modification
-void gui_sst(game_t *game);
+const char *gui_sst(game_t *game);
 // end of game
-void gui_seg(game_t *game, const char *team_name);
+const char *gui_seg(game_t *game, const char *team_name);
 // server message
-void gui_smg(game_t *game, const char *message);
+const char *gui_smg(game_t *game, const char *message);
 // server unknown command
-void gui_suc(game_t *game);
+const char *gui_suc(game_t *game);
 // server command parameter
-void gui_sbp(game_t *game);
+const char *gui_sbp(game_t *game);
+
+void gui_send_all(game_t *game, const char *msg);
+void gui_request_process(game_t *game, player_t *sender, const char *body);
 // end of gui commandes functions
 
 //broadcast functions

@@ -65,8 +65,12 @@ void server_select(server_t *server)
             else
             {
                 printf("Received %ld bytes\n", rbytes);
-                printf("Received: %s\n", buffer);
-                actions_accept(&server->actions, action_new(((socket_t *)head->value)->fd, buffer));
+                printf("%s\n", buffer);
+                player_t *player = get_player_by_fd(server->game, ((socket_t *)head->value)->fd);
+                if (strcmp(player->team_name, "GRAPHIC") == 0)
+                    gui_request_process(server->game, player, buffer);
+                else
+                    actions_accept(&server->actions, action_new(((socket_t *)head->value)->fd, buffer));
             }
         }
         head = head->next;
@@ -83,6 +87,17 @@ void server_handshake(server_t *server, int fd)
     recv(fd, buffer, 1024, 0);
     printf("Handshake done\n");
     printf("Client is on team %s\n", buffer);
+    if (strncmp(buffer, "GRAPHIC", 7) == 0)
+    {
+        printf("Graphic client connected\n");
+        dprintf(fd, "%d\n"
+                    "%d %d\n",
+                0,
+                server->options->width,
+                server->options->height);
+        add_player(server->game, "GRAPHIC", fd);
+        return;
+    }
     for (list_t head = server->game->teams; head != NULL; head = head->next)
     {
         team_t *team = (team_t *)head->value;
@@ -93,6 +108,7 @@ void server_handshake(server_t *server, int fd)
                     team->max_players - team->nb_players,
                     server->options->width,
                     server->options->height);
+            printf("Player added %d\n", fd);
             add_player(server->game, team->name, fd);
             //gui communication
             gui_player_connexion(server->game, get_player_by_fd(server->game, fd));

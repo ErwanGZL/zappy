@@ -1,20 +1,23 @@
 #include "game.h"
 
-void gui_map_size(game_t *game)
+#include <stdlib.h>
+#include <string.h>
+
+const char *gui_map_size(game_t *game)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "msz %d %d\n", game->map->size.x, game->map->size.y);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
-void gui_tile_content(game_t *game, int x, int y)
+const char *gui_tile_content(game_t *game, int x, int y)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "bct %d %d %d %d %d %d %d %d %d\n", x, y, ress[0], ress[1], ress[2], ress[3], ress[4], ress[5], ress[6]);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
-void gui_map_content(game_t *game)
+const char *gui_map_content(game_t *game)
 {
     memset(game->buffer, 0, BUFSIZ / 2);
     memset(game->send_message, 0, BUFSIZ);
@@ -27,10 +30,10 @@ void gui_map_content(game_t *game)
             memset(game->buffer, 0, BUFSIZ / 2);
         }
     }
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
-void gui_team_names(game_t *game)
+const char *gui_team_names(game_t *game)
 {
     memset(game->send_message, 0, BUFSIZ);
     memset(game->buffer, 0, BUFSIZ / 2);
@@ -39,71 +42,74 @@ void gui_team_names(game_t *game)
         memcpy(game->buffer, game->send_message, strlen(game->send_message));
         sprintf(game->send_message, "%stna %s\n", game->buffer, ((team_t *)ptr->value)->name);
     }
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
-void gui_player_connexion(game_t *game, player_t *player)
+const char *gui_player_connexion(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "pnw %d %d %d %d %d %s\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_orientation(player), player->entity->level, player->team_name);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
-void gui_player_position(game_t *game, player_t *player)
+const char *gui_player_position(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "ppo %d %d %d %d\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_orientation(player));
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
-void gui_player_level(game_t *game, player_t *player)
+const char *gui_player_level(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "plv %d %d\n", player->fd, player->entity->level);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
-void gui_player_inventory(game_t *game, player_t *player)
+const char *gui_player_inventory(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
-    sprintf(game->send_message, "pin %d %d %d %d %d %d %d %d %d %d", player->fd, player->entity->pos.x, player->entity->pos.y, player->entity->food_left, ress_player[0], ress_player[1], ress_player[2], ress_player[3], ress_player[4], ress_player[5]);
-    send_message_to_gui(game);
+    sprintf(game->send_message, "pin %d %d %d %d %d %d %d %d %d %d\n", player->fd, player->entity->pos.x, player->entity->pos.y, player->entity->food_left, ress_player[0], ress_player[1], ress_player[2], ress_player[3], ress_player[4], ress_player[5]);
+    return game->send_message;
 }
 
 // player expulsion
-void gui_pex(game_t *game, player_t *target)
+const char *gui_pex(game_t *game, player_t *target)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "pex %d\n", target->fd);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // player broadcast
-void gui_pbc(game_t *game, fd_t from, const char *message)
+const char *gui_pbc(game_t *game, fd_t from, const char *message)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "pbc %d %s\n", from, message);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // player incantation
-void gui_pic(game_t *game, player_t *first, player_t *casters[])
+const char *gui_pic(game_t *game, player_t *first, player_t *casters[])
 {
     memset(game->send_message, 0, BUFSIZ);
+    memset(game->buffer, 0, BUFSIZ / 2);
     sprintf(game->send_message,
             "pic %d %d %d %d",
             first->entity->pos.x,
             first->entity->pos.y,
             first->entity->level + 1,
             first->fd);
-    for (int i = 0; casters[i] != NULL; i++)
-        sprintf(game->send_message, "%s %d", game->send_message, casters[i]->fd);
+    for (int i = 0; casters[i] != NULL; i++) {
+        strcpy(game->buffer, game->send_message);
+        sprintf(game->send_message, "%s %d", game->buffer, casters[i]->fd);
+    }
     strcat(game->send_message, "\n");
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // player incantation end
-void gui_pie(game_t *game, player_t *player, int result)
+const char *gui_pie(game_t *game, player_t *player, int result)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message,
@@ -111,43 +117,43 @@ void gui_pie(game_t *game, player_t *player, int result)
             player->entity->pos.x,
             player->entity->pos.y,
             result);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // player fork
-void gui_pfk(game_t *game, player_t *player)
+const char *gui_pfk(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "pfk %d\n", player->fd);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // player drop ressource
-void gui_pdr(game_t *game, player_t *player, mineral_t resource)
+const char *gui_pdr(game_t *game, player_t *player, mineral_t resource)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "pdr %d %d\n", player->fd, resource + 1);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // player take ressource
-void gui_pgt(game_t *game, player_t *player, mineral_t resource)
+const char *gui_pgt(game_t *game, player_t *player, mineral_t resource)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "pgt %d %d\n", player->fd, resource + 1);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // player death
-void gui_pdi(game_t *game, player_t *player)
+const char *gui_pdi(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "pdi %d\n", player->fd);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // player egg laying
-void gui_enw(game_t *game, player_t *player, int egg_id)
+const char *gui_enw(game_t *game, player_t *player, int egg_id)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message,
@@ -156,71 +162,71 @@ void gui_enw(game_t *game, player_t *player, int egg_id)
             player->fd,
             player->entity->pos.x,
             player->entity->pos.y);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // player connection to egg
-void gui_ebo(game_t *game, int egg_id)
+const char *gui_ebo(game_t *game, int egg_id)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "ebo %d\n", egg_id);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // egg death
-void gui_edi(game_t *game, int egg_id)
+const char *gui_edi(game_t *game, int egg_id)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "edi %d\n", egg_id);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // time unit request
-void gui_sgt(game_t *game)
+const char *gui_sgt(game_t *game)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "sgt %d\n", game->freq);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // time unit modification
-void gui_sst(game_t *game)
+const char *gui_sst(game_t *game)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "sst %d\n", game->freq);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // end of game
-void gui_seg(game_t *game, const char *team_name)
+const char *gui_seg(game_t *game, const char *team_name)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "seg %s\n", team_name);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // server message
-void gui_smg(game_t *game, const char *message)
+const char *gui_smg(game_t *game, const char *message)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "smg %s\n", message);
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // server unknown command
-void gui_suc(game_t *game)
+const char *gui_suc(game_t *game)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "suc\n");
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 // server command parameter
-void gui_sbp(game_t *game)
+const char *gui_sbp(game_t *game)
 {
     memset(game->send_message, 0, BUFSIZ);
     sprintf(game->send_message, "sbp\n");
-    send_message_to_gui(game);
+    return game->send_message;
 }
 
 //TODO
@@ -230,12 +236,83 @@ void gui_sbp(game_t *game)
 //egg laying by the player ?
 //player connection for an egg ?
 
-void send_message_to_gui(game_t *game)
+void gui_send_all(game_t *game, const char *msg)
 {
-    for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
-        player_t *player = ptr->value;
+    for (list_t head = game->players; head != NULL; head = head->next) {
+        player_t *player = head->value;
         if (strcmp(player->team_name, "GRAPHIC") == 0)
-            dprintf(player->fd, game->send_message, strlen(game->send_message));
+            dprintf(player->fd, msg);
     }
-    memset(game->send_message, 0, BUFSIZ);
+}
+
+void gui_request_process(game_t *game, player_t *sender, const char *body)
+{
+    bool send_all = false;
+    int x = 0, y = 0, n = 0, t = 0;
+    char buffer[1024] = {0};
+    strcpy(buffer, body);
+    fd_t fd = sender->fd;
+    if (strncmp(body, "msz", strlen("msz")) == 0) // map size
+    {
+        gui_map_size(game);
+    }
+    else if (strncmp(body, "bct", strlen("bct")) == 0) // tile content
+    {
+        strtok(buffer, " ");
+        x = atoi(strtok(NULL, " "));
+        y = atoi(strtok(NULL, " "));
+        gui_tile_content(game, x, y);
+    }
+    else if (strncmp(body, "mct", strlen("mct")) == 0) // map content
+    {
+        gui_map_content(game);
+    }
+    else if (strncmp(body, "tna", strlen("tna")) == 0) // team names
+    {
+        gui_team_names(game);
+    }
+    else if (strncmp(body, "ppo", strlen("ppo")) == 0) // player position
+    {
+        strtok(buffer, " ");
+        n = atoi(strtok(NULL, " "));
+        gui_player_position(game, get_player_by_fd(game, n));
+    }
+    else if (strncmp(body, "plv", strlen("plv")) == 0) // player level
+    {
+        strtok(buffer, " ");
+        n = atoi(strtok(NULL, " "));
+        gui_player_level(game, get_player_by_fd(game, n));
+    }
+    else if (strncmp(body, "pin", strlen("pin")) == 0) // player inventory
+    {
+        strtok(buffer, " ");
+        n = atoi(strtok(NULL, " "));
+        gui_player_inventory(game, get_player_by_fd(game, n));
+    }
+    else if (strncmp(body, "sgt", strlen("sgt")) == 0) // time unit
+    {
+        gui_sgt(game);
+    }
+    else if (strncmp(body, "sst", strlen("sst")) == 0) // time unit
+    {
+        strtok(buffer, " ");
+        t = atoi(strtok(NULL, " "));
+        if (t < 1) {
+            dprintf(fd, "sbp\n");
+            return;
+        }
+        game->freq = t;
+        gui_sst(game);
+        send_all = true;
+    }
+    else
+    {
+        dprintf(fd, "suc\n");
+        return;
+    }
+
+    if (send_all)
+        gui_send_all(game, game->send_message);
+    else
+        dprintf(fd, game->send_message);
 }
