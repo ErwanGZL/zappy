@@ -110,6 +110,9 @@ void server_handshake(server_t *server, int fd)
                     server->options->height);
             printf("Player added %d\n", fd);
             add_player(server->game, team->name, fd);
+            //gui communication
+            gui_player_connexion(server->game, get_player_by_fd(server->game, fd));
+            gui_send_all(server->game, server->game->send_message);
             return;
         }
     }
@@ -143,7 +146,6 @@ int server_run(server_t *server)
             head = &(*head)->next;
         }
     }
-
     return 0;
 }
 

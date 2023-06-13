@@ -11,7 +11,7 @@
 
 //macro that return the position of the tile in the map, if the position is out of the map, it will return the position of the tile on the other side of the map
 #define GET_POS(pos, max_pos) (pos.x = pos.x % max_pos.x, pos.y = pos.y % max_pos.y)
-#define SEND_POS(pos, max_pos) (pos.y = max_pos.y - pos.y - 1)
+#define SEND_POS(pos, max_pos) (pos = max_pos - pos - 1)
 
 #define LEFT 1
 #define RIGHT 2
@@ -147,14 +147,14 @@ const char *fork_player(game_t *game, player_t *player, const char *arg);
 player_t *get_player_by_fd(game_t *game, int fd);
 
 //gui commandes functions located in gui_commandes.c
-char *gui_map_size(game_t *game);
-char *gui_map_content(game_t *game);
-char *gui_tile_content(game_t *game, int x, int y);
-char *gui_team_names(game_t *game);
-char *gui_player_connexion(game_t *game, player_t *player);
-char *gui_player_position(game_t *game, player_t *player);
-char *gui_player_level(game_t *game, player_t *player);
-char *gui_player_inventory(game_t *game, player_t *player);
+const char *gui_map_size(game_t *game);
+const char *gui_map_content(game_t *game);
+const char *gui_tile_content(game_t *game, int x, int y);
+const char *gui_team_names(game_t *game);
+const char *gui_player_connexion(game_t *game, player_t *player);
+const char *gui_player_position(game_t *game, player_t *player);
+const char *gui_player_level(game_t *game, player_t *player);
+const char *gui_player_inventory(game_t *game, player_t *player);
 const char *gui_pex(game_t *game, player_t *target);
 // player broadcast
 const char *gui_pbc(game_t *game, fd_t from, const char *message);

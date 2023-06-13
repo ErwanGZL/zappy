@@ -41,14 +41,14 @@ static const char *(*callbacks[])(game_t *, player_t *, const char *) = {
     &turn_left,
     &look,
     &get_inventory,
-    NULL, // BROADCAST
+    &broadcast,
     &team_unused_slots,
-    NULL, // FORK
-    NULL, // EJECT
+    &fork_player,
+    &eject_player,
     &take_object,
     &drop_object,
     &resolve_incantation};
-
+// TODO : certaines actions doivent etre traités quand on récupére l'action du joueur, au tout débu du cd; ex: incantation fork;
 action_t *action_new(int issuer, const char *cmd)
 {
     action_t *action = calloc(1, sizeof(action_t));
