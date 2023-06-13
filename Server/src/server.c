@@ -90,12 +90,9 @@ void server_handshake(server_t *server, int fd)
     if (strncmp(buffer, "GRAPHIC", 7) == 0)
     {
         printf("Graphic client connected\n");
-        dprintf(fd, "%d\n"
-                    "%d %d\n",
-                0,
-                server->options->width,
-                server->options->height);
         add_player(server->game, "GRAPHIC", fd);
+        gui_map_size(server->game);
+        gui_send_all(server->game, server->game->send_message);
         return;
     }
     for (list_t head = server->game->teams; head != NULL; head = head->next)
