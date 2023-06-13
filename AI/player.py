@@ -1,7 +1,10 @@
 from enum import Enum
 from . import ai
+from utile import *
 from typing import Tuple
 import subprocess
+from itertools import cycle
+import json
 
 
 class Orientation(Enum):
@@ -159,13 +162,14 @@ class Inventory:
             raise Exception("Invalid ressource")
 
     def print_inventory(self):
-        print("food: " + str(self.food))
-        print("linemate: " + str(self.linemate))
-        print("deraumere: " + str(self.deraumere))
-        print("sibur: " + str(self.sibur))
-        print("mendiane: " + str(self.mendiane))
-        print("phiras: " + str(self.phiras))
-        print("thystame: " + str(self.thystame))
+        message = "food " + str(self.food) + ","
+        message += "linemate " + str(self.linemate) + ","
+        message += "deraumere " + str(self.deraumere) + ","
+        message += "sibur " + str(self.sibur) + ","
+        message += "mendiane " + str(self.mendiane) + ","
+        message += "phiras " + str(self.phiras) + ","
+        message += "thystame " + str(self.thystame)
+        return message
 
     def set_ressource(self, item, amount):
         if item == "food":
@@ -182,22 +186,35 @@ class Inventory:
             self.phiras = amount
         elif item == "thystame":
             self.thystame = amount
+        else:
+            raise Exception("Invalid ressource")
+
+    def set_inventory(self, inventory: list):
+        for i in inventory:
+            self.set_ressource(i[0], int(i[1]))
 
 
 ##class player:
 
 
 class Player:
-    def __init__(self, x, y):
+    def __init__(self, team_name: str, servport, servhost, id):
+        self.id = id
         self.level = 1
         self.inventory = Inventory()
+        self.share_inventory = Inventory()
         self.orientation = Orientation.UP
         self.slot = 0
         self.player_conected = 6
         self.command = []
         self.look_content = []
-        self.map = [[0 for i in range(x)] for j in range(y)]
-        self.pos = Position(0, 0, x, y)
+        self.inventory_content = []
+        self.message_to_send = ""
+        self.team_name = team_name
+        self.servport = servport
+        self.servhost = servhost
+        self.new_object = False
+        self.ressource_to_take = ""
 
     def add_memory_up(self, content: list):
         lvl = 1
@@ -293,7 +310,9 @@ class Player:
         content = content.split(",")
         content = self.add_memory(content)
 
-    def broadcast(self):
+    def broadcast_inventory(self):
+        message = "Broadcast " + self.inventory.print_inventory()
+        self.message_to_send = xor_compressed_cipher(message, self.team_name)
         pass
 
     def elevation(self):
@@ -337,17 +356,22 @@ class Player:
     def go_to(self, obj: Tuple[int, int]):
         pass
 
-    def update_inventory(self, content: str):
-        content = content.split(",")
-        result = []
-        for item in content:
-            parts = item.split(" ")
-            name = parts[0]
-            value = parts[1]
-            result.append((name, value))
+    def update_inventory(self, result: str):
         for item in result:
             self.inventory.set_ressource(item[0], item[1])
-        pass
+
+    def update_share_inventory(self, result: str):
+        for item in result:
+            self.share_inventory.set_ressource(item[0], item[1])
+        # decrypted_message = xor_compressed_decipher(encrypted_message, self.team_name)
+        # json_message = json.dumps(str_to_list(decrypted_message))
+        # for item in json_message:
+        #     try:
+        #         self.inventory.set_ressource(
+        #             item[0], int(item[1]) + int(self.inventory.get_ressource(item[0]))
+        #         )
+        #     except:
+        #         continue
 
     def command_interpreter(self, answer: list):
         for i in answer:
@@ -355,9 +379,13 @@ class Player:
             if command[0] == "Connect_nbr":
                 self.player_conected = int(command[1])
             elif command[0] == "Look":
-                self.look_content = list(command[1])
+                self.look_content = str_to_list(command[1])
+            elif command[0] == "Inventory":
+                self.inventory_content = str_to_list(command[1])
+            elif command[0] == "Take":
+                self.ressource_to_take = command[1]
 
-    def logic(self, answer: list = []) -> list:
+    def logic(self, answer: list, direction: int, message_brod: str) -> list:
         self.command_interpreter(answer)
         self.command.append("Connect_nbr")
         if self.player_conected < 6:
@@ -365,12 +393,26 @@ class Player:
                 [
                     "./zappy_ia",
                     "-p",
-                    self.servaddr[1],
+                    self.servport,
                     "-n",
                     self.team_name,
                     "-h",
-                    self.servaddr[0],
+                    self.servhost,
+                    self.id + 1,
                 ]
             )
             return self.command
+        if self.inventory_content != []:
+            tmp = self.inventory
+            self.update_inventory(self.inventory_content)
+            if tmp != self.inventory:
+                self.update_share_inventory(self.inventory_content)
+                message = xor_compressed_cipher(
+                    self.inventory.print_inventory(), self.team_name
+                )
+                self.command.append("Broadcast " + message)
+                self.inventory_content = []
+        if self.ressource_to_take != "":
+            self.inventory.add_ressource(self.ressource_to_take)
+            self.ressource_to_take = ""
         pass

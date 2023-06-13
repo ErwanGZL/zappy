@@ -4,7 +4,7 @@ from . import player
 
 
 class AI:
-    def __init__(self, team_name, port, host="localhost") -> None:
+    def __init__(self, team_name, port, host="localhost", id=0) -> None:
         """
         This function is the constructor of the AI class.
         It initializes the AI and connects to the server.
@@ -58,7 +58,9 @@ class AI:
             r = self.socket.recv(1024)
             self.slots_avl, self.map_x, self.map_y = [int(x) for x in r.split()]
             #
-            self.player = player.Player(self.map_x, self.map_y)
+            self.player = player.Player(
+                self.team_name, self.servaddr[0], self.servaddr[1]
+            )
             if self.slots_avl > 0:
                 self.connected = True
 
@@ -134,16 +136,21 @@ class AI:
             )
 
         recieved = []
+        message = ""
+        direction = None
         send = []
 
         while self.running:
             # Wait for a message from the server
             for i in range(len(send)):
                 str_recieved = self.wait_for_message()
+                if str_recieved.split(" ")[0] == "message":
+                    direction = str_recieved.split(",")[0]
+                    message = str_recieved.split(",")[1]
                 recieved.append(send[i].split("\n", 1)[0] + "|" + str_recieved)
 
             # Process the message
-            send = self.player.logic(recieved)
+            send = self.player.logic(recieved, direction, message)
             for i in range(len(send)):
                 self.send_message(send[i])
             recieved = []
