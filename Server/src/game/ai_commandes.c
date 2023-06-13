@@ -116,6 +116,7 @@ int check_death(game_t *game)
             // TODO: kill player
             //gui communication
             gui_pdi(game, player);
+            gui_send_all(game, game->send_message);
             return 1;
         }
     }
@@ -166,6 +167,7 @@ const char *take_object(game_t *game, player_t *player, const char *arg)
         printf("Player %d take %s\n", player->fd, mineral_tab[index]);
         //gui communication
         gui_pgt(game, player, index);
+        gui_send_all(game, game->send_message);
         return "ok\n";
     }
     return "ko\n";
@@ -180,6 +182,7 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
         printf("Player %d dropped %s\n", player->fd, mineral_tab[index]);
         //gui communication
         gui_pdr(game, player, index);
+        gui_send_all(game, game->send_message);
         return "ok\n";
     }
     return "ko\n";
@@ -229,6 +232,7 @@ const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
     }
     //gui communication
     gui_pie(game, player, player->entity->level);
+    gui_send_all(game, game->send_message);
     memset(game->buffer, 0, BUFSIZ);
     sprintf(game->buffer, "Current level: %d\n", player->entity->level);
     return game->buffer;
@@ -324,6 +328,7 @@ const char *fork_player(game_t *game, player_t *player, const char *arg)
     team->max_players ++;
     //gui communication
     gui_enw(game, player, ((egg_t *) list_get_elem_at_back(game->eggs))->id);
+    gui_send_all(game, game->send_message);
     return "ok\n";
 }
 
@@ -420,5 +425,6 @@ const char *broadcast(game_t *game, player_t *player, const char *arg)
     }
     //gui communication
     gui_pbc(game, player->fd, arg);
+    gui_send_all(game, game->send_message);
     return "ok\n";
 }

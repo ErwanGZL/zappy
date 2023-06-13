@@ -48,7 +48,7 @@ static const char *(*callbacks[])(game_t *, player_t *, const char *) = {
     &take_object,
     &drop_object,
     &resolve_incantation};
-
+// TODO : certaines actions doivent etre traités quand on récupére l'action du joueur, au tout débu du cd; ex: incantation fork;
 action_t *action_new(int issuer, const char *cmd)
 {
     action_t *action = calloc(1, sizeof(action_t));

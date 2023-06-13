@@ -112,6 +112,7 @@ void server_handshake(server_t *server, int fd)
             add_player(server->game, team->name, fd);
             //gui communication
             gui_player_connexion(server->game, get_player_by_fd(server->game, fd));
+            gui_send_all(server->game, server->game->send_message);
             return;
         }
     }
