@@ -4,7 +4,7 @@ from . import player
 
 
 class AI:
-    def __init__(self, team_name, port, host="localhost") -> None:
+    def __init__(self, team_name, port, host="localhost", id=0) -> None:
         """
         This function is the constructor of the AI class.
         It initializes the AI and connects to the server.
@@ -58,7 +58,9 @@ class AI:
             r = self.socket.recv(1024)
             self.slots_avl, self.map_x, self.map_y = [int(x) for x in r.split()]
             #
-            self.player = player.Player(self.map_x, self.map_y)
+            self.player = player.Player(
+                self.team_name, self.servaddr[0], self.servaddr[1]
+            )
             if self.slots_avl > 0:
                 self.connected = True
 
