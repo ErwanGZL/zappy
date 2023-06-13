@@ -122,10 +122,9 @@ int Network::handleMessages()
         returnCode = playerDie(data);
     else if (message.find("enw") == 0)
         returnCode = eggLay(data);
-    else if (message.find("eht") == 0) {
+    else if (message.find("eht") == 0)
         returnCode = eggConnect(data);
-        std::cout << "Egg connected--------------" << std::endl;
-    } else if (message.find("edi") == 0)
+    else if (message.find("edi") == 0)
         returnCode = eggDie(data);
     else if (message.find("sgt") == 0)
         returnCode = timeUnitRequest(data);
@@ -144,7 +143,7 @@ int Network::handleMessages()
     else if (message.find("internal stop") == 0)
         return 1;
     else
-        std::cout << "Unknown command" << message << "|" << std::endl;
+        std::cout << "Unknown command : " << "|" << message << "|" << std::endl;
     if (returnCode)
         return 1;
     return 0;
