@@ -1,7 +1,9 @@
 from enum import Enum
 from . import ai
+from . import utile
 from typing import Tuple
 import subprocess
+from itertools import cycle
 
 
 class Orientation(Enum):
@@ -183,6 +185,10 @@ class Inventory:
         elif item == "thystame":
             self.thystame = amount
 
+    def set_inventory(self, inventory: list):
+        for i in inventory:
+            self.set_ressource(i[0], int(i[1]))
+
 
 ##class player:
 
@@ -355,7 +361,9 @@ class Player:
             if command[0] == "Connect_nbr":
                 self.player_conected = int(command[1])
             elif command[0] == "Look":
-                self.look_content = list(command[1])
+                self.look_content = str_to_list(command[1])
+            elif command[0] == "Inventory":
+                str_to_list(command[1])
 
     def logic(self, answer: list = []) -> list:
         self.command_interpreter(answer)
