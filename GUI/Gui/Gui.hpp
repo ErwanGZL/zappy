@@ -22,7 +22,7 @@
 
 class Gui {
     public:
-        Gui(Data *data);
+        Gui(Data *data, sf::RenderWindow *window);
         ~Gui();
         void run();
         void generateMap();
@@ -34,7 +34,7 @@ class Gui {
     private:
         int _port;
         std::string _machine;
-        sf::RenderWindow _window;
+        sf::RenderWindow *_window;
         sf::View _viewGlobal;
         sf::View _currentView;
         sf::Font _font;

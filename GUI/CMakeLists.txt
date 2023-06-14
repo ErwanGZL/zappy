@@ -25,6 +25,7 @@ set(
     Gui/InfoPlayer.cpp
     Gui/InfoTeam.cpp
     Gui/EggGui.cpp
+    Gui/Menu.cpp
     Net/Network.cpp
     Net/Commands.cpp
     Data/Data.cpp
