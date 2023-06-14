@@ -9,42 +9,48 @@
 
 Network::Network(int ac, char **av)
 {
-    _port = 4242;
-    _machine = "127.0.0.1";
-    if ((ac - 1) % 2 != 0) {
-        std::cerr << "Invalid number of arguments" << std::endl;
-        exit(84);
-    }
-    for (int i = 1; i < ac; i += 2) {
-        if (std::string(av[i]) == "-p") {
-            try {
-                std::stoi(av[i + 1]);
-            } catch (std::exception &e) {
-                std::cerr << "Port must be a number" << std::endl;
-                exit(84);
-            }
-            _port = std::stoi(av[i + 1]);
-        }
-        else if (std::string(av[i]) == "-h")
-            _machine = av[i + 1];
-        else {
-            std::cerr << "Invalid argument" << std::endl;
-            exit(84);
-        }
-    }
-    _socket = socket(PF_INET, SOCK_STREAM, 0);
-    if (_socket == -1) {
-        perror("socket");
-        exit(84);
-    }
-    _addr.sin_family = AF_INET;
-    _addr.sin_port = htons(_port);
-    _addr.sin_addr.s_addr = inet_addr(_machine.c_str());
-    if (::connect(_socket, (struct sockaddr *)&_addr, sizeof(_addr)) == -1) {
-        perror("connect");
-        exit(84);
-    }
     _data = new Data();
+    if (ac != 1) {
+        _port = 4242;
+        _machine = "127.0.0.1";
+        if ((ac - 1) % 2 != 0) {
+            std::cerr << "Invalid number of arguments" << std::endl;
+            throw std::exception();
+        }
+        for (int i = 1; i < ac; i += 2) {
+            if (std::string(av[i]) == "-p") {
+                try {
+                    std::stoi(av[i + 1]);
+                } catch (std::exception &e) {
+                    std::cerr << "Port must be a number" << std::endl;
+                    throw std::exception();
+                }
+                _port = std::stoi(av[i + 1]);
+            }
+            else if (std::string(av[i]) == "-h") {
+                _machine = av[i + 1];
+                if (_machine == "localhost")
+                    _machine = "127.0.0.1";
+            } else {
+                std::cerr << "Invalid argument" << std::endl;
+                throw std::exception();
+            }
+        }
+        _socket = socket(PF_INET, SOCK_STREAM, 0);
+        if (_socket == -1) {
+            perror("socket");
+            throw std::exception();
+        }
+        _addr.sin_family = AF_INET;
+        _addr.sin_port = htons(_port);
+        _addr.sin_addr.s_addr = inet_addr(_machine.c_str());
+        if (::connect(_socket, (struct sockaddr *)&_addr, sizeof(_addr)) == -1) {
+            perror("connect");
+            throw std::exception();
+        }
+        _data->setMachine(_machine);
+        _data->setPort(_port);
+    }
     _buffer = "";
 }
 
@@ -73,6 +79,26 @@ std::string Network::getMessage()
 void Network::run()
 {
     pthread_create(&_guiThread, NULL, threadGui, (void *)_data);
+    usleep(1000000);
+    std::cout << "GUI thread created" << std::endl;
+    _data->lock();
+    _port = _data->getPort();
+    _machine = _data->getMachine();
+    _socket = socket(PF_INET, SOCK_STREAM, 0);
+    if (_socket == -1) {
+        perror("socket");
+        _data->stop = true;
+        return;
+    }
+    _addr.sin_family = AF_INET;
+    _addr.sin_port = htons(_port);
+    _addr.sin_addr.s_addr = inet_addr(_machine.c_str());
+    if (::connect(_socket, (struct sockaddr *)&_addr, sizeof(_addr)) == -1) {
+        perror("connect");
+        _data->stop = true;
+        return;
+    }
+    _data->unlock();
     while (1) {
         if (handleMessages()) return;
     }
