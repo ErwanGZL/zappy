@@ -121,6 +121,21 @@ void actions_apply_elapsed_time(list_t action_list, size_t elapsed_time)
     }
 }
 
+void actions_remove_from_issuer(list_t *action_list, int issuer)
+{
+    for (list_t *head = action_list; *head != NULL;)
+    {
+        action_t *action = (action_t *)(*head)->value;
+        if (action->issuer == issuer)
+        {
+            list_del_elem_at_front(head);
+            free(action);
+            continue;
+        }
+        head = &(*head)->next;
+    }
+}
+
 static void accumulate_cooldown(list_t action_list, action_t *action)
 {
     int max_cooldown = 0;
