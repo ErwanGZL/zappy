@@ -27,7 +27,7 @@ void server_select(server_t *server)
 
     readfds = server->netctl->watched_fd;
 
-    timeout = actions_get_next_timeout(server->actions, server->game->freq);
+    timeout = server_get_next_timeout(server);
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
     act = select(FD_SETSIZE, &readfds, NULL, NULL, timeout);
@@ -38,6 +38,7 @@ void server_select(server_t *server)
     dt = (end.tv_nsec - start.tv_nsec) + ((end.tv_sec - start.tv_sec) * 1E9);
     elapsed = dt * server->game->freq * 1E-9;
     actions_apply_elapsed_time(server->actions, elapsed);
+    player_decrease_food(server->game->players, elapsed);
     if (act < 0)
     {
         printf("Timeout\n");
@@ -107,7 +108,7 @@ void server_handshake(server_t *server, int fd)
                     server->options->height);
             printf("Player added %d\n", fd);
             add_player(server->game, team->name, fd);
-            //gui communication
+            // gui communication
             gui_player_connexion(server->game, get_player_by_fd(server->game, fd));
             gui_send_all(server->game, server->game->send_message);
             return;
@@ -142,6 +143,18 @@ int server_run(server_t *server)
             }
             head = &(*head)->next;
         }
+        for (list_t head = server->game->players; head != NULL; head = head->next)
+        {
+            player_t *player = (player_t *)head->value;
+            if (strncmp(player->team_name, "GRAPHIC", 7) == 0)
+                continue;
+            if (player->entity->food_timer_units <= 0) {
+                player->entity->food_left -= 1;
+                player->entity->food_timer_units += 126;
+                printf("Food left : %d\n", player->entity->food_left);
+            }
+        }
+        check_death(server->game);
     }
     return 0;
 }

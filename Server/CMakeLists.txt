@@ -18,6 +18,7 @@ set(
     src/game/map_handling.c
     src/game/ai_commandes.c
     src/game/gui_communication.c
+    src/timeout.c
 )
 
 # Create an executable target
