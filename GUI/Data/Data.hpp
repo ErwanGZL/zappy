@@ -44,6 +44,7 @@ class Data {
         void setPort(int port) {_port = port;};
         std::string getMachine() {return _machine;};
         int getPort() {return _port;};
+        bool stop = false;
 
     private:
         std::vector<std::vector<Tile*>> _map;

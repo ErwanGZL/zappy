@@ -24,6 +24,7 @@ void *threadGui(void *arg)
         data->unlock();
     }
     Gui *gui = new Gui(data, menu->getWindow());
+    std::cout << "Machine: " << data->getMachine() << std::endl;
     gui->run();
     return (NULL);
 }
@@ -48,6 +49,10 @@ void Gui::run ()
 {
     bool generated = false;
     while (_window->isOpen()) {
+        if (_data->stop == true) {
+            _window->close();
+            return;
+        }
         if (_data->getWidth() != -1 && _data->getHeight() != -1 && generated == false) {
             generateMap();
             generated = true;
@@ -56,13 +61,17 @@ void Gui::run ()
         while (_window->pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 _window->close();
-            _infoTile->setMouse(*_window, event);
-            _infoPlayer->setMouse(*_window, event, _viewGlobal);
+            if (generated == true) {
+                _infoTile->setMouse(*_window, event);
+                _infoPlayer->setMouse(*_window, event, _viewGlobal);
+            }
         }
-        _window->clear(sf::Color::Black);
-        updateData();
-        animate();
-        display();
+        if (generated == true) {
+            _window->clear(sf::Color::Black);
+            updateData();
+            animate();
+            display();
+        }
         _window->display();
     }
 }

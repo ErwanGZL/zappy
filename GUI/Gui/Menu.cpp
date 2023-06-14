@@ -34,27 +34,27 @@ Menu::Menu()
     _textPort.setCharacterSize(50);
     _textPort.setFillColor(sf::Color::White);
     _textPort.setPosition(720 / 2, 480 / 2);
-    _box1.setSize(sf::Vector2f(500, 100));
+    _box1.setSize(sf::Vector2f(500, 50));
     _box1.setFillColor(sf::Color(0, 0, 0, 200));
-    _box1.setPosition(720 / 2, 480 / 2 - 150);
+    _box1.setPosition(720 / 2, 480 / 2 - 120);
     _box1.setOrigin(_box1.getGlobalBounds().width / 2, _box1.getGlobalBounds().height / 2);
-    _box2.setSize(sf::Vector2f(500, 100));
+    _box2.setSize(sf::Vector2f(500, 50));
     _box2.setFillColor(sf::Color(0, 0, 0, 200));
-    _box2.setPosition(720 / 2, 480 / 2);
+    _box2.setPosition(720 / 2, 480 / 2 + 30);
     _box2.setOrigin(_box2.getGlobalBounds().width / 2, _box2.getGlobalBounds().height / 2);
 
     _textureButton.loadFromFile("GUI/sprites/button.png");
     _button.setTexture(_textureButton);
-    _button.setTextureRect(sf::IntRect(0, 0, 22, 16));
-    _button.setPosition(720 / 2, 480 / 2 + 200);
+    _button.setTextureRect(sf::IntRect(0, 0, 24, 16));
+    _button.setPosition(720 / 2, 480 / 2 + 150);
     _button.setOrigin(_button.getGlobalBounds().width / 2, _button.getGlobalBounds().height / 2);
     _button.setScale(5, 5);
 
     _textButton.setFont(_font);
-    _textButton.setString("Connect");
+    _textButton.setString("OK");
     _textButton.setCharacterSize(50);
     _textButton.setFillColor(sf::Color::Black);
-    _textButton.setPosition(720 / 2, 480 / 2 + 200);
+    _textButton.setPosition(720 / 2, 480 / 2 + 120);
     _textButton.setOrigin(_textButton.getGlobalBounds().width / 2, _textButton.getGlobalBounds().height / 2);
 }
 
@@ -82,6 +82,7 @@ void Menu::display()
     _window->draw(_textMachine);
     _window->draw(_textPort);
     _window->draw(_button);
+    _window->draw(_textButton);
     _window->display();
 }
 
@@ -92,26 +93,41 @@ void Menu::event()
         if (event.type == sf::Event::Closed)
             _window->close();
         if (event.type == sf::Event::TextEntered) {
-            if (event.text.unicode == 8 && _machine.size() > 0 && _positionWrite == 1)
+            if (event.text.unicode == 8 && _machine.size() > 0 && _positionWrite == 1) {
                 _machine.pop_back();
-            else if (event.text.unicode == 8 && _port.size() > 0 && _positionWrite == 2)
+            } else if (event.text.unicode == 8 && _port.size() > 0 && _positionWrite == 2) {
                 _port.pop_back();
-            else if (event.text.unicode < 128 && _machine.size() < 20 && _positionWrite == 1)
+            } else if (event.text.unicode > 31 && event.text.unicode < 128 && _machine.size() < 20 && _positionWrite == 1) {
                 _machine += static_cast<char>(event.text.unicode);
-            else if (event.text.unicode < 128 && _port.size() < 20 && _positionWrite == 2)
+            } else if (event.text.unicode > 31 && event.text.unicode < 128 && _port.size() < 20 && _positionWrite == 2) {
                 _port += static_cast<char>(event.text.unicode);
+            } else if (event.text.unicode == 13) {
+                try {
+                    _portConnect = std::stoi(_port);
+                    _connected = true;
+                } catch (std::exception &e) {
+                }
+            }
+            _textMachine.setString(_machine);
+            _textPort.setString(_port);
+            _textMachine.setOrigin(_textMachine.getGlobalBounds().width / 2, _textMachine.getGlobalBounds().height / 2);
+            _textPort.setOrigin(_textPort.getGlobalBounds().width / 2, _textPort.getGlobalBounds().height / 2);
         }
         if (_button.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(*_window)))) {
             _textButton.setFillColor(sf::Color::White);
             if (event.type == sf::Event::MouseButtonPressed) {
-                _button.setTextureRect(sf::IntRect(22, 0, 22, 16));
+                _button.setTextureRect(sf::IntRect(24, 0, 24, 16));
             }
             if (event.type == sf::Event::MouseButtonReleased) {
-                _connected = true;
+                try {
+                    _portConnect = std::stoi(_port);
+                    _connected = true;
+                } catch (std::exception &e) {
+                }
             }
         } else {
             _textButton.setFillColor(sf::Color::Black);
-            _button.setTextureRect(sf::IntRect(0, 0, 22, 16));
+            _button.setTextureRect(sf::IntRect(0, 0, 24, 16));
         }
         if (_box1.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(*_window)))) {
             if (event.type == sf::Event::MouseButtonPressed) {
@@ -122,6 +138,16 @@ void Menu::event()
             if (event.type == sf::Event::MouseButtonPressed) {
                 _positionWrite = 2;
             }
+        }
+        if (_positionWrite == 1) {
+            _box1.setFillColor(sf::Color(0, 0, 0, 255));
+            _box2.setFillColor(sf::Color(0, 0, 0, 200));
+        } else if (_positionWrite == 2) {
+            _box1.setFillColor(sf::Color(0, 0, 0, 200));
+            _box2.setFillColor(sf::Color(0, 0, 0, 255));
+        } else {
+            _box1.setFillColor(sf::Color(0, 0, 0, 200));
+            _box2.setFillColor(sf::Color(0, 0, 0, 200));
         }
     }
 }
