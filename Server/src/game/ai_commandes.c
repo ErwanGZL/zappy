@@ -31,10 +31,12 @@ const char *move_forward(game_t *game, player_t *player, const char *arg)
         player->entity->pos.y = normalize(player->entity->pos.y + 1, game->map->size.y);
     else if (player->entity->orientation.y == -1)
         player->entity->pos.y = normalize(player->entity->pos.y - 1, game->map->size.y);
+    gui_player_position(game, player);
+    gui_send_all(game, game->send_message);
     return ("ok\n");
 }
 
-const char *turn_left(game_t *game, player_t *player, const char *arg)
+const char *turn_right(game_t *game, player_t *player, const char *arg)
 {
     if (player == NULL)
         return "ko\n";
@@ -57,10 +59,12 @@ const char *turn_left(game_t *game, player_t *player, const char *arg)
         player->entity->orientation.x = 0;
         player->entity->orientation.y = 1;
     }
+    gui_player_position(game, player);
+    gui_send_all(game, game->send_message);
     return "ok\n";
 }
 
-const char *turn_right(game_t *game ,player_t *player, const char *arg)
+const char *turn_left(game_t *game ,player_t *player, const char *arg)
 {
     if (player == NULL)
         return "ko\n";
@@ -83,6 +87,8 @@ const char *turn_right(game_t *game ,player_t *player, const char *arg)
         player->entity->orientation.x = 0;
         player->entity->orientation.y = 1;
     }
+    gui_player_position(game, player);
+    gui_send_all(game, game->send_message);
     return "ok";
 }
 
