@@ -59,6 +59,7 @@ void server_select(server_t *server)
             if (rbytes == 0)
             {
                 printf("Client disconnected\n");
+                actions_remove_from_issuer(&server->actions, ((socket_t *)head->value)->fd);
                 remove_player(server->game, ((socket_t *)head->value)->fd);
                 netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
                 head = server->netctl->clients;
@@ -129,6 +130,33 @@ int server_run(server_t *server)
     while (1)
     {
         server_select(server);
+        for (list_t head = server->game->players; head != NULL; head = head->next)
+        {
+            player_t *player = (player_t *)head->value;
+            if (strncmp(player->team_name, "GRAPHIC", 7) == 0)
+                continue;
+            if (player->entity->food_timer_units <= 0) {
+                player->entity->food_left -= 1;
+                player->entity->food_timer_units += 126;
+                printf("Food left : %d\n", player->entity->food_left);
+            }
+        }
+        check_death(server->game);
+        for (list_t *head = &server->game->players; (*head) != NULL;)
+        {
+            player_t *player = (player_t *)(*head)->value;
+            if (strncmp(player->team_name, "GRAPHIC", 7) == 0)
+                continue;
+            if (player->entity->food_left <= 0)
+            {
+                printf("Player %d died\n", player->fd);
+                actions_remove_from_issuer(&server->actions, player->fd);
+                remove_player(server->game, player->fd);
+                netctl_disconnect(server->netctl, player->fd);
+                continue;
+            }
+            head = &(*head)->next;
+        }
         for (list_t *head = &server->actions; *head != NULL;)
         {
             action_t *action = (action_t *)(*head)->value;
@@ -143,18 +171,6 @@ int server_run(server_t *server)
             }
             head = &(*head)->next;
         }
-        for (list_t head = server->game->players; head != NULL; head = head->next)
-        {
-            player_t *player = (player_t *)head->value;
-            if (strncmp(player->team_name, "GRAPHIC", 7) == 0)
-                continue;
-            if (player->entity->food_timer_units <= 0) {
-                player->entity->food_left -= 1;
-                player->entity->food_timer_units += 126;
-                printf("Food left : %d\n", player->entity->food_left);
-            }
-        }
-        check_death(server->game);
     }
     return 0;
 }
