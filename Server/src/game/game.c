@@ -198,3 +198,13 @@ void destroy_egg(game_t *game, int x, int y, int *success)
         pos++;
     }
 }
+
+void player_decrease_food(list_t players, int elapsed_units)
+{
+    for (list_t head = players; head != NULL; head = head->next) {
+        player_t *p = (player_t *)head->value;
+        if (strncmp(p->team_name, "GRAPHIC", 7) == 0)
+            continue;
+        p->entity->food_timer_units -= elapsed_units;
+    }
+}

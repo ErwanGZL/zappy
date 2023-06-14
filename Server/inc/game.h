@@ -1,5 +1,7 @@
 
 #pragma once
+
+#include "typedef.h"
 #include "list.h"
 #include "options.h"
 #include <stdio.h>
@@ -68,6 +70,7 @@ typedef struct entity {
     pos_t orientation;
     int *minerals;
     int food_left;
+    int food_timer_units;
 } entity_t;
 
 typedef struct player {
@@ -205,3 +208,8 @@ int get_impact_point(pos_t receiver, pos_t sender);
 int find_provenance(game_t *game, player_t *sender, player_t *receiver);
 const char *broadcast(game_t *game, player_t *player, const char *arg);
 //end of broadcast functions
+
+
+// Timeouts
+timeval_t *player_get_next_food_timeout(list_t players, int freq);
+void player_decrease_food(list_t players, int elapsed_units);

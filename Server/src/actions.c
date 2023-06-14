@@ -112,21 +112,6 @@ bool actions_accept(list_t *action_list, action_t *action)
     return false;
 }
 
-timeval_t *actions_get_next_timeout(list_t action_list, int frequency)
-{
-    if (action_list == NULL) {
-        printf("No timeout\n");
-        return NULL;
-    }
-    timeval_t *timeout = calloc(1, sizeof(timeval_t));
-    list_sort(&action_list, action_cmp_cooldown);
-    action_t *action = (action_t *)action_list->value;
-    timeout->tv_usec = ((double) action->cooldown / frequency) * 1000000;
-    printf("Next action: %s cd: %d\n", actions[action->type], action->cooldown);
-    printf("Timeout: %lds %ldus\n", timeout->tv_usec / 1000000, timeout->tv_usec % 1000000);
-    return timeout;
-}
-
 void actions_apply_elapsed_time(list_t action_list, size_t elapsed_time)
 {
     for (list_t head = action_list; head != NULL; head = head->next)
