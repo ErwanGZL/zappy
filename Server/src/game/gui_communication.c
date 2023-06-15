@@ -260,7 +260,13 @@ void gui_send_at_connexion(game_t *game, int fd)
         dprintf(fd, game->send_message);
         gui_player_level(game, player);
         dprintf(fd, game->send_message);
-        //TODO : add incantating and forking status
+        if (player->entity->is_incantating == true) {
+            incantation_t *incantation = get_incantation_by_player(game, player);
+            if (incantation != NULL)
+                gui_pic(game, incantation->first, incantation->casters);
+        }
+        if (player->entity->is_forking == true)
+            gui_pfk(game, player);
     }
 }
 
