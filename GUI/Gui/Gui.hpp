@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <thread>
 #include "Data.hpp"
 #include "Perlin.hpp"
@@ -19,10 +20,11 @@
 #include "InfoPlayer.hpp"
 #include <climits>
 #include <cstdlib>
+#include "Sound.hpp"
 
 class Gui {
     public:
-        Gui(Data *data, sf::RenderWindow *window);
+        Gui(Data *data, sf::RenderWindow *window, int vol1, int vol2, sf::Music *music);
         ~Gui();
         void run();
         void generateMap();
@@ -51,4 +53,7 @@ class Gui {
         sf::IntRect getRectBorder(int x, int y, int *rotate);
 
         Data *_data;
+        Sound _musicBar;
+        Sound _effectBar;
+        sf::Music *_music;
 };

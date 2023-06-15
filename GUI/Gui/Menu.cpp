@@ -7,7 +7,7 @@
 
 #include "Menu.hpp"
 
-Menu::Menu()
+Menu::Menu() : _musicBar("Music", 720 / 2 - 200, 480 / 2 + 150, 50), _effectsBar("Effects", 720 / 2 + 200, 480 / 2 + 150, 50)
 {
     _window = new sf::RenderWindow(sf::VideoMode(720, 480), "Zappy");
     _window->setFramerateLimit(60);
@@ -64,14 +64,18 @@ Menu::Menu()
     _background.setTextureRect(sf::IntRect(0, 0, 1903, 1109));
     _background.setScale(0.5, 0.5);
     _background.setOrigin(1903 / 2, 1109 / 2);
+    _connected = false;
 
-    // _music.openFromFile("GUI/sounds/music/game.ogg");
-    // _music.setLoop(true);
-    // _music.play();
+    _music = new sf::Music();
+
+    _music->openFromFile("GUI/sounds/music/game.ogg");
+    _music->setLoop(true);
+    _music->play();
 }
 
 Menu::~Menu()
 {
+    _music->stop();
 }
 
 void Menu::run()
@@ -79,6 +83,7 @@ void Menu::run()
     while (_window->isOpen()) {
         event();
         display();
+        _music->setVolume(_musicBar.getVolume());
         if (_connected == true)
             break;
     }
@@ -103,6 +108,8 @@ void Menu::display()
     _window->draw(_textPort);
     _window->draw(_button);
     _window->draw(_textButton);
+    _musicBar.draw(_window);
+    _effectsBar.draw(_window);
     _window->display();
 }
 
@@ -139,6 +146,7 @@ void Menu::event()
                 _button.setTextureRect(sf::IntRect(24, 0, 24, 16));
             }
             if (event.type == sf::Event::MouseButtonReleased) {
+                _button.setTextureRect(sf::IntRect(0, 0, 24, 16));
                 try {
                     _portConnect = std::stoi(_port);
                     _connected = true;
@@ -169,6 +177,8 @@ void Menu::event()
             _box1.setFillColor(sf::Color(0, 0, 0, 200));
             _box2.setFillColor(sf::Color(0, 0, 0, 200));
         }
+        _effectsBar.event(event, _window);
+        _musicBar.event(event, _window);
     }
 }
 

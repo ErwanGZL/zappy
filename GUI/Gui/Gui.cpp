@@ -17,19 +17,21 @@ void *threadGui(void *arg)
     Data *data = (Data *)arg;
     Menu *menu = new Menu();
     if (data->getMachine() == "" || data->getPort() == -1) {
-        data->lock();
         menu->run();
         data->setMachine(menu->getMachine());
         data->setPort(menu->getPort());
-        data->unlock();
     }
     data->post();
-    Gui *gui = new Gui(data, menu->getWindow());
+    usleep(100000);
+    data->wait();
+    Gui *gui = new Gui(data, menu->getWindow(), menu->getMusicVolume(), menu->getEffectVolume(), menu->getMusic());
     gui->run();
+    delete menu;
+    delete gui;
     return (NULL);
 }
 
-Gui::Gui(Data *data, sf::RenderWindow *window)
+Gui::Gui(Data *data, sf::RenderWindow *window, int vol1, int vol2, sf::Music *music) : _musicBar("Music", 720 / 2 - 230, 480 / 2 + 200, vol1), _effectBar("Effects", 720 / 2 + 230, 480 / 2 + 200, vol2)
 {
     _data = data;
     _window = window;
@@ -39,16 +41,27 @@ Gui::Gui(Data *data, sf::RenderWindow *window)
     _infoTile = new InfoTile(_data);
     _infoPlayer = new InfoPlayer(_data);
     _egg = new EggGui(_data, &_texturePlayer);
+    _music = music;
 }
 
 Gui::~Gui()
 {
+    for (int i = 0; i < _map.size(); i++) {
+        delete _map[i];
+    }
+    for (int i = 0; i < _players.size(); i++) {
+        delete _players[i];
+    }
+    delete _egg;
+    delete _infoTile;
+    delete _infoPlayer;
 }
 
 void Gui::run ()
 {
     bool generated = false;
     while (_window->isOpen()) {
+        _music->setVolume(_musicBar.getVolume());
         if (_data->stop == true) {
             _window->close();
             return;
@@ -65,6 +78,8 @@ void Gui::run ()
                 _infoTile->setMouse(*_window, event);
                 _infoPlayer->setMouse(*_window, event, _viewGlobal);
             }
+            _musicBar.event(event, _window);
+            _effectBar.event(event, _window);
         }
         if (generated == true) {
             _window->clear(sf::Color::Black);
@@ -244,9 +259,12 @@ void Gui::display()
     for (size_t i = 0;i < _players.size();i++) {
         _players[i]->draw(_window);
     }
+    _window->setView(_currentView);
     _infoTile->draw(*_window);
     _window->setView(_currentView);
     _infoPlayer->draw(*_window);
+    _musicBar.draw(_window);
+    _effectBar.draw(_window);
     _window->setView(_currentView);
 }
 
