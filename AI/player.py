@@ -406,7 +406,6 @@ class Player:
                     self.team_name,
                     "-h",
                     self.servhost,
-                    self.id + 1,
                 ]
             )
             return self.command
