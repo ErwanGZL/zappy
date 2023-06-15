@@ -198,8 +198,8 @@ class Inventory:
 
 
 class Player:
-    def __init__(self, team_name: str, servport, servhost, id):
-        self.id = id
+    def __init__(self, team_name: str, servport, servhost):
+        self.id = 0
         self.level = 1
         self.inventory = Inventory()
         self.share_inventory = [
@@ -394,19 +394,18 @@ class Player:
                 self.ressource_to_take = command[1]
 
     def logic(self, answer: list, direction: int, message_brod: str) -> list:
-
         self.command_interpreter(answer)
         self.command.append("Connect_nbr")
         if self.player_conected < 6:
             subprocess.call(
                 [
                     "./zappy_ia",
-                    "-p
+                    "-p",
                     self.servport,
                     "-n",
                     self.team_name,
                     "-h",
-                    self.servhost
+                    self.servhost,
                 ]
             )
             return self.command
