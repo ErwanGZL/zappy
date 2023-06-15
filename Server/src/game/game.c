@@ -221,8 +221,10 @@ incantation_t *get_incantation(game_t *game, player_t *player)
         player_t *p = (player_t *)ptr->value;
         if (p->fd == player->fd)
             continue;
-        if (p->entity->pos.x == x && p->entity->pos.y == y && p->entity->level == player->entity->level && p->entity->is_incantating == false)
+        if (p->entity->pos.x == x && p->entity->pos.y == y && p->entity->level == player->entity->level && p->entity->is_incantating == false) {
             list_add_elem_at_back(&incantation->casters, p);
+            p->entity->is_incantating = true;
+        }
     }
     list_add_elem_at_back(&game->incantations, incantation);
     return incantation;
