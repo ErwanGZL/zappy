@@ -8,6 +8,10 @@
 #pragma once
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Audio.hpp>
+
 
 class Menu {
     public:
@@ -44,4 +48,6 @@ class Menu {
         bool _connected;
 
         int _positionWrite = 0;
+
+        sf::Music _music;
 };

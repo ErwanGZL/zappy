@@ -64,6 +64,10 @@ Menu::Menu()
     _background.setTextureRect(sf::IntRect(0, 0, 1903, 1109));
     _background.setScale(0.5, 0.5);
     _background.setOrigin(1903 / 2, 1109 / 2);
+
+    // _music.openFromFile("GUI/sounds/music/game.ogg");
+    // _music.setLoop(true);
+    // _music.play();
 }
 
 Menu::~Menu()

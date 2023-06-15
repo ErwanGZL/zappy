@@ -15,6 +15,8 @@
 #include "Egg.hpp"
 #include "enum.hpp"
 #include <mutex>
+#include <thread>
+#include <semaphore.h>
 
 class Data {
     public:
@@ -44,6 +46,8 @@ class Data {
         void setPort(int port) {_port = port;};
         std::string getMachine() {return _machine;};
         int getPort() {return _port;};
+        void wait() {sem_wait(&_semaphore);};
+        void post() {sem_post(&_semaphore);};
         bool stop = false;
 
     private:
@@ -57,5 +61,5 @@ class Data {
         int _height = -1;
         int _timeUnit = 0;
         std::mutex _mutex;
-
+        sem_t _semaphore;
 };
