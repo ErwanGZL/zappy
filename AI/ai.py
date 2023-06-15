@@ -4,7 +4,7 @@ from . import player
 
 
 class AI:
-    def __init__(self, team_name, port, host="localhost", id=0) -> None:
+    def __init__(self, team_name, port, host="localhost") -> None:
         """
         This function is the constructor of the AI class.
         It initializes the AI and connects to the server.

@@ -202,7 +202,15 @@ class Player:
         self.id = id
         self.level = 1
         self.inventory = Inventory()
-        self.share_inventory = Inventory()
+        self.share_inventory = [
+            Inventory(),
+            Inventory(),
+            Inventory(),
+            Inventory(),
+            Inventory(),
+            Inventory(),
+            Inventory(),
+        ]
         self.orientation = Orientation.UP
         self.slot = 0
         self.player_conected = 6
@@ -311,7 +319,7 @@ class Player:
         content = self.add_memory(content)
 
     def broadcast_inventory(self):
-        message = "Broadcast " + self.inventory.print_inventory()
+        message = "Broadcast " + self.id + " " + self.inventory.print_inventory()
         self.message_to_send = xor_compressed_cipher(message, self.team_name)
         pass
 
@@ -362,7 +370,7 @@ class Player:
 
     def update_share_inventory(self, result: str):
         for item in result:
-            self.share_inventory.set_ressource(item[0], item[1])
+            self.share_inventory[self.id].set_ressource(item[0], item[1])
         # decrypted_message = xor_compressed_decipher(encrypted_message, self.team_name)
         # json_message = json.dumps(str_to_list(decrypted_message))
         # for item in json_message:
@@ -398,7 +406,6 @@ class Player:
                     self.team_name,
                     "-h",
                     self.servhost,
-                    self.id + 1,
                 ]
             )
             return self.command
