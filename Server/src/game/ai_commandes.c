@@ -171,8 +171,8 @@ int get_mineral_index(const char *arg)
 const char *take_object(game_t *game, player_t *player, const char *arg)
 {
     int index = get_mineral_index(arg);
-    if (game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1] > 0) {
-        game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1]--;
+    if (game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1] > 0) {
+        game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]--;
         player->entity->minerals[index]++;
         printf("Player %d take %s\n", player->fd, mineral_tab[index]);
         //gui communication
