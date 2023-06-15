@@ -3,6 +3,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+int get_gui_orientation(player_t * player)
+{
+    pos_t orientation = player->entity->orientation;
+    if (orientation.y == -1)
+        return 3;
+    if (orientation.x == 1)
+        return 2;
+    if (orientation.y == 1)
+        return 1;
+    if (orientation.x == -1)
+        return 4;
+    return 0;
+}
+
 const char *gui_map_size(game_t *game)
 {
     memset(game->send_message, 0, BUFSIZ);
@@ -39,20 +53,21 @@ const char *gui_team_names(game_t *game)
         memcpy(game->buffer, game->send_message, strlen(game->send_message));
         sprintf(game->send_message, "%stna %s\n", game->buffer, ((team_t *)ptr->value)->name);
     }
+    printf(game->send_message);
     return game->send_message;
 }
 
 const char *gui_player_connexion(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
-    sprintf(game->send_message, "pnw %d %d %d %d %d %s\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_from_orientation(player), player->entity->level, player->team_name);
+    sprintf(game->send_message, "pnw %d %d %d %d %d %s\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_gui_orientation(player), player->entity->level, player->team_name);
     return game->send_message;
 }
 
 const char *gui_player_position(game_t *game, player_t *player)
 {
     memset(game->send_message, 0, BUFSIZ);
-    sprintf(game->send_message, "ppo %d %d %d %d\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_from_orientation(player));
+    sprintf(game->send_message, "ppo %d %d %d %d\n", player->fd, player->entity->pos.x, player->entity->pos.y, get_gui_orientation(player));
     return game->send_message;
 }
 

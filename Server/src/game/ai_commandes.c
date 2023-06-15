@@ -31,10 +31,12 @@ const char *move_forward(game_t *game, player_t *player, const char *arg)
         player->entity->pos.y = normalize(player->entity->pos.y + 1, game->map->size.y);
     else if (player->entity->orientation.y == -1)
         player->entity->pos.y = normalize(player->entity->pos.y - 1, game->map->size.y);
+    gui_player_position(game, player);
+    gui_send_all(game, game->send_message);
     return ("ok\n");
 }
 
-const char *turn_left(game_t *game, player_t *player, const char *arg)
+const char *turn_right(game_t *game, player_t *player, const char *arg)
 {
     if (player == NULL)
         return "ko\n";
@@ -57,10 +59,12 @@ const char *turn_left(game_t *game, player_t *player, const char *arg)
         player->entity->orientation.x = 0;
         player->entity->orientation.y = 1;
     }
+    gui_player_position(game, player);
+    gui_send_all(game, game->send_message);
     return "ok\n";
 }
 
-const char *turn_right(game_t *game ,player_t *player, const char *arg)
+const char *turn_left(game_t *game ,player_t *player, const char *arg)
 {
     if (player == NULL)
         return "ko\n";
@@ -83,6 +87,8 @@ const char *turn_right(game_t *game ,player_t *player, const char *arg)
         player->entity->orientation.x = 0;
         player->entity->orientation.y = 1;
     }
+    gui_player_position(game, player);
+    gui_send_all(game, game->send_message);
     return "ok";
 }
 
@@ -101,6 +107,8 @@ void decrease_food_left(game_t *game)
     for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
     {
         player_t *player = ptr->value;
+        if (strcmp(player->team_name, "GRAPHIC") == 0)
+            continue;
         player->entity->food_left -= 1;
     }
 }
@@ -110,6 +118,8 @@ int check_death(game_t *game)
     for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
     {
         player_t *player = ptr->value;
+        if (strcmp(player->team_name, "GRAPHIC") == 0)
+            continue;
         if (player->entity->food_left <= 0)
         {
             // send death message
@@ -161,8 +171,8 @@ int get_mineral_index(const char *arg)
 const char *take_object(game_t *game, player_t *player, const char *arg)
 {
     int index = get_mineral_index(arg);
-    if (game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1] > 0) {
-        game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1]--;
+    if (game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1] > 0) {
+        game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]--;
         player->entity->minerals[index]++;
         printf("Player %d take %s\n", player->fd, mineral_tab[index]);
         //gui communication
@@ -194,9 +204,11 @@ int check_players(game_t *game, player_t *player, int players_needed, int level_
     for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
     {
         player_t *player2 = ptr->value;
+        if (strcmp(player2->team_name, "GRAPHIC") == 0)
+            continue;
         if (player2->entity->pos.x == player->entity->pos.x && player2->entity->pos.y == player->entity->pos.y)
         {
-            if (player2->entity->level != level_required)
+            if (player2->entity->level == level_required)
             {
                 nb_players++;
             }
@@ -211,28 +223,38 @@ int check_players(game_t *game, player_t *player, int players_needed, int level_
 
 const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
 {
-    int lvl = player->entity->level;
+    if (strncmp(verif_incantation(game, player, arg), "ko", strlen("ko")) == 0) {
+        exit(0);
+        return "ko";
+    }
+    int lvl = player->entity->level - 1;
     for (int i = 0; i < 6; i++)
     {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[i + 1] -= for_level[lvl][i + 2];
     }
+    gui_tile_content(game, player->entity->pos.x, player->entity->pos.y);
+    gui_send_all(game, game->send_message);
     player->entity->level++;
+    gui_pie(game, player, player->entity->level);
+    gui_send_all(game, game->send_message);
     int leveled_up = 1;
     for (list_t ptr = game->players; ptr != NULL && leveled_up <= for_level[lvl][1]; ptr = ptr->next)
     {
         player_t *player2 = ptr->value;
+        if (strcmp(player2->team_name, "GRAPHIC") == 0)
+            continue;
         if (player2->entity->pos.x == player->entity->pos.x && player2->entity->pos.y == player->entity->pos.y)
         {
             if (player2->entity->level == lvl)
             {
                 player2->entity->level++;
                 leveled_up++;
+                gui_pie(game, player, player2->entity->level);
+                gui_send_all(game, game->send_message);
             }
         }
     }
     //gui communication
-    gui_pie(game, player, player->entity->level);
-    gui_send_all(game, game->send_message);
     memset(game->buffer, 0, BUFSIZ);
     sprintf(game->buffer, "Current level: %d\n", player->entity->level);
     return game->buffer;
@@ -240,13 +262,15 @@ const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
 
 const char *verif_incantation(game_t *game, player_t *player, const char *arg)
 {
-    int lvl = player->entity->level;
-    if (check_players(game, player, for_level[lvl][0], for_level[lvl][1]) == 0)
+    int lvl = player->entity->level - 1;
+    if (check_players(game, player, for_level[lvl][0], for_level[lvl][1]) == 1)
         return "ko\n";
+    printf("players ok\n");
     for (int i = 0; i < 6; i++) {
         if (game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[i + 1] < for_level[lvl][i + 2])
             return "ko\n";
     }
+    printf("map ok\n");
     return "Elevation underway\n";
 }
 
@@ -254,6 +278,8 @@ char *get_player_in_tile(game_t *game, char *ressources, int x, int y)
 {
     for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
         player_t *player = ptr->value;
+        if (strcmp(player->team_name, "GRAPHIC") == 0)
+            continue;
         if (player->entity->pos.x == x && player->entity->pos.y == y) {
             ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 8));
             strcat(ressources, "player ");
@@ -308,6 +334,8 @@ const char *eject_player(game_t *game, player_t *player, const char *arg)
     int success = 0;
     for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
         player_t *player2 = ptr->value;
+        if (strcmp(player->team_name, "GRAPHIC") == 0)
+            continue;
         if (player2->entity->pos.x == x && player2->entity->pos.y == y && player2 != player) {
             player2->entity->pos.x = normalize(player2->entity->pos.x + 1, game->map->size.x);
             player2->entity->pos.y = normalize(player2->entity->pos.y + 1, game->map->size.y);
@@ -421,6 +449,8 @@ const char *broadcast(game_t *game, player_t *player, const char *arg)
 {
     for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
         player_t *player2 = ptr->value;
+        if (strcmp(player2->team_name, "GRAPHIC") == 0)
+            continue;
         send_broadcast_message(arg, player2->fd, find_provenance(game, player, player2));
     }
     //gui communication
