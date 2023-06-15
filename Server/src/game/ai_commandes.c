@@ -198,6 +198,25 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
     return "ko\n";
 }
 
+int check_incantation_players(game_t *game, player_t *player, int players_needed, int level_required)
+{
+    int nb_players = 1;
+    incantation_t *incantation = get_incantation_by_player(game, player);
+    for (list_t player = incantation->casters; player != NULL; player = player->next)
+    {
+        player_t *player2 = player->value;
+        if (player2->entity->level == level_required)
+        {
+            nb_players++;
+        }
+    }
+    if (nb_players >= players_needed)
+    {
+        return 0;
+    }
+    return 1;
+}
+
 int check_players(game_t *game, player_t *player, int players_needed, int level_required)
 {
     int nb_players = 0;
@@ -214,7 +233,7 @@ int check_players(game_t *game, player_t *player, int players_needed, int level_
             }
         }
     }
-    if (nb_players == players_needed)
+    if (nb_players >= players_needed)
     {
         return 0;
     }
@@ -223,9 +242,8 @@ int check_players(game_t *game, player_t *player, int players_needed, int level_
 
 const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
 {
-    if (strncmp(verif_incantation(game, player, arg), "ko", strlen("ko")) == 0) {
-        exit(0);
-        return "ko";
+    if (strncmp(verif_incantation(game, player, arg, 1), "ko", strlen("ko")) == 0) {
+        return "ko\n";
     }
     int lvl = player->entity->level - 1;
     for (int i = 0; i < 6; i++)
@@ -237,33 +255,36 @@ const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
     player->entity->level++;
     gui_pie(game, player, player->entity->level);
     gui_send_all(game, game->send_message);
-    int leveled_up = 1;
-    for (list_t ptr = game->players; ptr != NULL && leveled_up <= for_level[lvl][1]; ptr = ptr->next)
+    incantation_t *incantation = get_incantation_by_player(game, player);
+    if (incantation == NULL)
+        return "ko\n";
+    for (list_t ptr = incantation->casters; ptr != NULL; ptr = ptr->next)
     {
         player_t *player2 = ptr->value;
-        if (strcmp(player2->team_name, "GRAPHIC") == 0)
-            continue;
         if (player2->entity->pos.x == player->entity->pos.x && player2->entity->pos.y == player->entity->pos.y)
         {
-            if (player2->entity->level == lvl)
-            {
-                player2->entity->level++;
-                leveled_up++;
-                gui_pie(game, player, player2->entity->level);
-                gui_send_all(game, game->send_message);
-            }
+            player2->entity->level++;
+            gui_pie(game, player, player2->entity->level);
+            gui_send_all(game, game->send_message);
+            dprintf(player2->fd, "Current level: %d\n", player2->entity->level);
         }
     }
     //gui communication
     memset(game->buffer, 0, BUFSIZ);
     sprintf(game->buffer, "Current level: %d\n", player->entity->level);
+    remove_incantation_by_player(game, player);
     return game->buffer;
 }
 
-const char *verif_incantation(game_t *game, player_t *player, const char *arg)
+const char *verif_incantation(game_t *game, player_t *player, const char *arg, int state)
 {
     int lvl = player->entity->level - 1;
-    if (check_players(game, player, for_level[lvl][0], for_level[lvl][1]) == 1)
+    int status = 0;
+    if (state == 0)
+        status = check_players(game, player, for_level[lvl][0], for_level[lvl][1]);
+    else
+        status = check_incantation_players(game, player, for_level[lvl][0], for_level[lvl][1]);
+    if (status == 1)
         return "ko\n";
     printf("players ok\n");
     for (int i = 0; i < 6; i++) {

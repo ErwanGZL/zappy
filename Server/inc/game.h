@@ -121,6 +121,8 @@ typedef struct incantation {
 
 //incantation functions
 incantation_t *get_incantation(game_t *game, player_t *player);
+incantation_t *get_incantation_by_player(game_t *game, player_t *player);
+game_t *remove_incantation_by_player(game_t *game, player_t *player);
 
 //map handling functions
 int normalize(int x, int x_max);
@@ -154,7 +156,7 @@ const char *team_unused_slots(game_t *game, player_t *player, const char *arg);
 int check_death(game_t *game);
 const char *get_inventory(game_t *game, player_t *player, const char *arg);
 const char *resolve_incantation(game_t *game, player_t *player, const char *arg);
-const char *verif_incantation(game_t *game, player_t *player, const char *arg);
+const char *verif_incantation(game_t *game, player_t *player, const char *arg, int state);
 const char *take_object(game_t *game, player_t *player, const char *arg);
 const char *drop_object(game_t *game, player_t *player, const char *arg);
 const char *eject_player(game_t *game, player_t *player, const char *arg);

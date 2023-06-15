@@ -229,3 +229,26 @@ incantation_t *get_incantation(game_t *game, player_t *player)
     list_add_elem_at_back(&game->incantations, incantation);
     return incantation;
 }
+
+incantation_t *get_incantation_by_player(game_t *game, player_t *player)
+{
+    for (list_t ptr = game->incantations; ptr != NULL; ptr = ptr->next) {
+        incantation_t *incantation = (incantation_t *)ptr->value;
+        if (incantation->first->fd == player->fd)
+            return incantation;
+    }
+    return NULL;
+}
+
+game_t *remove_incantation_by_player(game_t *game, player_t *player)
+{
+    int i = 0;
+    for (list_t ptr = game->incantations; ptr != NULL; ptr = ptr->next, i++) {
+        incantation_t *incantation = (incantation_t *)ptr->value;
+        if (incantation->first->fd == player->fd) {
+            list_del_elem_at_position(&game->incantations, i);
+            break;
+        }
+    }
+    return game;
+}
