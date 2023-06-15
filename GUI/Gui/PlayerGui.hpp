@@ -7,6 +7,7 @@
 
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <vector>
 #include "enum.hpp"
@@ -16,7 +17,7 @@ class PlayerGui {
     public:
         PlayerGui(int id, sf::Texture *texture, int teamId, Data *data);
         ~PlayerGui();
-        void update(int tileId);
+        void update(int tileId, int volume);
         void animate(int timeUnit);
         void draw(sf::RenderWindow *window);
         sf::Sprite getSprite() {return _sprite;};
@@ -43,4 +44,13 @@ class PlayerGui {
         int _nextY = 0;
         int _tileId = 1;
         Data *_data;
+
+        sf::SoundBuffer _bufferBroadcast;
+        sf::Sound _soundBroadcast;
+        sf::SoundBuffer _bufferIncantation;
+        sf::Sound _soundIncantation;
+        sf::SoundBuffer _bufferEgg;
+        sf::Sound _soundEgg;
+        sf::SoundBuffer _bufferWalk;
+        sf::Sound _soundWalk;
 };

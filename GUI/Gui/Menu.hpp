@@ -11,6 +11,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Audio.hpp>
+#include "Sound.hpp"
 
 
 class Menu {
@@ -23,6 +24,9 @@ class Menu {
         sf::RenderWindow *getWindow() const {return _window;};
         std::string getMachine() const {return _machine;};
         int getPort() const {return _portConnect;};
+        int getMusicVolume() {return _musicBar.getVolume();};
+        int getEffectVolume() {return _effectsBar.getVolume();};
+        sf::Music *getMusic() {return _music;};
 
     private:
         sf::RenderWindow *_window;
@@ -49,5 +53,8 @@ class Menu {
 
         int _positionWrite = 0;
 
-        sf::Music _music;
+        sf::Music *_music;
+
+        Sound _effectsBar;
+        Sound _musicBar;
 };

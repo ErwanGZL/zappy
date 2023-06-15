@@ -80,13 +80,13 @@ void Network::run()
 {
     pthread_create(&_guiThread, NULL, threadGui, (void *)_data);
     _data->wait();
-    _data->lock();
     _port = _data->getPort();
     _machine = _data->getMachine();
     _socket = socket(PF_INET, SOCK_STREAM, 0);
     if (_socket == -1) {
         perror("socket");
         _data->stop = true;
+        _data->post();
         return;
     }
     _addr.sin_family = AF_INET;
@@ -95,9 +95,11 @@ void Network::run()
     if (::connect(_socket, (struct sockaddr *)&_addr, sizeof(_addr)) == -1) {
         perror("connect");
         _data->stop = true;
+        _data->post();
         return;
     }
-    _data->unlock();
+    _data->post();
+    std::cout<< "cbon\n";
     while (1) {
         if (handleMessages()) return;
     }
