@@ -394,18 +394,19 @@ class Player:
                 self.ressource_to_take = command[1]
 
     def logic(self, answer: list, direction: int, message_brod: str) -> list:
+
         self.command_interpreter(answer)
         self.command.append("Connect_nbr")
         if self.player_conected < 6:
             subprocess.call(
                 [
                     "./zappy_ia",
-                    "-p",
+                    "-p
                     self.servport,
                     "-n",
                     self.team_name,
                     "-h",
-                    self.servhost,
+                    self.servhost
                 ]
             )
             return self.command
