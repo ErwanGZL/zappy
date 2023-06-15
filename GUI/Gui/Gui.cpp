@@ -310,7 +310,7 @@ void Gui::updateData()
     _currentView = _infoPlayer->getView(_viewGlobal, _players);
     generatePlayer();
     for (size_t i = 0;i < _players.size();i++) {
-        _players[i]->update(_map[_players[i]->getX() / 16 + _players[i]->getY() / 16 * _data->getWidth()]->getId());
+        _players[i]->update(_map[_players[i]->getX() / 16 + _players[i]->getY() / 16 * _data->getWidth()]->getId(), _effectBar.getVolume());
     }
     for (size_t i = 0;i < _map.size();i++) {
         _map[i]->update();

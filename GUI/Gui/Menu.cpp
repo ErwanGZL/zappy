@@ -117,6 +117,9 @@ void Menu::event()
 {
     sf::Event event;
     while (_window->pollEvent(event)) {
+        int x = _window->mapPixelToCoords(sf::Mouse::getPosition(*_window)).x;
+        int y = _window->mapPixelToCoords(sf::Mouse::getPosition(*_window)).y;
+        sf::Vector2f pos = sf::Vector2f((float) x, (float) y);
         if (event.type == sf::Event::Closed)
             _window->close();
         if (event.type == sf::Event::TextEntered) {
@@ -140,7 +143,7 @@ void Menu::event()
             _textMachine.setOrigin(_textMachine.getGlobalBounds().width / 2, _textMachine.getGlobalBounds().height / 2);
             _textPort.setOrigin(_textPort.getGlobalBounds().width / 2, _textPort.getGlobalBounds().height / 2);
         }
-        if (_button.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(*_window)))) {
+        if (_button.getGlobalBounds().contains(pos)) {
             _textButton.setFillColor(sf::Color::White);
             if (event.type == sf::Event::MouseButtonPressed) {
                 _button.setTextureRect(sf::IntRect(24, 0, 24, 16));
@@ -157,12 +160,12 @@ void Menu::event()
             _textButton.setFillColor(sf::Color::Black);
             _button.setTextureRect(sf::IntRect(0, 0, 24, 16));
         }
-        if (_box1.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(*_window)))) {
+        if (_box1.getGlobalBounds().contains(pos)) {
             if (event.type == sf::Event::MouseButtonPressed) {
                 _positionWrite = 1;
             }
         }
-        if (_box2.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(*_window)))) {
+        if (_box2.getGlobalBounds().contains(pos)) {
             if (event.type == sf::Event::MouseButtonPressed) {
                 _positionWrite = 2;
             }
