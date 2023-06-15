@@ -79,8 +79,7 @@ std::string Network::getMessage()
 void Network::run()
 {
     pthread_create(&_guiThread, NULL, threadGui, (void *)_data);
-    usleep(1000000);
-    std::cout << "GUI thread created" << std::endl;
+    _data->wait();
     _data->lock();
     _port = _data->getPort();
     _machine = _data->getMachine();

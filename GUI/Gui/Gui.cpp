@@ -23,8 +23,8 @@ void *threadGui(void *arg)
         data->setPort(menu->getPort());
         data->unlock();
     }
+    data->post();
     Gui *gui = new Gui(data, menu->getWindow());
-    std::cout << "Machine: " << data->getMachine() << std::endl;
     gui->run();
     return (NULL);
 }

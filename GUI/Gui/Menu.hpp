@@ -8,6 +8,10 @@
 #pragma once
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Audio.hpp>
+
 
 class Menu {
     public:
@@ -36,9 +40,14 @@ class Menu {
 
         sf::Sprite _button;
         sf::Texture _textureButton;
-        sf::IntRect _rectButton;
+
+        sf::Sprite _background;
+        sf::Texture _textureBackground;
+        sf::Clock _clock;
 
         bool _connected;
 
         int _positionWrite = 0;
+
+        sf::Music _music;
 };

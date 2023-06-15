@@ -9,6 +9,7 @@
 
 Data::Data()
 {
+    _semaphore = sem_t();
 }
 
 Data::~Data()

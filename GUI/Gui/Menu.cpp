@@ -15,13 +15,13 @@ Menu::Menu()
     _text1.setFont(_font);
     _text1.setString("Machine");
     _text1.setCharacterSize(50);
-    _text1.setFillColor(sf::Color::Black);
+    _text1.setFillColor(sf::Color::White);
     _text1.setPosition(720 / 2, 480 / 2 - 200);
     _text1.setOrigin(_text1.getGlobalBounds().width / 2, _text1.getGlobalBounds().height / 2);
     _text2.setFont(_font);
     _text2.setString("Port");
     _text2.setCharacterSize(50);
-    _text2.setFillColor(sf::Color::Black);
+    _text2.setFillColor(sf::Color::White);
     _text2.setPosition(720 / 2, 480 / 2 - 50);
     _text2.setOrigin(_text2.getGlobalBounds().width / 2, _text2.getGlobalBounds().height / 2);
     _textMachine.setFont(_font);
@@ -56,6 +56,18 @@ Menu::Menu()
     _textButton.setFillColor(sf::Color::Black);
     _textButton.setPosition(720 / 2, 480 / 2 + 120);
     _textButton.setOrigin(_textButton.getGlobalBounds().width / 2, _textButton.getGlobalBounds().height / 2);
+
+
+    _textureBackground.loadFromFile("GUI/sprites/background.png");
+    _background.setTexture(_textureBackground);
+    _background.setPosition(720 / 2, 480 / 2);
+    _background.setTextureRect(sf::IntRect(0, 0, 1903, 1109));
+    _background.setScale(0.5, 0.5);
+    _background.setOrigin(1903 / 2, 1109 / 2);
+
+    // _music.openFromFile("GUI/sounds/music/game.ogg");
+    // _music.setLoop(true);
+    // _music.play();
 }
 
 Menu::~Menu()
@@ -75,6 +87,14 @@ void Menu::run()
 void Menu::display()
 {
     _window->clear(sf::Color::Blue);
+    _window->draw(_background);
+    if (_clock.getElapsedTime().asSeconds() > 0.3) {
+        _clock.restart();
+        if (_background.getTextureRect().left < 1903 * 3)
+            _background.setTextureRect(sf::IntRect(_background.getTextureRect().left + 1903, 0, 1903, 1109));
+        else
+            _background.setTextureRect(sf::IntRect(0, 0, 1903, 1109));
+    }
     _window->draw(_box1);
     _window->draw(_box2);
     _window->draw(_text1);
