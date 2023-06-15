@@ -241,7 +241,6 @@ const char *gui_sbp(game_t *game)
     return game->send_message;
 }
 
-
 void gui_send_at_connexion(game_t *game, int fd)
 {
     gui_map_size(game);
@@ -251,10 +250,21 @@ void gui_send_at_connexion(game_t *game, int fd)
     gui_map_content(game, fd);
     gui_team_names(game);
     dprintf(fd, game->send_message);
+    for (list_t ptr = game->players; ptr != NULL ; ptr = ptr->next) {
+        player_t *player = ptr->value;
+        if (strcmp(player->team_name, "GRAPHIC") == 0)
+            continue;
+        gui_player_connexion(game, player);
+        dprintf(fd, game->send_message);
+        gui_player_inventory(game, player);
+        dprintf(fd, game->send_message);
+        gui_player_level(game, player);
+        dprintf(fd, game->send_message);
+        //TODO : add incantating and forking status
+    }
 }
 
 //TODO
-//all requests and unknown command and command parameter
 //expulsion ???
 //start of an incatation ?
 //egg laying by the player ?

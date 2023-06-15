@@ -122,11 +122,11 @@ int check_death(game_t *game)
             continue;
         if (player->entity->food_left <= 0)
         {
-            // send death message
-            // TODO: kill player
             //gui communication
             gui_pdi(game, player);
             gui_send_all(game, game->send_message);
+            //client communication
+            dprintf(player->fd, "dead\n");
             return 1;
         }
     }
