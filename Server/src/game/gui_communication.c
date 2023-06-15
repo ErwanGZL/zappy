@@ -53,6 +53,7 @@ const char *gui_team_names(game_t *game)
         memcpy(game->buffer, game->send_message, strlen(game->send_message));
         sprintf(game->send_message, "%stna %s\n", game->buffer, ((team_t *)ptr->value)->name);
     }
+    printf(game->send_message);
     return game->send_message;
 }
 
