@@ -27,7 +27,7 @@ void server_select(server_t *server)
 
     readfds = server->netctl->watched_fd;
 
-    timeout = actions_get_next_timeout(server->actions, server->game->freq);
+    timeout = server_get_next_timeout(server);
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
     act = select(FD_SETSIZE, &readfds, NULL, NULL, timeout);
@@ -38,6 +38,7 @@ void server_select(server_t *server)
     dt = (end.tv_nsec - start.tv_nsec) + ((end.tv_sec - start.tv_sec) * 1E9);
     elapsed = dt * server->game->freq * 1E-9;
     actions_apply_elapsed_time(server->actions, elapsed);
+    player_decrease_food(server->game->players, elapsed);
     if (act < 0)
     {
         printf("Timeout\n");
@@ -58,6 +59,8 @@ void server_select(server_t *server)
             if (rbytes == 0)
             {
                 printf("Client disconnected\n");
+                actions_remove_from_issuer(&server->actions, ((socket_t *)head->value)->fd);
+                remove_player(server->game, ((socket_t *)head->value)->fd);
                 netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
                 head = server->netctl->clients;
                 continue;
@@ -90,12 +93,8 @@ void server_handshake(server_t *server, int fd)
     if (strncmp(buffer, "GRAPHIC", 7) == 0)
     {
         printf("Graphic client connected\n");
-        dprintf(fd, "%d\n"
-                    "%d %d\n",
-                0,
-                server->options->width,
-                server->options->height);
         add_player(server->game, "GRAPHIC", fd);
+        gui_send_at_connexion(server->game, fd);
         return;
     }
     for (list_t head = server->game->teams; head != NULL; head = head->next)
@@ -110,12 +109,16 @@ void server_handshake(server_t *server, int fd)
                     server->options->height);
             printf("Player added %d\n", fd);
             add_player(server->game, team->name, fd);
+            // gui communication
+            gui_player_connexion(server->game, get_player_by_fd(server->game, fd));
+            gui_send_all(server->game, server->game->send_message);
             return;
         }
     }
     printf("Team not found\n");
     dprintf(fd, "0\n"
                 "0 0\n");
+    remove_player(server->game, fd);
     netctl_disconnect(server->netctl, fd);
 }
 
@@ -127,10 +130,36 @@ int server_run(server_t *server)
     while (1)
     {
         server_select(server);
+        for (list_t head = server->game->players; head != NULL; head = head->next)
+        {
+            player_t *player = (player_t *)head->value;
+            if (strncmp(player->team_name, "GRAPHIC", 7) == 0)
+                continue;
+            if (player->entity->food_timer_units <= 0) {
+                player->entity->food_left -= 1;
+                player->entity->food_timer_units += 126;
+                printf("Food left : %d\n", player->entity->food_left);
+            }
+        }
+        check_death(server->game);
+        for (list_t *head = &server->game->players; (*head) != NULL;)
+        {
+            player_t *player = (player_t *)(*head)->value;
+            if (strncmp(player->team_name, "GRAPHIC", 7) == 0)
+                continue;
+            if (player->entity->food_left <= 0)
+            {
+                printf("Player %d died\n", player->fd);
+                actions_remove_from_issuer(&server->actions, player->fd);
+                remove_player(server->game, player->fd);
+                netctl_disconnect(server->netctl, player->fd);
+                continue;
+            }
+            head = &(*head)->next;
+        }
         for (list_t *head = &server->actions; *head != NULL;)
         {
             action_t *action = (action_t *)(*head)->value;
-            printf("Action: %d\n", action->cooldown);
             if (action->cooldown <= 0)
             {
                 // player_t *p = get_player_by_fd(server->game, action->issuer);
@@ -143,7 +172,6 @@ int server_run(server_t *server)
             head = &(*head)->next;
         }
     }
-
     return 0;
 }
 

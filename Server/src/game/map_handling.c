@@ -13,7 +13,7 @@ int get_map_ressources(game_t *game,int index)
     int res = 0;
     for (int i = 0; i < game->map->size.y ; i++) {
         for (int a = 0; a < game->map->size.x ; a++) {
-            res += get_ressource(game, i, a, index);
+            res += get_ressource(game, a, i, index);
         }
     }
     return res;

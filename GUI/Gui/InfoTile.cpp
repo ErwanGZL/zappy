@@ -67,7 +67,7 @@ void InfoTile::setMouse(sf::RenderWindow &window, sf::Event event)
 {
     int x = window.mapPixelToCoords(sf::Mouse::getPosition(window)).x;
     int y = window.mapPixelToCoords(sf::Mouse::getPosition(window)).y;
-    if (x > -8 && x < 152 && y > -8 && y < 152) {
+    if (x > -8 && x < _data->getWidth() * 16 - 8 && y > -8 && y < _data->getHeight() * 16 - 8) {
         if (_overlay.getPosition() != sf::Vector2f((x + 8) / 16 * 16, (y + 8) / 16 * 16))
             _isToggled = false;
         _overlay.setPosition(sf::Vector2f((x + 8) / 16 * 16, (y + 8) / 16 * 16));

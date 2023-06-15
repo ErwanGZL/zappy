@@ -9,42 +9,49 @@
 
 Network::Network(int ac, char **av)
 {
-    _port = 4242;
-    _machine = "127.0.0.1";
-    if ((ac - 1) % 2 != 0) {
-        std::cerr << "Invalid number of arguments" << std::endl;
-        exit(84);
-    }
-    for (int i = 1; i < ac; i += 2) {
-        if (std::string(av[i]) == "-p") {
-            try {
-                std::stoi(av[i + 1]);
-            } catch (std::exception &e) {
-                std::cerr << "Port must be a number" << std::endl;
-                exit(84);
-            }
-            _port = std::stoi(av[i + 1]);
-        }
-        else if (std::string(av[i]) == "-h")
-            _machine = av[i + 1];
-        else {
-            std::cerr << "Invalid argument" << std::endl;
-            exit(84);
-        }
-    }
-    _socket = socket(PF_INET, SOCK_STREAM, 0);
-    if (_socket == -1) {
-        perror("socket");
-        exit(84);
-    }
-    _addr.sin_family = AF_INET;
-    _addr.sin_port = htons(_port);
-    _addr.sin_addr.s_addr = inet_addr(_machine.c_str());
-    if (::connect(_socket, (struct sockaddr *)&_addr, sizeof(_addr)) == -1) {
-        perror("connect");
-        exit(84);
-    }
     _data = new Data();
+    if (ac != 1) {
+        _port = 4242;
+        _machine = "127.0.0.1";
+        if ((ac - 1) % 2 != 0) {
+            std::cerr << "Invalid number of arguments" << std::endl;
+            throw std::exception();
+        }
+        for (int i = 1; i < ac; i += 2) {
+            if (std::string(av[i]) == "-p") {
+                try {
+                    std::stoi(av[i + 1]);
+                } catch (std::exception &e) {
+                    std::cerr << "Port must be a number" << std::endl;
+                    throw std::exception();
+                }
+                _port = std::stoi(av[i + 1]);
+            }
+            else if (std::string(av[i]) == "-h") {
+                _machine = av[i + 1];
+                if (_machine == "localhost")
+                    _machine = "127.0.0.1";
+            } else {
+                std::cerr << "Invalid argument" << std::endl;
+                throw std::exception();
+            }
+        }
+        _socket = socket(PF_INET, SOCK_STREAM, 0);
+        if (_socket == -1) {
+            perror("socket");
+            throw std::exception();
+        }
+        _addr.sin_family = AF_INET;
+        _addr.sin_port = htons(_port);
+        _addr.sin_addr.s_addr = inet_addr(_machine.c_str());
+        if (::connect(_socket, (struct sockaddr *)&_addr, sizeof(_addr)) == -1) {
+            perror("connect");
+            throw std::exception();
+        }
+        _data->setMachine(_machine);
+        _data->setPort(_port);
+    }
+    _buffer = "";
 }
 
 Network::~Network()
@@ -53,21 +60,18 @@ Network::~Network()
 
 std::string Network::getMessage()
 {
-    if (_buffer.find("\n") != std::string::npos) {
-        std::string message = _buffer.substr(0, _buffer.find("\n"));
-        _buffer = _buffer.substr(_buffer.find("\n") + 1);
-        return message;
-    }
-    char buffer[BUFSIZ] = {0};
-    size_t size = read(_socket, buffer, BUFSIZ);
-    if (size == 0) {
-        return "internal stop";
-    }
-    _buffer += std::string(buffer).substr(0, size);
-    if (_buffer.find("\n") != std::string::npos) {
-        std::string message = _buffer.substr(0, _buffer.find("\n"));
-        _buffer = _buffer.substr(_buffer.find("\n") + 1);
-        return message;
+    while (true) {
+        if (_buffer.find("\n") != std::string::npos) {
+            std::string message = _buffer.substr(0, _buffer.find("\n"));
+            _buffer = _buffer.substr(_buffer.find("\n") + 1);
+            return message;
+        }
+        char buffer[BUFSIZ] = {0};
+        size_t size = read(_socket, buffer, BUFSIZ);
+        if (size == 0) {
+            return "internal stop";
+        }
+        _buffer += std::string(buffer).substr(0, size);
     }
     return "";
 }
@@ -75,6 +79,26 @@ std::string Network::getMessage()
 void Network::run()
 {
     pthread_create(&_guiThread, NULL, threadGui, (void *)_data);
+    usleep(1000000);
+    std::cout << "GUI thread created" << std::endl;
+    _data->lock();
+    _port = _data->getPort();
+    _machine = _data->getMachine();
+    _socket = socket(PF_INET, SOCK_STREAM, 0);
+    if (_socket == -1) {
+        perror("socket");
+        _data->stop = true;
+        return;
+    }
+    _addr.sin_family = AF_INET;
+    _addr.sin_port = htons(_port);
+    _addr.sin_addr.s_addr = inet_addr(_machine.c_str());
+    if (::connect(_socket, (struct sockaddr *)&_addr, sizeof(_addr)) == -1) {
+        perror("connect");
+        _data->stop = true;
+        return;
+    }
+    _data->unlock();
     while (1) {
         if (handleMessages()) return;
     }
@@ -82,9 +106,10 @@ void Network::run()
 
 int Network::handleMessages()
 {
+    std::cout << "end read" << std::endl;
     std::string message = getMessage();
     std::string data;
-    std::cout << "Message received: " << message << std::endl;
+    std::cout << "Message received: |" << message << "|" << std::endl;
     if (message.find(" ") != std::string::npos)
         data = message.substr(message.find(" ") + 1);
     int returnCode = 0;
@@ -122,10 +147,9 @@ int Network::handleMessages()
         returnCode = playerDie(data);
     else if (message.find("enw") == 0)
         returnCode = eggLay(data);
-    else if (message.find("eht") == 0) {
+    else if (message.find("eht") == 0)
         returnCode = eggConnect(data);
-        std::cout << "Egg connected--------------" << std::endl;
-    } else if (message.find("edi") == 0)
+    else if (message.find("edi") == 0)
         returnCode = eggDie(data);
     else if (message.find("sgt") == 0)
         returnCode = timeUnitRequest(data);
@@ -144,9 +168,10 @@ int Network::handleMessages()
     else if (message.find("internal stop") == 0)
         return 1;
     else
-        std::cout << "Unknown command" << message << "|" << std::endl;
+        std::cout << "Unknown command : |" << message << "|" << std::endl;
     if (returnCode)
         return 1;
+    std::cout << "Return code: " << returnCode << std::endl;
     return 0;
 }
 

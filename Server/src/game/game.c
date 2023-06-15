@@ -104,6 +104,9 @@ game_t *init_game(option_t *opt)
     }
     memset(game->send_message, 0, BUFSIZ);
     memset(game->buffer, 0, BUFSIZ / 2);
+    game->alloc_buffer = calloc(1, 10);
+    memset(game->alloc_buffer, 0, 10);
+    game = spawn_ressources(game);
     return game;
 }
 
@@ -185,10 +188,23 @@ void destroy_egg(game_t *game, int x, int y, int *success)
     for (list_t ptr = game->eggs ; ptr != NULL ; ptr = ptr->next) {
         egg_t *egg = ptr->value;
         if (egg->pos.x == x && egg->pos.y == y) {
+            //gui communication
+            gui_edi(game, ((egg_t *) list_get_elem_at_position(game->eggs, pos))->id);
+            gui_send_all(game, game->send_message);
             list_del_elem_at_position(&game->eggs, pos);
             *success = 1;
+            //remove a place in the team
         }
-        //remove a place in the team
         pos++;
+    }
+}
+
+void player_decrease_food(list_t players, int elapsed_units)
+{
+    for (list_t head = players; head != NULL; head = head->next) {
+        player_t *p = (player_t *)head->value;
+        if (strncmp(p->team_name, "GRAPHIC", 7) == 0)
+            continue;
+        p->entity->food_timer_units -= elapsed_units;
     }
 }

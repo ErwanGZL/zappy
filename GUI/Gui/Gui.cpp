@@ -6,6 +6,7 @@
 */
 
 #include "Gui.hpp"
+#include "Menu.hpp"
 #include <iostream>
 #include <unistd.h>
 #include <random>
@@ -13,17 +14,26 @@
 
 void *threadGui(void *arg)
 {
-    Gui *gui = new Gui((Data *)arg);
+    Data *data = (Data *)arg;
+    Menu *menu = new Menu();
+    if (data->getMachine() == "" || data->getPort() == -1) {
+        data->lock();
+        menu->run();
+        data->setMachine(menu->getMachine());
+        data->setPort(menu->getPort());
+        data->unlock();
+    }
+    Gui *gui = new Gui(data, menu->getWindow());
+    std::cout << "Machine: " << data->getMachine() << std::endl;
     gui->run();
     return (NULL);
 }
 
-Gui::Gui(Data *data)
+Gui::Gui(Data *data, sf::RenderWindow *window)
 {
     _data = data;
-    _window.create(sf::VideoMode(720, 480), "Zappy");
-    _window.setFramerateLimit(60);
-    _viewGlobal = _window.getDefaultView();
+    _window = window;
+    _viewGlobal = _window->getDefaultView();
     _textureMap.loadFromFile("GUI/sprites/map.png");
     _texturePlayer.loadFromFile("GUI/sprites/Sprites.png");
     _infoTile = new InfoTile(_data);
@@ -37,20 +47,32 @@ Gui::~Gui()
 
 void Gui::run ()
 {
-    generateMap();
-    while (_window.isOpen()) {
-        sf::Event event;
-        while (_window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                _window.close();
-            _infoTile->setMouse(_window, event);
-            _infoPlayer->setMouse(_window, event, _viewGlobal);
+    bool generated = false;
+    while (_window->isOpen()) {
+        if (_data->stop == true) {
+            _window->close();
+            return;
         }
-        _window.clear(sf::Color::Black);
-        updateData();
-        animate();
-        display();
-        _window.display();
+        if (_data->getWidth() != -1 && _data->getHeight() != -1 && generated == false) {
+            generateMap();
+            generated = true;
+        }
+        sf::Event event;
+        while (_window->pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                _window->close();
+            if (generated == true) {
+                _infoTile->setMouse(*_window, event);
+                _infoPlayer->setMouse(*_window, event, _viewGlobal);
+            }
+        }
+        if (generated == true) {
+            _window->clear(sf::Color::Black);
+            updateData();
+            animate();
+            display();
+        }
+        _window->display();
     }
 }
 
@@ -58,11 +80,11 @@ void Gui::generateMap()
 {
     int width = _data->getWidth();
     int height = _data->getHeight();
-    float ratiox = std::abs(float(_window.getSize().x) / float((width + 4) * 16));
-    float ratioy = std::abs(float(_window.getSize().y) / float((height + 4) * 16));
+    float ratiox = std::abs(float(_window->getSize().x) / float((width + 4) * 16));
+    float ratioy = std::abs(float(_window->getSize().y) / float((height + 4) * 16));
     _viewGlobal.zoom(1./std::min(ratiox, ratioy));
     _viewGlobal.setCenter(width * 8 - 8, height * 8 - 8);
-    _window.setView(_viewGlobal);
+    _window->setView(_viewGlobal);
     _currentView = _viewGlobal;
     Perlin perlin(width, height);
     std::vector<std::vector<int>> noiseMap = perlin.run();
@@ -196,6 +218,8 @@ sf::IntRect Gui::getRect(int x, int y, std::vector<std::vector<int>> mappa)
 
 void Gui::animate()
 {
+    if (_data->getTimeUnit() == 0)
+        return;
     for (int i = 0; i < _map.size(); i++) {
         _map[i]->animate(_data->getTimeUnit());
     }
@@ -206,24 +230,24 @@ void Gui::animate()
 
 void Gui::display()
 {
-    _window.setView(_currentView);
+    _window->setView(_currentView);
     for (int i = 0; i < _map.size(); i++) {
-        _map[i]->display(&_window);
+        _map[i]->display(_window);
     }
-    _window.setView(_currentView);
+    _window->setView(_currentView);
     for (int i = 0; i < _map.size(); i++) {
-        _map[i]->displayRessources(&_window);
+        _map[i]->displayRessources(_window);
     }
-    _window.setView(_currentView);
-    _egg->draw(&_window);
-    _window.setView(_currentView);
+    _window->setView(_currentView);
+    _egg->draw(_window);
+    _window->setView(_currentView);
     for (size_t i = 0;i < _players.size();i++) {
-        _players[i]->draw(&_window);
+        _players[i]->draw(_window);
     }
-    _infoTile->draw(_window);
-    _window.setView(_currentView);
-    _infoPlayer->draw(_window);
-    _window.setView(_currentView);
+    _infoTile->draw(*_window);
+    _window->setView(_currentView);
+    _infoPlayer->draw(*_window);
+    _window->setView(_currentView);
 }
 
 void Gui::generatePlayer()

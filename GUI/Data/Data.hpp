@@ -14,6 +14,7 @@
 #include "Player.hpp"
 #include "Egg.hpp"
 #include "enum.hpp"
+#include <mutex>
 
 class Data {
     public:
@@ -37,14 +38,24 @@ class Data {
         Player *getPlayerById(int id);
         Egg *getEggById(int id);
         std::vector<Player*> getPlayersByCoords(int x, int y);
+        void lock() {_mutex.lock();};
+        void unlock() {_mutex.unlock();};
+        void setMachine(std::string machine) {_machine = machine;};
+        void setPort(int port) {_port = port;};
+        std::string getMachine() {return _machine;};
+        int getPort() {return _port;};
+        bool stop = false;
 
     private:
         std::vector<std::vector<Tile*>> _map;
         std::vector<Team*> _teams;
         std::vector<Player*> _players;
         std::vector<Egg*> _eggs;
-        int _width = 0;
-        int _height = 0;
+        std::string _machine = "";
+        int _port = -1;
+        int _width = -1;
+        int _height = -1;
         int _timeUnit = 0;
+        std::mutex _mutex;
 
 };

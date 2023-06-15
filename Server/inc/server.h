@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "typedef.h"
 #include "list.h"
 #include "netctl.h"
 #include "options.h"
@@ -19,6 +20,8 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/select.h>
+
+#define MIN_TIMEVAL(a, b) ((a->tv_sec < b->tv_sec) || (a->tv_sec == b->tv_sec && a->tv_usec < b->tv_usec) ? a : b)
 
 typedef struct server_s
 {
@@ -33,3 +36,4 @@ void server_select(server_t *server);
 void server_destroy(server_t *server);
 void server_handshake(server_t *server, int fd);
 int server_run(server_t *server);
+timeval_t *server_get_next_timeout(server_t *server);

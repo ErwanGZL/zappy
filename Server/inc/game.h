@@ -1,5 +1,7 @@
 
 #pragma once
+
+#include "typedef.h"
 #include "list.h"
 #include "options.h"
 #include <stdio.h>
@@ -11,7 +13,7 @@
 
 //macro that return the position of the tile in the map, if the position is out of the map, it will return the position of the tile on the other side of the map
 #define GET_POS(pos, max_pos) (pos.x = pos.x % max_pos.x, pos.y = pos.y % max_pos.y)
-#define SEND_POS(pos, max_pos) (pos.y = max_pos.y - pos.y - 1)
+#define SEND_POS(pos, max_pos) (pos = max_pos - pos - 1)
 
 #define LEFT 1
 #define RIGHT 2
@@ -68,6 +70,7 @@ typedef struct entity {
     pos_t orientation;
     int *minerals;
     int food_left;
+    int food_timer_units;
 } entity_t;
 
 typedef struct player {
@@ -97,6 +100,7 @@ typedef struct game {
     int freq;
     char buffer[BUFSIZ / 2];
     char send_message[BUFSIZ];
+    char *alloc_buffer;
 } game_t;
 
 typedef struct egg {
@@ -142,19 +146,20 @@ const char *take_object(game_t *game, player_t *player, const char *arg);
 const char *drop_object(game_t *game, player_t *player, const char *arg);
 const char *eject_player(game_t *game, player_t *player, const char *arg);
 const char *fork_player(game_t *game, player_t *player, const char *arg);
+game_t *remove_player(game_t *game, int fd);
 //end of ai commandes functions
 
 player_t *get_player_by_fd(game_t *game, int fd);
 
 //gui commandes functions located in gui_commandes.c
-char *gui_map_size(game_t *game);
-char *gui_map_content(game_t *game);
-char *gui_tile_content(game_t *game, int x, int y);
-char *gui_team_names(game_t *game);
-char *gui_player_connexion(game_t *game, player_t *player);
-char *gui_player_position(game_t *game, player_t *player);
-char *gui_player_level(game_t *game, player_t *player);
-char *gui_player_inventory(game_t *game, player_t *player);
+const char *gui_map_size(game_t *game);
+const char *gui_map_content(game_t *game, int fd);
+const char *gui_tile_content(game_t *game, int x, int y);
+const char *gui_team_names(game_t *game);
+const char *gui_player_connexion(game_t *game, player_t *player);
+const char *gui_player_position(game_t *game, player_t *player);
+const char *gui_player_level(game_t *game, player_t *player);
+const char *gui_player_inventory(game_t *game, player_t *player);
 const char *gui_pex(game_t *game, player_t *target);
 // player broadcast
 const char *gui_pbc(game_t *game, fd_t from, const char *message);
@@ -189,6 +194,8 @@ const char *gui_suc(game_t *game);
 // server command parameter
 const char *gui_sbp(game_t *game);
 
+void gui_send_at_connexion(game_t *game, int fd);
+
 void gui_send_all(game_t *game, const char *msg);
 void gui_request_process(game_t *game, player_t *sender, const char *body);
 // end of gui commandes functions
@@ -201,3 +208,8 @@ int get_impact_point(pos_t receiver, pos_t sender);
 int find_provenance(game_t *game, player_t *sender, player_t *receiver);
 const char *broadcast(game_t *game, player_t *player, const char *arg);
 //end of broadcast functions
+
+
+// Timeouts
+timeval_t *player_get_next_food_timeout(list_t players, int freq);
+void player_decrease_food(list_t players, int elapsed_units);
