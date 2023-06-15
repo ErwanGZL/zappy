@@ -39,6 +39,8 @@ game_t *add_player(game_t *game, team_name_t team_name, int fd)
     player->entity->orientation = (pos_t){1, 0};
     player->entity->food_left = 10;
     player->entity->minerals = init_minerals();
+    player->entity->is_incantating = false;
+    player->entity->is_forking = false;
     list_add_elem_at_back(&game->players, player);
     team_t *ptr = get_team_by_name(game, team_name);
     if (ptr != NULL)
@@ -207,4 +209,21 @@ void player_decrease_food(list_t players, int elapsed_units)
             continue;
         p->entity->food_timer_units -= elapsed_units;
     }
+}
+
+incantation_t *get_incantation(game_t *game, player_t *player)
+{
+    int y = player->entity->pos.y;
+    int x = player->entity->pos.x;
+    incantation_t *incantation = calloc(1, sizeof(incantation_t));
+    incantation->first = player;
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
+        player_t *p = (player_t *)ptr->value;
+        if (p->fd == player->fd)
+            continue;
+        if (p->entity->pos.x == x && p->entity->pos.y == y && p->entity->level == player->entity->level && p->entity->is_incantating == false)
+            list_add_elem_at_back(&incantation->casters, p);
+    }
+    list_add_elem_at_back(&game->incantations, incantation);
+    return incantation;
 }

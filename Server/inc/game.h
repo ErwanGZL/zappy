@@ -71,6 +71,8 @@ typedef struct entity {
     int *minerals;
     int food_left;
     int food_timer_units;
+    int is_incantating;
+    int is_forking;
 } entity_t;
 
 typedef struct player {
@@ -94,6 +96,7 @@ typedef struct game {
     list_t players;
     list_t teams;
     list_t eggs;
+    list_t incantations;
     int egg_nbr;
     int nb_teams;
     int nb_players;
@@ -103,11 +106,21 @@ typedef struct game {
     char *alloc_buffer;
 } game_t;
 
+//egg structure
 typedef struct egg {
     int id;
     pos_t pos;
     team_name_t team_name;
 } egg_t;
+
+//incantation structure
+typedef struct incantation {
+    player_t *first;
+    list_t casters; //(player_t *)
+} incantation_t;
+
+//incantation functions
+incantation_t *get_incantation(game_t *game, player_t *player);
 
 //map handling functions
 int normalize(int x, int x_max);
