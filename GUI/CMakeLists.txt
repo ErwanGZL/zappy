@@ -12,7 +12,6 @@ if (APPLE)
 else()
     find_package(SFML 2.5 COMPONENTS system window graphics REQUIRED)
 endif()
-
 # Add source files to your project
 set(
     SOURCES

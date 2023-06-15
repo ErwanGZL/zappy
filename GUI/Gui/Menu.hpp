@@ -36,7 +36,10 @@ class Menu {
 
         sf::Sprite _button;
         sf::Texture _textureButton;
-        sf::IntRect _rectButton;
+
+        sf::Sprite _background;
+        sf::Texture _textureBackground;
+        sf::Clock _clock;
 
         bool _connected;
 
