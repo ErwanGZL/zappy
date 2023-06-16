@@ -14,6 +14,28 @@ Data::Data()
 
 Data::~Data()
 {
+    for (int i = 0; i < _map.size(); i++) {
+        for (int j = 0; j < _map[i].size(); j++) {
+            Tile *tile = _map[i][j];
+            _map[i].erase(_map[i].begin() + j);
+            delete tile;
+        }
+    }
+    for (int i = 0; i < _players.size(); i++) {
+        Player *player = _players[i];
+        _players.erase(_players.begin() + i);
+        delete _players[i];
+    }
+    for (int i = 0; i < _eggs.size(); i++) {
+        Egg *egg = _eggs[i];
+        _eggs.erase(_eggs.begin() + i);
+        delete _eggs[i];
+    }
+    for (int i = 0; i < _teams.size(); i++) {
+        Team *team = _teams[i];
+        _teams.erase(_teams.begin() + i);
+        delete _teams[i];
+    }
 }
 
 void Data::createMap(int width, int height)
@@ -85,9 +107,16 @@ Player *Data::getPlayerById(int id)
 
 void Data::removePlayer(int id)
 {
+    std::vector<int> ids;
     for (int i = 0; i < _players.size(); i++) {
-        if (_players[i]->getId() == id)
-            _players.erase(_players.begin() + i);
+        if (_players[i]->getId() == id) {
+            ids.push_back(i);
+        }
+    }
+    for (int i = 0; i < ids.size(); i++) {
+        // Player *player = _players[ids[i]];
+        _players.erase(_players.begin() + ids[i]);
+        // delete player;
     }
 }
 
@@ -109,8 +138,11 @@ Egg *Data::getEggById(int id)
 void Data::removeEgg(int id)
 {
     for (int i = 0; i < _eggs.size(); i++) {
-        if (_eggs[i]->getId() == id)
+        if (_eggs[i]->getId() == id) {
+            Egg *egg = _eggs[i];
             _eggs.erase(_eggs.begin() + i);
+            delete egg;
+        }
     }
 }
 

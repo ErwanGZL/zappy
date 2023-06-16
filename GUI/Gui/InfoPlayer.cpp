@@ -22,6 +22,9 @@ InfoPlayer::InfoPlayer(Data *data)
 
 InfoPlayer::~InfoPlayer()
 {
+    for (int i = 0;i < _teams.size();i++) {
+        delete _teams[i];
+    }
 }
 
 void InfoPlayer::setMouse(sf::RenderWindow &window, sf::Event event, sf::View view)

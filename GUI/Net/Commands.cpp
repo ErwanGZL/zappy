@@ -195,8 +195,12 @@ int Network::playerTake(std::string str)
     int index = std::stoi(str.substr(0, str.find(" ")));
     std::vector<int> ressources = _data->getPlayerById(index)->getRessources();
     _data->getPlayerById(index)->setStatus(NONE);
-    int ressource = std::stoi(str.substr(str.find(" ") + 1));
-    ressources[ressource] += 1;
+    try {
+        int ressource = std::stoi(str.substr(str.find(" ") + 1));
+        ressources[ressource] += 1;
+    } catch (std::exception &e) {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
     sendCommand("mct");
     return 0;
 }

@@ -117,6 +117,11 @@ game_t *remove_player(game_t *game, int fd)
     int i = 0;
     for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next, i++) {
         if (((player_t *) ptr->value)->fd == fd) {
+            //gui communication
+            gui_pdi(game, ptr->value);
+            gui_send_all(game, game->send_message);
+            //client communication
+            dprintf(((player_t *) ptr->value)->fd, "dead\n");
             team_t *ptr2 = get_team_by_name(game, ((player_t *) ptr->value)->team_name);
             if (ptr2 != NULL)
                 ptr2->nb_players--;

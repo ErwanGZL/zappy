@@ -70,4 +70,6 @@ class Network {
 
         std::string _buffer;
         pthread_t _guiThread;
+        fd_set _readfds;
+        struct timeval _tv;
 };
