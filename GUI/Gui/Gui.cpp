@@ -26,8 +26,8 @@ void *threadGui(void *arg)
     data->wait();
     Gui *gui = new Gui(data, menu->getWindow(), menu->getMusicVolume(), menu->getEffectVolume(), menu->getMusic());
     gui->run();
-    delete menu;
     delete gui;
+    delete menu;
     return (NULL);
 }
 
@@ -72,8 +72,10 @@ void Gui::run ()
         }
         sf::Event event;
         while (_window->pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                _window->close();
+            if (event.type == sf::Event::Closed) {
+                _data->stop = true;
+                return;
+            }
             if (generated == true) {
                 _infoTile->setMouse(*_window, event);
                 _infoPlayer->setMouse(*_window, event, _viewGlobal);

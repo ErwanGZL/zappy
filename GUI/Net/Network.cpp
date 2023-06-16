@@ -52,10 +52,14 @@ Network::Network(int ac, char **av)
         _data->setPort(_port);
     }
     _buffer = "";
+    _tv.tv_sec = 1;
+    _tv.tv_usec = 0;
 }
 
 Network::~Network()
 {
+    pthread_join(_guiThread, NULL);
+    delete _data;
 }
 
 std::string Network::getMessage()
@@ -67,8 +71,21 @@ std::string Network::getMessage()
             return message;
         }
         char buffer[BUFSIZ] = {0};
+        FD_ZERO(&_readfds);
+        FD_SET(_socket, &_readfds);
+        _tv.tv_sec = 1;
+        _tv.tv_usec = 0;
+        int retval = select(_socket + 1, &_readfds, NULL, NULL, &_tv);
+        if (retval == -1) {
+            perror("select()");
+            return "internal stop";
+        } else if (retval == 0) {
+            if (_data->stop == true)
+                return "internal stop";
+            continue;
+        }
         size_t size = read(_socket, buffer, BUFSIZ);
-        if (size == 0) {
+        if (size == 0 || _data->stop == true) {
             return "internal stop";
         }
         _buffer += std::string(buffer).substr(0, size);
@@ -99,7 +116,6 @@ void Network::run()
         return;
     }
     _data->post();
-    std::cout<< "cbon\n";
     while (1) {
         if (handleMessages()) return;
     }
@@ -107,10 +123,10 @@ void Network::run()
 
 int Network::handleMessages()
 {
-    std::cout << "end read" << std::endl;
+    // std::cout << "end read" << std::endl;
     std::string message = getMessage();
     std::string data;
-    std::cout << "Message received: |" << message << "|" << std::endl;
+    // std::cout << "Message received: |" << message << "|" << std::endl;
     if (message.find(" ") != std::string::npos)
         data = message.substr(message.find(" ") + 1);
     int returnCode = 0;
@@ -172,7 +188,7 @@ int Network::handleMessages()
         std::cout << "Unknown command : |" << message << "|" << std::endl;
     if (returnCode)
         return 1;
-    std::cout << "Return code: " << returnCode << std::endl;
+    // std::cout << "Return code: " << returnCode << std::endl;
     return 0;
 }
 

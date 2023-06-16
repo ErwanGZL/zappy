@@ -122,12 +122,12 @@ void PlayerGui::animate(int timeUnit)
             _frame++;
             if (_frame >= _nbFrame)
                 _frame = 0;
-            _soundWalk.play();
+            // _soundWalk.play();
         }
     }
-    if (_data->getPlayerById(_id)->getStatus() == BROADCASTING) {
-        _soundBroadcast.play();
-    }
+    // if (_data->getPlayerById(_id)->getStatus() == BROADCASTING) {
+    //     _soundBroadcast.play();
+    // }
 }
 
 void PlayerGui::draw(sf::RenderWindow *window)

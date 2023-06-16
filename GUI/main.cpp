@@ -13,6 +13,7 @@ int main (int ac, char **av)
     try {
         Network *net = new Network(ac, av);
         net->run();
+        delete net;
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
         return 84;

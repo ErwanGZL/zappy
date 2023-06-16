@@ -14,6 +14,22 @@ Data::Data()
 
 Data::~Data()
 {
+    for (int i = 0; i < _map.size(); i++) {
+        for (int j = 0; j < _map[i].size(); j++) {
+            Tile *tile = _map[i][j];
+            _map[i].erase(_map[i].begin() + j);
+            delete tile;
+        }
+    }
+    for (int i = 0; i < _players.size(); i++) {
+        delete _players[i];
+    }
+    for (int i = 0; i < _eggs.size(); i++) {
+        delete _eggs[i];
+    }
+    for (int i = 0; i < _teams.size(); i++) {
+        delete _teams[i];
+    }
 }
 
 void Data::createMap(int width, int height)
@@ -86,8 +102,11 @@ Player *Data::getPlayerById(int id)
 void Data::removePlayer(int id)
 {
     for (int i = 0; i < _players.size(); i++) {
-        if (_players[i]->getId() == id)
+        if (_players[i]->getId() == id) {
+            Player *player = _players[i];
             _players.erase(_players.begin() + i);
+            delete player;
+        }
     }
 }
 
@@ -109,8 +128,11 @@ Egg *Data::getEggById(int id)
 void Data::removeEgg(int id)
 {
     for (int i = 0; i < _eggs.size(); i++) {
-        if (_eggs[i]->getId() == id)
+        if (_eggs[i]->getId() == id) {
+            Egg *egg = _eggs[i];
             _eggs.erase(_eggs.begin() + i);
+            delete egg;
+        }
     }
 }
 

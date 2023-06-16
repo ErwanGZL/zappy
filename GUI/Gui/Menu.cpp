@@ -76,6 +76,9 @@ Menu::Menu() : _musicBar("Music", 720 / 2 - 200, 480 / 2 + 150, 50), _effectsBar
 Menu::~Menu()
 {
     _music->stop();
+    _window->close();
+    delete _music;
+    delete _window;
 }
 
 void Menu::run()
