@@ -232,6 +232,7 @@ incantation_t *get_incantation(game_t *game, player_t *player)
             dprintf(p->fd, "Elevation underway\n");
         }
     }
+    gui_pic(game, incantation->first, incantation->casters);
     list_add_elem_at_back(&game->incantations, incantation);
     return incantation;
 }
