@@ -198,8 +198,8 @@ class Inventory:
 
 
 class Player:
-    def __init__(self, team_name: str, servport, servhost, id):
-        self.id = id
+    def __init__(self, team_name: str, servport, servhost):
+        self.id = 0
         self.level = 1
         self.inventory = Inventory()
         self.share_inventory = [
