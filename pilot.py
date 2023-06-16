@@ -256,7 +256,7 @@ class ManualAI:
             else:
                 self.scr.addstr(6, 11, f"no", curses.color_pair(1))
             self.scr.addstr(curses.LINES - 5, 0,
-                            str(self.buffer.split('\n'))[:-1].center(curses.COLS, ' '))
+                            str(self.buffer.split('\n')[:-1])[1:-1].center(curses.COLS, ' '))
             self.scr.addstr(9, 10, "Inventory")
             self.scr.addstr(9, 20, "At reach")
             self.scr.addstr(10, 0, "food")
