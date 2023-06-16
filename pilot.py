@@ -6,7 +6,7 @@ import threading
 import curses
 import curses.ascii
 import time
-
+import re
 
 class Tile:
     def __init__(self, content: list) -> None:
@@ -229,6 +229,16 @@ class ManualAI:
         broadcasting = False
         look = Look("")
 
+        inventory = {
+            "food": 0,
+            "linemate": 0,
+            "deraumere": 0,
+            "sibur": 0,
+            "mendiane": 0,
+            "phiras": 0,
+            "thystame": 0
+        }
+
         while self.connected:
             c = self.scr.getch()
             if c != -1:
@@ -258,6 +268,19 @@ class ManualAI:
             self.scr.addstr(3, curses.COLS - 10, look.lv3())
             self.scr.addstr(4, curses.COLS - 10, look.lv2())
             self.scr.addstr(5, curses.COLS - 10, look.lv1())
+            self.scr.addstr(10, 0, "food")
+            self.scr.addstr(10, 10, str(inventory["food"]))
+            self.scr.addstr(11, 0, "linemate")
+            self.scr.addstr(11, 10, str(inventory["linemate"]))
+            self.scr.addstr(12, 0, "deraumere")
+            self.scr.addstr(12, 10, str(inventory["deraumere"]))
+            self.scr.addstr(13, 0, "sibur")
+            self.scr.addstr(13, 10, str(inventory["sibur"]))
+            self.scr.addstr(14, 0, "mendiane")
+            self.scr.addstr(14, 10, str(inventory["mendiane"]))
+            self.scr.addstr(15, 0, "phiras")
+            self.scr.addstr(15, 10, str(inventory["phiras"]))
+            self.scr.addstr(16, 0, "thystame")
 
             center_y = curses.LINES // 2
             center_x = curses.COLS // 2
@@ -293,8 +316,10 @@ class ManualAI:
                 elif c == ord('+'):
                     m = self.get_next_message()
                     if m[0] == '[' and m[-1] == ']':
-                        if r"\d+" in m:
-                            pass
+                        if re.search(r"\w+\s+\d+", m):
+                            for s in m[1:-1].split(","):
+                                k, v = s.split()
+                                inventory[k] = int(v)
                         else:
                             look = Look(m)
                 elif c == ord('i'):
@@ -331,7 +356,7 @@ class ManualAI:
                 else:
                     self.scr.addstr(
                         center_y, 0, f"{(last_key)}".center(curses.COLS, ' '))
-            time.sleep(0.001)
+            time.sleep(0.1)
 
         self.running = False
 
