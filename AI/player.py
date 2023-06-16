@@ -4,7 +4,6 @@ from utile import *
 from typing import Tuple
 import subprocess
 from itertools import cycle
-import json
 
 
 class Orientation(Enum):
@@ -212,8 +211,8 @@ class Player:
             Inventory(),
         ]
         self.orientation = Orientation.UP
-        self.slot = 0
-        self.player_conected = 6
+        self.slot_open = 0
+
         self.command = []
         self.look_content = []
         self.inventory_content = []
@@ -223,6 +222,8 @@ class Player:
         self.servhost = servhost
         self.new_object = False
         self.ressource_to_take = ""
+
+        self.enough_player = False
 
     def add_memory_up(self, content: list):
         lvl = 1
@@ -381,6 +382,45 @@ class Player:
         #     except:
         #         continue
 
+    def end_turn_command(self):
+        self.command.append("Look")
+        self.command.append("Connect_nbr")
+
+    def fork_player(self):
+        if self.inventory.get_ressource(Ressouces.FOOD) < 20 or self.enough_player == True or self.id != 0:
+            return
+
+        if self.slot_open != 0:
+            subprocess.call(
+                [
+                    "./zappy_ia",
+                    "-p",
+                    self.servport,
+                    "-n",
+                    self.team_name,
+                    "-h",
+                    self.servhost,
+                ]
+            )
+            self.id = 1
+        else :
+            self.command.append("Fork")
+
+    def encode (self, message: str):
+        return xor_compressed_cipher(self.id + '|' + message, self.team_name)
+
+    def decode (self, message: str):
+        return xor_compressed_decipher(message, self.team_name)
+
+    def message_interpreter(self, messages: list):
+        for i in messages:
+            direction = i.split(", ")[0]
+            message = self.decode(i.split(", ")[1])
+            if message == "ready":
+                self.enough_player = True
+            if message == "here":
+                self.id += 1
+
     def command_interpreter(self, answer: list):
         for i in answer:
             command = i.split("|")
@@ -393,9 +433,8 @@ class Player:
             elif command[0] == "Take":
                 self.ressource_to_take = command[1]
 
-    def logic(self, answer: list, direction: int, message_brod: str) -> list:
+    def logic(self, answer: list, message: list) -> list:
         self.command_interpreter(answer)
-        self.command.append("Connect_nbr")
         if self.player_conected < 6:
             subprocess.call(
                 [
