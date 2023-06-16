@@ -7,23 +7,20 @@
 
 #include "TileGui.hpp"
 
-TileGui::TileGui(int x, int y, int id, sf::Texture *texture, sf::IntRect rect, int rotate, Data *data)
+TileGui::TileGui(sf::Sprite *tile, int x, int y, int id, sf::Texture *texture, sf::IntRect rect, int rotate, Data *data)
 {
     _data = data;
     _x = x;
     _y = y;
-    _spriteTile.setTexture(*texture);
+    _spriteTile = tile;
     _spriteRessource.setTexture(*texture);
     _spriteRessource.setOrigin(16, 16);
     _spriteRessource.setScale(0.5, 0.5);
-    _spriteTile.setTextureRect(rect);
-    _spriteTile.setPosition(x, y);
-    _spriteTile.setOrigin(8, 8);
-    _spriteTile.setRotation(rotate);
     _rect = rect;
     _id = id;
     _nbFrame = (rect.top == 16 * 6 || id == 0) ? 4 : 0;
     _frame = 0;
+    _rotate = rotate;
     _ressourcesPos = std::vector<std::vector<sf::Vector2f>>(8);
 }
 
@@ -57,7 +54,6 @@ void TileGui::animate(int timeUnit)
             if (_frame >= _nbFrame)
                 _frame = 0;
             _rect.left = _frame * 16;
-            _spriteTile.setTextureRect(_rect);
             _clock.restart();
         }
     }
@@ -65,7 +61,10 @@ void TileGui::animate(int timeUnit)
 
 void TileGui::display(sf::RenderWindow *window)
 {
-    window->draw(_spriteTile);
+    _spriteTile->setPosition(_x, _y);
+    _spriteTile->setTextureRect(_rect);
+    _spriteTile->setRotation(_rotate);
+    window->draw(*_spriteTile);
 }
 
 void TileGui::displayRessources(sf::RenderWindow *window)

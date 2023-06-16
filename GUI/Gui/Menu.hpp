@@ -24,8 +24,8 @@ class Menu {
         sf::RenderWindow *getWindow() const {return _window;};
         std::string getMachine() const {return _machine;};
         int getPort() const {return _portConnect;};
-        int getMusicVolume() {return _musicBar.getVolume();};
-        int getEffectVolume() {return _effectsBar.getVolume();};
+        int getMusicVolume() {return _musicBar->getVolume();};
+        int getEffectVolume() {return _effectsBar->getVolume();};
         sf::Music *getMusic() {return _music;};
 
     private:
@@ -55,6 +55,6 @@ class Menu {
 
         sf::Music *_music;
 
-        Sound _effectsBar;
-        Sound _musicBar;
+        Sound *_effectsBar;
+        Sound *_musicBar;
 };

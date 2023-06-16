@@ -70,7 +70,7 @@ std::string Network::getMessage()
             _buffer = _buffer.substr(_buffer.find("\n") + 1);
             return message;
         }
-        char buffer[BUFSIZ] = {0};
+        std::vector<char> buffer = std::vector<char>(BUFSIZ, 0);
         FD_ZERO(&_readfds);
         FD_SET(_socket, &_readfds);
         _tv.tv_sec = 1;
@@ -84,11 +84,11 @@ std::string Network::getMessage()
                 return "internal stop";
             continue;
         }
-        size_t size = read(_socket, buffer, BUFSIZ);
+        size_t size = read(_socket, buffer.data(), BUFSIZ);
         if (size == 0 || _data->stop == true) {
             return "internal stop";
         }
-        _buffer += std::string(buffer).substr(0, size);
+        _buffer += std::string(buffer.begin(), buffer.begin() + size);
     }
     return "";
 }
@@ -127,6 +127,7 @@ int Network::handleMessages()
     std::string message = getMessage();
     std::string data;
     // std::cout << "Message received: |" << message << "|" << std::endl;
+    _data->lock();
     if (message.find(" ") != std::string::npos)
         data = message.substr(message.find(" ") + 1);
     int returnCode = 0;
@@ -182,10 +183,12 @@ int Network::handleMessages()
         returnCode = commandParameter(data);
     else if (message.find("ebo") == 0)
         returnCode = eggConnect(data);
-    else if (message.find("internal stop") == 0)
+    else if (message.find("internal stop") == 0) {
+        _data->unlock();
         return 1;
-    else
+    } else
         std::cout << "Unknown command : |" << message << "|" << std::endl;
+    _data->unlock();
     if (returnCode)
         return 1;
     // std::cout << "Return code: " << returnCode << std::endl;
@@ -195,5 +198,5 @@ int Network::handleMessages()
 void Network::sendCommand(std::string command)
 {
     command += "\n";
-    write(_socket, command.c_str(), command.size());
+    send(_socket, command.c_str(), command.size(), 0);
 }

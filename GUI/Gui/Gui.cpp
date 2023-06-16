@@ -42,19 +42,27 @@ Gui::Gui(Data *data, sf::RenderWindow *window, int vol1, int vol2, sf::Music *mu
     _infoPlayer = new InfoPlayer(_data);
     _egg = new EggGui(_data, &_texturePlayer);
     _music = music;
+    _tile = new sf::Sprite();
+    _tile->setTexture(_textureMap);
+    _tile->setOrigin(8, 8);
 }
 
 Gui::~Gui()
 {
     for (int i = 0; i < _map.size(); i++) {
+        TileGui *tile = _map[i];
+        _map.erase(_map.begin() + i);
         delete _map[i];
     }
     for (int i = 0; i < _players.size(); i++) {
+        PlayerGui *player = _players[i];
+        _players.erase(_players.begin() + i);
         delete _players[i];
     }
     delete _egg;
     delete _infoTile;
     delete _infoPlayer;
+    delete _tile;
 }
 
 void Gui::run ()
@@ -107,7 +115,7 @@ void Gui::generateMap()
     std::vector<std::vector<int>> noiseMap = perlin.run();
     for (int i = 0; i < noiseMap.size() ; i++) {
         for (int j = 0; j < noiseMap[i].size(); j++) {
-            TileGui *tile = new TileGui(j * 16, i * 16, noiseMap[i][j], &_textureMap, getRect(i, j, noiseMap), 0, _data);
+            TileGui *tile = new TileGui(_tile ,j * 16, i * 16, noiseMap[i][j], &_textureMap, getRect(i, j, noiseMap), 0, _data);
             _map.push_back(tile);
         }
     }
@@ -116,7 +124,7 @@ void Gui::generateMap()
             if (i < 0 || j < 0 || i >= width || j >= height) {
                 int rotate = 0;
                 sf::IntRect rect = getRectBorder(i, j, &rotate);
-                TileGui *tile = new TileGui(i * 16, j * 16, -1, &_textureMap, rect, rotate, _data);
+                TileGui *tile = new TileGui(_tile, i * 16, j * 16, -1, &_textureMap, rect, rotate, _data);
                 _map.push_back(tile);
             }
         }
@@ -294,6 +302,7 @@ void Gui::generatePlayer()
         _players.push_back(player);
     }
 
+    std::vector<int> index;
     for (size_t i = 0;i < _players.size();i++) {
         bool found = false;
         for (size_t j = 0;j < _data->getPlayers().size();j++) {
@@ -301,14 +310,19 @@ void Gui::generatePlayer()
                 found = true;
         }
         if (!found) {
-            _players.erase(_players.begin() + i);
-            i--;
+            index.push_back(i);
         }
+    }
+    for (size_t i = 0;i < index.size();i++) {
+        PlayerGui *player = _players[index[i]];
+        _players.erase(_players.begin() + index[i]);
+        delete player;
     }
 }
 
 void Gui::updateData()
 {
+    _data->lock();
     _currentView = _infoPlayer->getView(_viewGlobal, _players);
     generatePlayer();
     for (size_t i = 0;i < _players.size();i++) {
@@ -319,4 +333,5 @@ void Gui::updateData()
     }
     _infoTile->update();
     _infoPlayer->update();
+    _data->unlock();
 }
