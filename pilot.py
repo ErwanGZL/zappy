@@ -299,7 +299,7 @@ class ManualAI:
             self.scr.addstr(20 - 5, curses.COLS - 27, "<+>      Consume response")
             self.scr.addstr(21 - 5, curses.COLS - 27, "<I>      Inventory")
             self.scr.addstr(22 - 5, curses.COLS - 27, "<UP>     Move forward")
-            self.scr.addstr(23 - 5, curses.COLS - 27, "<DOWN>   Move backward")
+            self.scr.addstr(23 - 5, curses.COLS - 27, "<RIGHT>  Turn right")
             self.scr.addstr(24 - 5, curses.COLS - 27, "<LEFT>   Turn left")
 
             center_y = curses.LINES // 2
@@ -355,19 +355,52 @@ class ManualAI:
             else:
                 if c == curses.ascii.ESC:
                     self.running = False
+                    self.scr.addstr(18 - 5, curses.COLS - 27, "<ESC>    Quit", curses.color_pair(4))
                 elif c == curses.KEY_UP:
                     self.send_message("Forward")
+                    self.scr.addstr(22 - 5, curses.COLS - 27, "<UP>     Move forward", curses.color_pair(4))
                 elif c == curses.KEY_RIGHT:
                     self.send_message("Right")
+                    self.scr.addstr(23 - 5, curses.COLS - 27, "<RIGHT>  Turn right", curses.color_pair(4))
                 elif c == curses.KEY_LEFT:
                     self.send_message("Left")
+                    self.scr.addstr(24 - 5, curses.COLS - 27, "<LEFT>   Turn left", curses.color_pair(4))
                 elif c == ord('f'):
                     self.send_message("Fork")
+                    self.scr.addstr(14 - 5, curses.COLS - 27, "<F>      Fork", curses.color_pair(4))
                 elif c == ord(' '):
                     self.send_message("Look")
+                    self.scr.addstr(16 - 5, curses.COLS - 27, "<SPACE>  Look", curses.color_pair(4))
                 elif c == curses.ascii.NL:
                     broadcasting = True
+                    self.scr.addstr(10 - 5, curses.COLS - 27, "<ENTER>  Broadcast", curses.color_pair(4))
+                elif c == ord('i'):
+                    self.send_message("Inventory")
+                    self.scr.addstr(21 - 5, curses.COLS - 27, "<I>      Inventory", curses.color_pair(4))
+                elif c == ord('e'):
+                    self.send_message("Eject")
+                    self.scr.addstr(15 - 5, curses.COLS - 27, "<E>      Eject", curses.color_pair(4))
+                elif c == ord('p'):
+                    picking = True
+                    self.scr.addstr(11 - 5, curses.COLS - 27, "<P>      Pick", curses.color_pair(4))
+                elif c == ord('!'):
+                    self.send_message("Incantation")
+                    self.scr.addstr(13 - 5, curses.COLS - 27, "<!>      Incantation", curses.color_pair(4))
+                elif c == ord('c'):
+                    self.send_message("Connect_nbr")
+                    self.scr.addstr(17 - 5, curses.COLS - 27, "<C>      Connect_nbr", curses.color_pair(4))
+                elif c == ord('s'):
+                    dropping = True
+                    self.scr.addstr(12 - 5, curses.COLS - 27, "<S>      Set", curses.color_pair(4))
+                elif c == ord('d'):
+                    dropping = True
+                    self.scr.addstr(12 - 5, curses.COLS - 27, "<D>      Drop", curses.color_pair(4))
+                elif c == ord('a'):
+                    auto = not auto
+                    self.scr.addstr(19 - 5, curses.COLS - 27, "<A>      Auto", curses.color_pair(4))
                 elif c == ord('+') or auto:
+                    if c == ord('+'):
+                        self.scr.addstr(20 - 5, curses.COLS - 27, "<+>      Consume response", curses.color_pair(4))
                     m = self.get_next_message()
                     if m and m[0] == '[' and m[-1] == ']':
                         if re.search(r"\w+\s+\d+", m):
@@ -376,22 +409,6 @@ class ManualAI:
                                 inventory[k] = int(v)
                         else:
                             look = Look(m)
-                elif c == ord('i'):
-                    self.send_message("Inventory")
-                elif c == ord('e'):
-                    self.send_message("Eject")
-                elif c == ord('t'):
-                    picking = True
-                elif c == ord('!'):
-                    self.send_message("Incantation")
-                elif c == ord('c'):
-                    self.send_message("Connect_nbr")
-                elif c == ord('s'):
-                    dropping = True
-                elif c == ord('d'):
-                    dropping = True
-                elif c == ord('a'):
-                    auto = not auto
 
             if last_key == curses.ascii.ESC:
                 self.scr.addstr(
