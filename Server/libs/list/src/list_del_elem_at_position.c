@@ -25,6 +25,7 @@ bool list_del_elem_at_position(list_t *front_ptr, unsigned int position)
     list_t buff = head->next->next;
     free(head->next);
     head->next = buff;
-    head->next->prev = head;
+    if (buff != NULL)
+        head->next->prev = head;
     return true;
 }
