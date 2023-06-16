@@ -20,6 +20,11 @@ timeval_t *player_get_next_food_timeout(list_t players, int freq)
                                : food_timer_units;
     }
     timeout->tv_usec = ((double)food_timer_units / freq) * 1000000;
+    if (timeout->tv_usec == 0)
+    {
+        free(timeout);
+        return NULL;
+    }
     return timeout;
 }
 
@@ -46,8 +51,6 @@ timeval_t *server_get_next_timeout(server_t *server)
         return action_timeout;
 
     timeval_t *next = calloc(1, sizeof(timeval_t));
-    printf("Action timeout : %ld.%ld\n", action_timeout->tv_sec, action_timeout->tv_usec);
-    printf("Player food timeout : %ld.%ld\n", pfood_timeout->tv_sec, pfood_timeout->tv_usec);
     memcpy(
         next,
         MIN_TIMEVAL(action_timeout, pfood_timeout),
@@ -60,6 +63,5 @@ timeval_t *server_get_next_timeout(server_t *server)
         free(next);
         return NULL;
     }
-    printf("Next timeout : %ld.%ld\n", next->tv_sec, next->tv_usec);
     return next;
 }

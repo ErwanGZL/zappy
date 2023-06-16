@@ -28,6 +28,10 @@ void server_select(server_t *server)
     readfds = server->netctl->watched_fd;
 
     timeout = server_get_next_timeout(server);
+    if (timeout != NULL)
+        printf("Timeout: %f\n", timeout->tv_usec / 1000000.0);
+    else
+        printf("No timeout\n");
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
     act = select(FD_SETSIZE, &readfds, NULL, NULL, timeout);
@@ -135,7 +139,8 @@ int server_run(server_t *server)
             player_t *player = (player_t *)head->value;
             if (strncmp(player->team_name, "GRAPHIC", 7) == 0)
                 continue;
-            if (player->entity->food_timer_units <= 0) {
+            if (player->entity->food_timer_units <= 0)
+            {
                 player->entity->food_left -= 1;
                 player->entity->food_timer_units += 126;
                 printf("Food left : %d\n", player->entity->food_left);
@@ -146,7 +151,10 @@ int server_run(server_t *server)
         {
             player_t *player = (player_t *)(*head)->value;
             if (strncmp(player->team_name, "GRAPHIC", 7) == 0)
+            {
+                head = &(*head)->next;
                 continue;
+            }
             if (player->entity->food_left <= 0)
             {
                 printf("Player %d died\n", player->fd);
