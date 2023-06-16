@@ -146,7 +146,6 @@ int server_run(server_t *server)
                 printf("Food left : %d\n", player->entity->food_left);
             }
         }
-        check_death(server->game);
         for (list_t *head = &server->game->players; (*head) != NULL;)
         {
             player_t *player = (player_t *)(*head)->value;

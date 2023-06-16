@@ -113,26 +113,6 @@ void decrease_food_left(game_t *game)
     }
 }
 
-int check_death(game_t *game)
-{
-    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
-    {
-        player_t *player = ptr->value;
-        if (strcmp(player->team_name, "GRAPHIC") == 0)
-            continue;
-        if (player->entity->food_left <= 0)
-        {
-            //gui communication
-            gui_pdi(game, player);
-            gui_send_all(game, game->send_message);
-            //client communication
-            dprintf(player->fd, "dead\n");
-            return 1;
-        }
-    }
-    return 0;
-}
-
 const char *get_inventory(game_t *game, player_t *player, const char *arg)
 {
     char *inventory = calloc(1, sizeof(char) * 5);
