@@ -41,6 +41,7 @@ PlayerGui::~PlayerGui()
 int PlayerGui::stateTop()
 {
     int top = 0;
+    if (_data->getPlayerById(_id) == NULL) return (top);
     Player *player = _data->getPlayerById(_id);
     PlayerStatus status = player->getStatus();
     if (status == NONE)
@@ -59,6 +60,7 @@ int PlayerGui::stateTop()
 void PlayerGui::update(int tileId, int volume)
 {
     _tileId = tileId;
+    if (_data->getPlayerById(_id) == NULL) return;
     _nextX = _data->getPlayerById(_id)->getX() * 16;
     _nextY = _data->getPlayerById(_id)->getY() * 16;
     if (_data->getPlayerById(_id)->getX() != _sprite.getPosition().x / 16 || _data->getPlayerById(_id)->getY() != _sprite.getPosition().y / 16) {
@@ -122,12 +124,12 @@ void PlayerGui::animate(int timeUnit)
             _frame++;
             if (_frame >= _nbFrame)
                 _frame = 0;
-            // _soundWalk.play();
+            _soundWalk.play();
         }
     }
-    // if (_data->getPlayerById(_id)->getStatus() == BROADCASTING) {
-    //     _soundBroadcast.play();
-    // }
+    if (_data->getPlayerById(_id) != NULL && _data->getPlayerById(_id)->getStatus() == BROADCASTING) {
+        _soundBroadcast.play();
+    }
 }
 
 void PlayerGui::draw(sf::RenderWindow *window)

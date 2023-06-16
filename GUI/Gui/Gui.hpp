@@ -56,4 +56,6 @@ class Gui {
         Sound _musicBar;
         Sound _effectBar;
         sf::Music *_music;
+
+        sf::Sprite *_tile;
 };

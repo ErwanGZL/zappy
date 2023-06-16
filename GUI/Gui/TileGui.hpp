@@ -13,8 +13,17 @@
 #include "Data.hpp"
 
 class TileGui {
+    public:
+        TileGui(sf::Sprite *tile, int x, int y, int id, sf::Texture *texture, sf::IntRect rect, int rotate, Data *data);
+        ~TileGui();
+        void update();
+        void animate(int timeUnit);
+        void display(sf::RenderWindow *window);
+        void displayRessources(sf::RenderWindow *window);
+        int getId() {return _id;};
+
     private:
-        sf::Sprite _spriteTile;
+        sf::Sprite *_spriteTile;
         sf::Sprite _spriteRessource;
         sf::IntRect _rect;
         sf::Texture _textureRessource;
@@ -26,13 +35,5 @@ class TileGui {
         std::vector<std::vector<sf::Vector2f>> _ressourcesPos;
         int _x = 0;
         int _y = 0;
-
-    public:
-        TileGui(int x, int y, int id, sf::Texture *texture, sf::IntRect rect, int rotate, Data *data);
-        ~TileGui();
-        void update();
-        void animate(int timeUnit);
-        void display(sf::RenderWindow *window);
-        void displayRessources(sf::RenderWindow *window);
-        int getId() {return _id;};
+        int _rotate;
 };

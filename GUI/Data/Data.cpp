@@ -22,12 +22,18 @@ Data::~Data()
         }
     }
     for (int i = 0; i < _players.size(); i++) {
+        Player *player = _players[i];
+        _players.erase(_players.begin() + i);
         delete _players[i];
     }
     for (int i = 0; i < _eggs.size(); i++) {
+        Egg *egg = _eggs[i];
+        _eggs.erase(_eggs.begin() + i);
         delete _eggs[i];
     }
     for (int i = 0; i < _teams.size(); i++) {
+        Team *team = _teams[i];
+        _teams.erase(_teams.begin() + i);
         delete _teams[i];
     }
 }
@@ -101,12 +107,16 @@ Player *Data::getPlayerById(int id)
 
 void Data::removePlayer(int id)
 {
+    std::vector<int> ids;
     for (int i = 0; i < _players.size(); i++) {
         if (_players[i]->getId() == id) {
-            Player *player = _players[i];
-            _players.erase(_players.begin() + i);
-            delete player;
+            ids.push_back(i);
         }
+    }
+    for (int i = 0; i < ids.size(); i++) {
+        // Player *player = _players[ids[i]];
+        _players.erase(_players.begin() + ids[i]);
+        // delete player;
     }
 }
 

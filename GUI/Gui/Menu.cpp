@@ -7,7 +7,7 @@
 
 #include "Menu.hpp"
 
-Menu::Menu() : _musicBar("Music", 720 / 2 - 200, 480 / 2 + 150, 50), _effectsBar("Effects", 720 / 2 + 200, 480 / 2 + 150, 50)
+Menu::Menu()
 {
     _window = new sf::RenderWindow(sf::VideoMode(720, 480), "Zappy");
     _window->setFramerateLimit(60);
@@ -57,7 +57,6 @@ Menu::Menu() : _musicBar("Music", 720 / 2 - 200, 480 / 2 + 150, 50), _effectsBar
     _textButton.setPosition(720 / 2, 480 / 2 + 120);
     _textButton.setOrigin(_textButton.getGlobalBounds().width / 2, _textButton.getGlobalBounds().height / 2);
 
-
     _textureBackground.loadFromFile("GUI/sprites/background.png");
     _background.setTexture(_textureBackground);
     _background.setPosition(720 / 2, 480 / 2);
@@ -71,6 +70,8 @@ Menu::Menu() : _musicBar("Music", 720 / 2 - 200, 480 / 2 + 150, 50), _effectsBar
     _music->openFromFile("GUI/sounds/music/game.ogg");
     _music->setLoop(true);
     _music->play();
+    _musicBar = new Sound("Music", 720 / 2 - 200, 480 / 2 + 150, 50);
+    _effectsBar = new Sound("Effects", 720 / 2 + 200, 480 / 2 + 150, 50);
 }
 
 Menu::~Menu()
@@ -79,6 +80,8 @@ Menu::~Menu()
     _window->close();
     delete _music;
     delete _window;
+    delete _musicBar;
+    delete _effectsBar;
 }
 
 void Menu::run()
@@ -86,7 +89,7 @@ void Menu::run()
     while (_window->isOpen()) {
         event();
         display();
-        _music->setVolume(_musicBar.getVolume());
+        _music->setVolume(_musicBar->getVolume());
         if (_connected == true)
             break;
     }
@@ -111,8 +114,8 @@ void Menu::display()
     _window->draw(_textPort);
     _window->draw(_button);
     _window->draw(_textButton);
-    _musicBar.draw(_window);
-    _effectsBar.draw(_window);
+    _musicBar->draw(_window);
+    _effectsBar->draw(_window);
     _window->display();
 }
 
@@ -183,8 +186,8 @@ void Menu::event()
             _box1.setFillColor(sf::Color(0, 0, 0, 200));
             _box2.setFillColor(sf::Color(0, 0, 0, 200));
         }
-        _effectsBar.event(event, _window);
-        _musicBar.event(event, _window);
+        _effectsBar->event(event, _window);
+        _musicBar->event(event, _window);
     }
 }
 
