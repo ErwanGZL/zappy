@@ -136,22 +136,30 @@ class AI:
             )
 
         recieved = []
-        message = ""
-        direction = None
+        message = []
         send = []
 
         while self.running:
             # Wait for a message from the server
-            for i in range(len(send)):
+            for i in range(min(len(send), 10)):
                 str_recieved = self.wait_for_message()
                 if str_recieved.split(" ")[0] == "message":
-                    direction = str_recieved.split(",")[0]
-                    message = str_recieved.split(",")[1]
-                recieved.append(send[i].split("\n", 1)[0] + "|" + str_recieved)
+                    message.append(str_recieved.split(" ")[1])
+                    i -= 1
+                else:
+                    recieved.append(send[i].split("\n", 1)[0] + "|" + str_recieved)
+
+            if len(send) > 10:
+                send = send[10:]
+            else:
+                send = []
 
             # Process the message
-            send = self.player.logic(recieved, direction, message)
-            for i in range(len(send)):
+            if send == []:
+                send = self.player.logic(recieved, message)
+                recieved = []
+                message = []
+
+            for i in range(min(len(send), 10)):
                 self.send_message(send[i])
-            recieved = []
         pass
