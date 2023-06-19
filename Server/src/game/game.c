@@ -99,6 +99,7 @@ game_t *init_game(option_t *opt)
     game->map = init_map(opt->width, opt->height);
     game->players = NULL;
     game->eggs = NULL;
+    game->teams = NULL;
     for (list_t head = opt->teams; head != NULL; head = head->next)
     {
         team_name_t name = (team_name_t)head->value;
@@ -233,6 +234,7 @@ incantation_t *get_incantation(game_t *game, player_t *player)
         }
     }
     gui_pic(game, incantation->first, incantation->casters);
+    gui_send_all(game, game->send_message);
     list_add_elem_at_back(&game->incantations, incantation);
     return incantation;
 }

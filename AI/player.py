@@ -1,10 +1,9 @@
 from enum import Enum
 from . import ai
-from utile import *
+from . import utile
 from typing import Tuple
 import subprocess
 from itertools import cycle
-import json
 
 
 class Orientation(Enum):
@@ -61,16 +60,6 @@ class Position:
         self.x += 1
 
 
-class Ressouces(Enum):
-    FOOD = 0
-    LINEMATE = 1
-    DERAUMERE = 2
-    SIBUR = 3
-    MENDIANE = 4
-    PHIRAS = 5
-    THYSTAME = 6
-
-
 for_level = [
     # nb player, linemate, deraumere, sibur, mendiane, phiras, thystame
     [1, 1, 0, 0, 0, 0, 0],
@@ -92,11 +81,12 @@ vision = [
     [49, 63],
     [64, 80],
 ]
+items = ["food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"]
 
 
 class Inventory:
     def __init__(self):
-        self.food = 10
+        self.food = 0
         self.linemate = 0
         self.deraumere = 0
         self.sibur = 0
@@ -104,70 +94,70 @@ class Inventory:
         self.phiras = 0
         self.thystame = 0
 
-    def add_ressource(self, ressource: Ressouces, amount: int):
-        if ressource == Ressouces.FOOD:
+    def add_ressource(self, ressource: str, amount: int):
+        if ressource == "food":
             self.food += amount
-        elif ressource == Ressouces.LINEMATE:
+        elif ressource == "linemate":
             self.linemate += amount
-        elif ressource == Ressouces.DERAUMERE:
+        elif ressource == "deraumere":
             self.deraumere += amount
-        elif ressource == Ressouces.SIBUR:
+        elif ressource == "sibur":
             self.sibur += amount
-        elif ressource == Ressouces.MENDIANE:
+        elif ressource == "mendiane":
             self.mendiane += amount
-        elif ressource == Ressouces.PHIRAS:
+        elif ressource == "phiras":
             self.phiras += amount
-        elif ressource == Ressouces.THYSTAME:
+        elif ressource == "thystame":
             self.thystame += amount
         else:
             raise Exception("Invalid ressource")
 
-    def remove_ressource(self, ressource: Ressouces, amount: int):
-        if ressource == Ressouces.FOOD:
+    def remove_ressource(self, ressource: str, amount: int):
+        if ressource == "food":
             if self.food < amount:
                 raise Exception("Not enough food")
             self.food -= amount
-        elif ressource == Ressouces.LINEMATE:
+        elif ressource == "linemate":
             if self.linemate < amount:
                 raise Exception("Not enough linemate")
             self.linemate -= amount
-        elif ressource == Ressouces.DERAUMERE:
+        elif ressource == "deraumere":
             if self.deraumere < amount:
                 raise Exception("Not enough deraumere")
             self.deraumere -= amount
-        elif ressource == Ressouces.SIBUR:
+        elif ressource == "sibur":
             if self.sibur < amount:
                 raise Exception("Not enough sibur")
             self.sibur -= amount
-        elif ressource == Ressouces.MENDIANE:
+        elif ressource == "mendiane":
             if self.mendiane < amount:
                 raise Exception("Not enough mendiane")
             self.mendiane -= amount
-        elif ressource == Ressouces.PHIRAS:
+        elif ressource == "phiras":
             if self.phiras < amount:
                 raise Exception("Not enough phiras")
             self.phiras -= amount
-        elif ressource == Ressouces.THYSTAME:
+        elif ressource == "thystame":
             if self.thystame < amount:
                 raise Exception("Not enough thystame")
             self.thystame -= amount
         else:
             raise Exception("Invalid ressource")
 
-    def get_ressource(self, ressource: Ressouces):
-        if ressource == Ressouces.FOOD:
+    def get_ressource(self, ressource: str):
+        if ressource == "food":
             return self.food
-        elif ressource == Ressouces.LINEMATE:
+        elif ressource == "linemate":
             return self.linemate
-        elif ressource == Ressouces.DERAUMERE:
+        elif ressource == "deraumere":
             return self.deraumere
-        elif ressource == Ressouces.SIBUR:
+        elif ressource == "sibur":
             return self.sibur
-        elif ressource == Ressouces.MENDIANE:
+        elif ressource == "mendiane":
             return self.mendiane
-        elif ressource == Ressouces.PHIRAS:
+        elif ressource == "phiras":
             return self.phiras
-        elif ressource == Ressouces.THYSTAME:
+        elif ressource == "thystame":
             return self.thystame
         else:
             raise Exception("Invalid ressource")
@@ -182,21 +172,21 @@ class Inventory:
         message += "thystame " + str(self.thystame)
         return message
 
-    def set_ressource(self, item, amount):
-        if item == "food":
-            self.food = amount
-        elif item == "linemate":
-            self.linemate = amount
-        elif item == "deraumere":
-            self.deraumere = amount
-        elif item == "sibur":
-            self.sibur = amount
-        elif item == "mendiane":
-            self.mendiane = amount
-        elif item == "phiras":
-            self.phiras = amount
-        elif item == "thystame":
-            self.thystame = amount
+    def set_ressource(self, item: str, amount: int):
+        if "food" in item:
+            self.food = int(amount)
+        elif "linemate" in item:
+            self.linemate = int(amount)
+        elif "deraumere" in item:
+            self.deraumere = int(amount)
+        elif "sibur" in item:
+            self.sibur = int(amount)
+        elif "mendiane" in item:
+            self.mendiane = int(amount)
+        elif "phiras" in item:
+            self.phiras = int(amount)
+        elif "thystame" in item:
+            self.thystame = int(amount)
         else:
             raise Exception("Invalid ressource")
 
@@ -223,97 +213,26 @@ class Player:
             Inventory(),
         ]
         self.orientation = Orientation.UP
-        self.slot = 0
-        self.unuse_egg = 0
+        self.slot_open = 0
+
         self.command = []
         self.look_content = []
         self.inventory_content = []
-        self.message_to_send = ""
         self.team_name = team_name
         self.servport = servport
         self.servhost = servhost
         self.new_object = False
         self.ressource_to_take = ""
 
-    def add_memory_up(self, content: list):
-        lvl = 1
-        while lvl <= self.level:
-            for i in range(self.pos.x - lvl, self.pos.x + lvl + 1):
-                if content[0] == "":
-                    content.pop(0)
-                    continue
-                i = i % self.map_x
-                if i < 0:
-                    i = self.map_x + i
-                vis = self.pos.x - lvl
-                vis = vis % self.map_x
-                if vis < 0:
-                    vis = self.map_x + vis
-                if self.map[i][vis] == "":
-                    self.map[i][vis] = content.pop(0)
-                else:
-                    " ".join([self.map[i][vis], content.pop(0)])
-            lvl += 1
+        self.enough_player = False
 
-    def add_memory_down(self, content: list):
-        lvl = 1
-        while lvl <= self.level:
-            for i in range(self.pos.x + lvl, self.pos.x - lvl - 1, -1):
-                if content[0] == "":
-                    content.pop(0)
-                    continue
-                i = i % self.map_x
-                if i < 0:
-                    i = self.map_x + i
-                vis = self.pos.x + lvl
-                vis = vis % self.map_x
-                if vis < 0:
-                    vis = self.map_x + vis
-                if self.map[i][vis] == "":
-                    self.map[i][vis] = content.pop(0)
-                else:
-                    " ".join([self.map[i][vis], content.pop(0)])
-            lvl += 1
+        self.first_turn = True
 
-    def add_memory_left(self, content: list):
-        lvl = 1
-        while lvl <= self.level:
-            for i in range(self.pos.y - lvl, self.pos.y + lvl + 1):
-                if content[0] == "":
-                    content.pop(0)
-                    continue
-                i = i % self.map_y
-                if i < 0:
-                    i = self.map_y + i
-                vis = self.pos.y - lvl
-                vis = vis % self.map_y
-                if vis < 0:
-                    vis = self.map_y + vis
-                if self.map[i][vis] == "":
-                    self.map[i][vis] = content.pop(0)
-                else:
-                    " ".join([self.map[i][vis], content.pop(0)])
-            lvl += 1
+    def encode(self, message: str):
+        return utile.xor_compressed_cipher(str(self.id) + "|" + message, self.team_name)
 
-    def add_memory_right(self, content: list):
-        lvl = 1
-        while lvl <= self.level:
-            for i in range(self.pos.y + lvl, self.pos.y - lvl - 1, -1):
-                if content[0] == "":
-                    content.pop(0)
-                    continue
-                i = i % self.map_y
-                if i < 0:
-                    i = self.map_y + i
-                vis = self.pos.y + lvl
-                vis = vis % self.map_y
-                if vis < 0:
-                    vis = self.map_y + vis
-                if self.map[i][vis] == "":
-                    self.map[i][vis] = content.pop(0)
-                else:
-                    " ".join([self.map[i][vis], content.pop(0)])
-            lvl += 1
+    def decode(self, message: str):
+        return utile.xor_compressed_decipher(message, self.team_name)
 
     def add_memory(self, content: list):
         if self.orientation == Orientation.UP:
@@ -330,9 +249,9 @@ class Player:
         content = self.add_memory(content)
 
     def broadcast_inventory(self):
-        message = "Broadcast " + self.id + " " + self.inventory.print_inventory()
-        self.message_to_send = xor_compressed_cipher(message, self.team_name)
-        pass
+        self.command.append(
+            "Broadcast " + self.encode(self.inventory.print_inventory()) + "\n"
+        )
 
     def elevation(self):
         pass
@@ -359,14 +278,14 @@ class Player:
             self.pos.go_right()
         pass
 
-    def find_object(self, obj: Ressouces):
+    def find_object(self, obj: str):
         # find the nearest object on the self.map
 
         pass
 
-    def need_to_elevation(self) -> Ressouces:
-        for i in Ressouces:
-            if i == Ressouces.FOOD:
+    def need_to_elevation(self) -> str:
+        for i in items:
+            if i == "food":
                 continue
             if self.inventory.get_ressource(i) < for_level[self.level][i.value]:
                 return i
@@ -389,40 +308,48 @@ class Player:
             self.command_to_send.append("Forward")
         return
 
-    def update_inventory(self, result: str):
+    def update_inventory(self, result: list):
+        value_return = 0
         for item in result:
-            self.inventory.set_ressource(item[0], item[1])
+            if self.inventory.get_ressource(item[0]) != int(item[1]):
+                value_return = 1
+            self.inventory.set_ressource(item[0], int(item[1]))
+            print(item[0], int(item[1]))
+        return value_return
 
-    def update_share_inventory(self, result: str):
+    def update_share_inventory(self, result: list):
         for item in result:
-            self.share_inventory[self.id].set_ressource(item[0], item[1])
-        # decrypted_message = xor_compressed_decipher(encrypted_message, self.team_name)
-        # json_message = json.dumps(str_to_list(decrypted_message))
-        # for item in json_message:
-        #     try:
-        #         self.inventory.set_ressource(
-        #             item[0], int(item[1]) + int(self.inventory.get_ressource(item[0]))
-        #         )
-        #     except:
-        #         continue
+            self.share_inventory[self.id - 1].set_ressource(item[0], item[1])
+        self.udate_total_inventory()
 
-    def command_interpreter(self, answer: list):
-        for i in answer:
-            command = i.split("|")
-            if command[0] == "Connect_nbr":
-                self.unuse_egg = int(command[1])
-            elif command[0] == "Look":
-                self.look_content = str_to_list(command[1])
-            elif command[0] == "Inventory":
-                self.inventory_content = str_to_list(command[1])
-            elif command[0] == "Take":
-                self.ressource_to_take = command[1]
+    def udate_total_inventory(self):
+        for j in items:
+            self.share_inventory[6].set_ressource(j, 0)
+        for i in range(6):
+            for j in items:
+                self.inventory.add_ressource(
+                    j, self.share_inventory[i].get_ressource(j)
+                )
 
-    def logic(self, answer: list, direction: int, message_brod: str) -> list:
-        self.command_interpreter(answer)
-        self.command.append("Connect_nbr")
-        self.command.append("Look")
-        if self.inventory.get_ressource(Ressouces.FOOD) >= 20 and self.unuse_egg > 0:
+    def end_turn_command(self):
+        if self.inventory_content != []:
+            if self.update_inventory(self.inventory_content) == 1:
+                self.update_share_inventory(self.inventory_content)
+                self.broadcast_inventory()
+        self.command.append("Connect_nbr\n")
+        self.command.append("Look\n")
+
+        self.inventory_content = []
+
+    def fork_player(self):
+        print(self.inventory.get_ressource("food"))
+        if (
+            self.inventory.get_ressource("food") < 20
+            or self.enough_player == True
+            or self.id != 0
+        ):
+            return
+        if self.slot_open != 0:
             subprocess.call(
                 [
                     "./zappy_ia",
@@ -434,28 +361,49 @@ class Player:
                     self.servhost,
                 ]
             )
+            self.id = 1
+        else:
+            self.command.append("Fork\n")
+
+    def message_interpreter(self, messages: list):
+        for i in messages:
+            direction = i.split(", ")[0]
+            message = self.decode(i.split(", ")[1]).split("\n")[0]
+            message = self.decode(message)
+            id_player = int(message.split("|")[0])
+            message = message.split("|")[1]
+            if message == "ready":
+                self.enough_player = True
+            if message == "here":
+                self.id += 1
+                if self.id == 6:
+                    self.command.append("Broadcast " + self.encode("ready") + "\n")
+
+    def command_interpreter(self, answer: list):
+        for i in answer:
+            print(i)
+            command = i.split("|")
+            if command[0] == "Connect_nbr":
+                self.slot_open = int(command[1])
+            elif command[0] == "Look":
+                self.look_content = utile.str_to_list(command[1])
+            elif command[0] == "Inventory":
+                self.inventory_content = utile.str_to_list(command[1])
+
+    def wake_up(self):
+        self.command.append("Broadcast " + self.encode("here") + "\n")
+        self.command.append("Inventory\n")
+        self.command.append("Look\n")
+        self.command.append("Connect_nbr\n")
+
+    def logic(self, answer: list, message: list) -> list:
+        self.command = []
+        if self.first_turn == True:
+            self.wake_up()
+            self.first_turn = False
             return self.command
-        if (
-            self.inventory.get_ressource(Ressouces.FOOD) < 20
-            and self.look_content != []
-            and "food" in self.look_content
-        ):
-            indices = []
-            for index, valeur in enumerate(self.look_content):
-                if valeur == "food":
-                    indices.append(index)
-            self.go_to_all(indices)
-        if self.inventory_content != []:
-            tmp = self.inventory
-            self.update_inventory(self.inventory_content)
-            if tmp != self.inventory:
-                self.update_share_inventory(self.inventory_content)
-                message = xor_compressed_cipher(
-                    self.inventory.print_inventory(), self.team_name
-                )
-                self.command.append("Broadcast " + message)
-                self.inventory_content = []
-        if self.ressource_to_take != "":
-            self.inventory.add_ressource(self.ressource_to_take)
-            self.ressource_to_take = ""
-        pass
+        self.command_interpreter(answer)
+        self.message_interpreter(message)
+        self.fork_player()
+        self.end_turn_command()
+        return self.command

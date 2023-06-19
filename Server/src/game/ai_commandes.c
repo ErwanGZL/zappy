@@ -115,16 +115,14 @@ void decrease_food_left(game_t *game)
 
 const char *get_inventory(game_t *game, player_t *player, const char *arg)
 {
-    char *inventory = calloc(1, sizeof(char) * 5);
+    char *inventory = calloc(1, sizeof(char) * 20);
+    memset(inventory, 0, 20);
     char num_buffer[10];
     memset(num_buffer, 0, 10);
-    strcat(inventory, "[");
-    int before = 0;
+    sprintf(inventory, "[food %d,", player->entity->food_left);
     for (int i = 0; i < 6; i++)
     {
         inventory = realloc(inventory, sizeof(char) * (strlen(inventory) + strlen(mineral_tab[i]) + 5));
-        if (before == 1)
-            strcat(inventory, " ");
         strcat(inventory, mineral_tab[i]);
         strcat(inventory, " ");
         sprintf(num_buffer, "%d", player->entity->minerals[i]);
@@ -133,7 +131,6 @@ const char *get_inventory(game_t *game, player_t *player, const char *arg)
         memset(num_buffer, 0, 10);
         if (i != 5)
             strcat(inventory, ",");
-        before = 1;
     }
     strcat(inventory, "]\n");
     return inventory;
@@ -158,6 +155,8 @@ const char *take_object(game_t *game, player_t *player, const char *arg)
         //gui communication
         gui_pgt(game, player, index);
         gui_send_all(game, game->send_message);
+        gui_player_inventory(game, player);
+        gui_send_all(game, game->send_message);
         return "ok\n";
     }
     return "ko\n";
@@ -167,11 +166,13 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
 {
     int index = get_mineral_index(arg);
     if (player->entity->minerals[index] > 0) {
-        game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1]++;
+        game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]++;
         player->entity->minerals[index]--;
         printf("Player %d dropped %s\n", player->fd, mineral_tab[index]);
         //gui communication
         gui_pdr(game, player, index);
+        gui_send_all(game, game->send_message);
+        gui_player_inventory(game, player);
         gui_send_all(game, game->send_message);
         return "ok\n";
     }
@@ -289,12 +290,25 @@ char *get_player_in_tile(game_t *game, char *ressources, int x, int y)
     return ressources;
 }
 
+char *get_egg_in_tile(game_t *game, char *ressources, int x, int y)
+{
+    for (list_t ptr = game->eggs; ptr != NULL; ptr = ptr->next) {
+        egg_t *egg = ptr->value;
+        if (egg->pos.x == x && egg->pos.y == y) {
+            ressources = realloc(ressources, sizeof(char) * (strlen(ressources) + 4));
+            strcat(ressources, "egg ");
+        }
+    }
+    return ressources;
+}
+
 const char *look(game_t *game, player_t *player, const char *arg)
 {
     char *ressources = calloc(1, sizeof(char) * 2);
     memset(ressources, 0, 2);
     memcpy(ressources, "[", 1);
     ressources = get_player_in_tile(game, ressources, player->entity->pos.x, player->entity->pos.y);
+    ressources = get_egg_in_tile(game, ressources, player->entity->pos.x, player->entity->pos.y);
     ressources = get_ressource_name(game, ressources, player->entity->pos.x, player->entity->pos.y);
     int x_mult = (player->entity->orientation.x != 0) ? ((player->entity->orientation.x > 0) ? 1 : -1) : 0;
     int y_mult = (player->entity->orientation.y != 0) ? ((player->entity->orientation.y > 0) ? 1 : -1) : 0;
@@ -315,6 +329,7 @@ const char *look(game_t *game, player_t *player, const char *arg)
                 strcat(ressources, ",");
             if (x_mult == 0) {
                 ressources = get_player_in_tile(game, ressources, normalize(new_x, game->map->size.x), normalize(start_y, game->map->size.y));
+                ressources = get_egg_in_tile(game, ressources, normalize(new_x, game->map->size.x), normalize(start_y, game->map->size.y));
                 ressources = get_ressource_name(game, ressources, normalize(new_x, game->map->size.x), normalize(start_y, game->map->size.y));
             } else {
                 ressources = get_player_in_tile(game, ressources, normalize(start_x, game->map->size.x), normalize(new_y, game->map->size.y));
@@ -450,7 +465,7 @@ const char *broadcast(game_t *game, player_t *player, const char *arg)
 {
     for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
         player_t *player2 = ptr->value;
-        if (strcmp(player2->team_name, "GRAPHIC") == 0)
+        if (strcmp(player2->team_name, "GRAPHIC") == 0 || player2 == player)
             continue;
         send_broadcast_message(arg, player2->fd, find_provenance(game, player, player2));
     }
