@@ -104,6 +104,7 @@ typedef struct game {
     char buffer[BUFSIZ / 2];
     char send_message[BUFSIZ];
     char *alloc_buffer;
+    int ressources_time_unit;
 } game_t;
 
 //egg structure
