@@ -4,6 +4,7 @@ from . import utile
 from typing import Tuple
 import subprocess
 from itertools import cycle
+from random import randint
 
 
 class Orientation(Enum):
@@ -227,6 +228,7 @@ class Player:
         self.enough_player = False
 
         self.first_turn = True
+        self.inventory_in_turn = False
 
     def encode(self, message: str):
         return utile.xor_compressed_cipher(str(self.id) + "|" + message, self.team_name)
@@ -292,29 +294,41 @@ class Player:
     def go_to(self, pos: int, item: str):
         cpt = 0
         if pos == 0:
-            self.command_to_send.append("Take " + item)
+            self.command.append("Take " + item)
+            self.inventory_in_turn = True
             return
-        self.command_to_send.append("Forward")
+        self.command.append("Forward")
         while not vision[cpt][0] <= pos <= vision[cpt][1]:
-            self.command_to_send.append("Forward")
+            self.command.append("Forward")
             cpt += 1
         direction = pos - ((vision[cpt][0] + vision[cpt][1]) // 2)
         if direction < 0:
-            self.command_to_send.append("Left")
+            self.command.append("Left")
         elif direction > 0:
-            self.command_to_send.append("Right")
+            self.command.append("Right")
         for i in range(abs(direction)):
-            self.command_to_send.append("Forward")
-        self.command_to_send.append("Take " + item)
+            self.command.append("Forward")
+        self.command.append("Take " + item)
+        self.inventory_in_turn = True
         return
+    
+    def item_in_look (self, item: str) -> int:
+        for i in range(len(self.look_content)):
+            if item in self.look_content[i]:
+                return i
+        return None
+
 
     def take_item(self):
         if self.inventory.get_ressource("food") < 20:
-            if "food" in self.look_content:
-                self.go_to(self.look_content.index("food"), "food")
+            if self.item_in_look("food") is not None:
+                self.go_to(self.item_in_look("food"), "food")
                 return
-            self.command_to_send.append("Forward")
-            return
+            else:
+                if randint(0, 5) == 0:
+                    self.command.append("Left")
+                self.command.append("Forward")
+                return
         if self.need_to_elevation() is not None:
             if self.need_to_elevation() in self.look_content:
                 self.go_to(
@@ -322,8 +336,11 @@ class Player:
                     self.need_to_elevation(),
                 )
                 return
-            self.command_to_send.append("Forward")
-            return
+            else:
+                if randint(0, 5) == 0:
+                    self.command.append("Left")
+                self.command.append("Forward")
+                return
 
     def update_inventory(self, result: list):
         #print("update inventory", result)
@@ -349,6 +366,9 @@ class Player:
                 )
 
     def end_turn_command(self):
+        if self.inventory_in_turn == True:
+            self.command.append("Inventory\n")
+            self.inventory_in_turn = False
         if self.inventory_content != []:
             if self.update_inventory(self.inventory_content) == 1:
                 self.update_share_inventory(self.inventory_content)
@@ -407,13 +427,10 @@ class Player:
         if self.first_turn == True:
             self.wake_up()
             self.first_turn = False
-            #print("WAKE UP")
             return self.command
-        #print("SECOND TURN")
         self.command_interpreter(answer)
         self.message_interpreter(message)
         self.fork_player()
+        self.take_item()
         self.end_turn_command()
-        # for i in self.command:
-            #print(self.id, "command: ", i)
         return self.command
