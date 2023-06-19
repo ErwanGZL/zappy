@@ -99,6 +99,7 @@ game_t *init_game(option_t *opt)
     game->map = init_map(opt->width, opt->height);
     game->players = NULL;
     game->eggs = NULL;
+    game->teams = NULL;
     for (list_t head = opt->teams; head != NULL; head = head->next)
     {
         team_name_t name = (team_name_t)head->value;
