@@ -1,6 +1,7 @@
 import socket
 import threading
 from . import player
+from time import sleep
 
 
 class AI:
@@ -76,6 +77,8 @@ class AI:
                     self.buffer += data.decode()
 
                     if "\n" in self.buffer:
+                        # print("____", self.buffer.count("\n"))
+                        # for _ in range(self.buffer.count("\n")):
                         self.msg_avl.set()
 
             except socket.timeout:  # Timeout occurred, check the flag variable
@@ -136,22 +139,35 @@ class AI:
             )
 
         recieved = []
-        message = ""
-        direction = None
+        message = []
         send = []
 
         while self.running:
             # Wait for a message from the server
-            for i in range(len(send)):
-                str_recieved = self.wait_for_message()
+            for i in range(min(len(send), 10)):
+                tmp = self.get_next_message()
+                if tmp == "":
+                    str_recieved = self.wait_for_message()
+                else:
+                    str_recieved = tmp
                 if str_recieved.split(" ")[0] == "message":
-                    direction = str_recieved.split(",")[0]
-                    message = str_recieved.split(",")[1]
-                recieved.append(send[i].split("\n", 1)[0] + "|" + str_recieved)
+                    message.append(str_recieved.split(" ")[1])
+                    i -= 1
+                else:
+                    recieved.append(send[i].split("\n", 1)[0] + "|" + str_recieved)
+
+            if len(send) > 10:
+                send = send[10:]
+            else:
+                send = []
 
             # Process the message
-            send = self.player.logic(recieved, direction, message)
-            for i in range(len(send)):
+            if send == []:
+                sleep(0.1)
+                send = self.player.logic(recieved, message)
+                recieved = []
+                message = []
+
+            for i in range(min(len(send), 10)):
                 self.send_message(send[i])
-            recieved = []
         pass
