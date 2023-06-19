@@ -28,10 +28,10 @@ void server_select(server_t *server)
     readfds = server->netctl->watched_fd;
 
     timeout = server_get_next_timeout(server);
-    if (timeout != NULL)
-        printf("Timeout: %f\n", timeout->tv_usec / 1000000.0);
-    else
-        printf("No timeout\n");
+    // if (timeout != NULL)
+    //     printf("Timeout: %f\n", timeout->tv_usec / 1000000.0);
+    // else
+    //     printf("No timeout\n");
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
     act = select(FD_SETSIZE, &readfds, NULL, NULL, timeout);
@@ -71,7 +71,7 @@ void server_select(server_t *server)
             }
             else
             {
-                printf("Received %ld bytes\n", rbytes);
+                //printf("Received %ld bytes\n", rbytes);
                 printf("%s\n", buffer);
                 player_t *player = get_player_by_fd(server->game, ((socket_t *)head->value)->fd);
                 if (strcmp(player->team_name, "GRAPHIC") == 0)
@@ -83,7 +83,7 @@ void server_select(server_t *server)
                         const char *buff = verif_incantation(server->game, player, NULL, 0);
                         if (strncmp(buff, "ko\n", 3) == 0)
                         {
-                            dprintf(player->fd, buff);
+                            //dprintf(player->fd, buff);
                             head = head->next;
                             continue;
                         }
@@ -157,6 +157,8 @@ int server_run(server_t *server)
                 player->entity->food_left -= 1;
                 player->entity->food_timer_units += 126;
                 printf("Food left : %d\n", player->entity->food_left);
+                gui_player_inventory(server->game, player);
+                gui_send_all(server->game, server->game->send_message);
             }
         }
         for (list_t *head = &server->game->players; (*head) != NULL;)

@@ -155,6 +155,8 @@ const char *take_object(game_t *game, player_t *player, const char *arg)
         //gui communication
         gui_pgt(game, player, index);
         gui_send_all(game, game->send_message);
+        gui_player_inventory(game, player);
+        gui_send_all(game, game->send_message);
         return "ok\n";
     }
     return "ko\n";
@@ -164,11 +166,13 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
 {
     int index = get_mineral_index(arg);
     if (player->entity->minerals[index] > 0) {
-        game->map->tiles[player->entity->pos.x][player->entity->pos.y].ressources[index + 1]++;
+        game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]++;
         player->entity->minerals[index]--;
         printf("Player %d dropped %s\n", player->fd, mineral_tab[index]);
         //gui communication
         gui_pdr(game, player, index);
+        gui_send_all(game, game->send_message);
+        gui_player_inventory(game, player);
         gui_send_all(game, game->send_message);
         return "ok\n";
     }

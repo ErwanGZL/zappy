@@ -234,6 +234,7 @@ incantation_t *get_incantation(game_t *game, player_t *player)
         }
     }
     gui_pic(game, incantation->first, incantation->casters);
+    gui_send_all(game, game->send_message);
     list_add_elem_at_back(&game->incantations, incantation);
     return incantation;
 }
