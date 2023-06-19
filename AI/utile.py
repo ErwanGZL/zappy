@@ -18,27 +18,37 @@ def xor_cipher(message, key):
         encrypted_message += encrypted_char
     return encrypted_message
 
-
 def xor_compressed_cipher(message, key):
     compressed_message = zlib.compress(message.encode())
     compressed_message_b64 = base64.b64encode(compressed_message).decode()
     encrypted_message = xor_cipher(compressed_message_b64, key)
-    return encrypted_message
+    return bytes(encrypted_message, "utf-8").hex()
 
 
 def xor_compressed_decipher(encrypted_message, key):
-    decrypted_message = xor_cipher(encrypted_message, key)
+    decrypted_message = xor_cipher(bytes.fromhex(encrypted_message).decode("utf-8"), key)
     compressed_message = base64.b64decode(decrypted_message)
     decompressed_message = zlib.decompress(compressed_message).decode()
     return decompressed_message
-
 
 def str_to_list(content: str):
     content = content.split(",")
     result = []
     for item in content:
+        item = item.replace("[", "")
+        item = item.replace("]", "")
+        if item != "":
+            if item[0] == " ":
+                item = item[1:]
+        if item != "":
+            if item[-1] == " ":
+                item = item[:-1]
         parts = item.split(" ")
-        name = parts[0]
-        value = parts[1]
-        result.append((name, value))
+        tmp = []
+        for i in range(len(parts)):
+            tmp.append(parts[i])
+        result.append(tmp)
     return result
+
+
+
