@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(zappy_server C)
 
 set(CMAKE_C_STANDARD 17)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter -g3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-format-security -g3")
 
 add_subdirectory(libs)
 

@@ -39,29 +39,33 @@ timeval_t *actions_get_next_timeout(list_t action_list, int frequency)
     return timeout;
 }
 
+timeval_t *ressources_get_next_timeout(game_t *game, int frequency)
+{
+    timeval_t *timeout = calloc(1, sizeof(timeval_t));
+    timeout->tv_usec = ((double)game->ressources_time_unit / frequency) * 1000000;
+    return timeout;
+}
+
 timeval_t *server_get_next_timeout(server_t *server)
 {
     timeval_t *action_timeout = actions_get_next_timeout(server->actions, server->game->freq);
     timeval_t *pfood_timeout = player_get_next_food_timeout(server->game->players, server->game->freq);
-    if (action_timeout == NULL && pfood_timeout == NULL)
-        return NULL;
-    else if (action_timeout == NULL)
-        return pfood_timeout;
-    else if (pfood_timeout == NULL)
-        return action_timeout;
+    timeval_t *ressources_timeout = ressources_get_next_timeout(server->game, server->game->freq);
 
-    timeval_t *next = calloc(1, sizeof(timeval_t));
-    memcpy(
-        next,
-        MIN_TIMEVAL(action_timeout, pfood_timeout),
-        sizeof(timeval_t));
-    free(action_timeout);
-    free(pfood_timeout);
-    if (next->tv_sec == 0 && next->tv_usec == 0)
-    {
-        printf("No timeout\n");
+    timeval_t *next = ressources_timeout;
+    if (action_timeout != NULL && (action_timeout->tv_usec < next->tv_usec)) {
         free(next);
-        return NULL;
+        next = action_timeout;
     }
+    else
+        free(action_timeout);
+
+    if (pfood_timeout != NULL && (pfood_timeout->tv_usec < next->tv_usec)) {
+        free(next);
+        next = pfood_timeout;
+    }
+    else
+        free(pfood_timeout);
+
     return next;
 }
