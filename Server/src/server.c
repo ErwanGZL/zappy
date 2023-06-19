@@ -43,6 +43,7 @@ void server_select(server_t *server)
     elapsed = dt * server->game->freq * 1E-9;
     actions_apply_elapsed_time(server->actions, elapsed);
     player_decrease_food(server->game->players, elapsed);
+    server->game->ressources_time_unit -= elapsed;
     if (act < 0)
     {
         printf("Timeout\n");
@@ -193,6 +194,10 @@ int server_run(server_t *server)
                 continue;
             }
             head = &(*head)->next;
+        }
+        if (server->game->ressources_time_unit <= 0) {
+            spawn_ressources(server->game);
+            server->game->ressources_time_unit += 20;
         }
     }
     return 0;

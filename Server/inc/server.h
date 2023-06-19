@@ -21,8 +21,6 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 
-#define MIN_TIMEVAL(a, b) ((a->tv_sec < b->tv_sec) || (a->tv_sec == b->tv_sec && a->tv_usec < b->tv_usec) ? a : b)
-
 typedef struct server_s
 {
     option_t *options;
