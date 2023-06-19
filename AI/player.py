@@ -249,9 +249,7 @@ class Player:
         content = self.add_memory(content)
 
     def broadcast_inventory(self):
-        self.command.append(
-            "Broadcast " + self.encode(self.inventory.print_inventory()) + "\n"
-        )
+        self.command.append("Broadcast " + self.encode(self.inventory.print_inventory()))
 
     def elevation(self):
         pass
@@ -328,12 +326,12 @@ class Player:
             return
 
     def update_inventory(self, result: list):
+        #print("update inventory", result)
         value_return = 0
         for item in result:
             if self.inventory.get_ressource(item[0]) != int(item[1]):
                 value_return = 1
             self.inventory.set_ressource(item[0], int(item[1]))
-            print(item[0], int(item[1]))
         return value_return
 
     def update_share_inventory(self, result: list):
@@ -361,46 +359,35 @@ class Player:
         self.inventory_content = []
 
     def fork_player(self):
-        print(self.inventory.get_ressource("food"))
-        if (
-            self.inventory.get_ressource("food") < 20
-            or self.enough_player == True
-            or self.id != 0
-        ):
+        if self.inventory.get_ressource("food") < 20 or self.enough_player == True or self.id != 0:
             return
         if self.slot_open != 0:
-            subprocess.call(
-                [
-                    "./zappy_ia",
-                    "-p",
-                    self.servport,
-                    "-n",
-                    self.team_name,
-                    "-h",
-                    self.servhost,
-                ]
-            )
+            subprocess.Popen(["./zappy_ai", "-p", str(self.servhost), "-n", str(self.team_name), "-h", str(self.servport)])
             self.id = 1
         else:
             self.command.append("Fork\n")
 
     def message_interpreter(self, messages: list):
         for i in messages:
+            #print("message received: ", i)
             direction = i.split(", ")[0]
-            message = self.decode(i.split(", ")[1]).split("\n")[0]
+            message = i.split(", ")[1].split("\n")[0]
             message = self.decode(message)
             id_player = int(message.split("|")[0])
             message = message.split("|")[1]
+            # print("direction: ", direction)
+            # print("message: ", message)
+            # print("id_player: ", id_player)
+
             if message == "ready":
                 self.enough_player = True
             if message == "here":
                 self.id += 1
                 if self.id == 6:
-                    self.command.append("Broadcast " + self.encode("ready") + "\n")
+                    self.command.append("Broadcast " + self.encode("ready"))
 
     def command_interpreter(self, answer: list):
         for i in answer:
-            print(i)
             command = i.split("|")
             if command[0] == "Connect_nbr":
                 self.slot_open = int(command[1])
@@ -410,7 +397,7 @@ class Player:
                 self.inventory_content = utile.str_to_list(command[1])
 
     def wake_up(self):
-        self.command.append("Broadcast " + self.encode("here") + "\n")
+        self.command.append("Broadcast " + self.encode("here"))
         self.command.append("Inventory\n")
         self.command.append("Look\n")
         self.command.append("Connect_nbr\n")
@@ -420,9 +407,13 @@ class Player:
         if self.first_turn == True:
             self.wake_up()
             self.first_turn = False
+            #print("WAKE UP")
             return self.command
+        #print("SECOND TURN")
         self.command_interpreter(answer)
         self.message_interpreter(message)
         self.fork_player()
         self.end_turn_command()
+        # for i in self.command:
+            #print(self.id, "command: ", i)
         return self.command
