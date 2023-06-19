@@ -71,6 +71,16 @@ for_level = [
     [6, 2, 2, 2, 2, 2, 1],
 ]
 
+vision = [
+    [1, 3],
+    [4, 8],
+    [9, 15],
+    [16, 24],
+    [25, 35],
+    [36, 48],
+    [49, 63],
+    [64, 80],
+]
 items = ["food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"]
 
 
@@ -218,13 +228,11 @@ class Player:
 
         self.first_turn = True
 
-    def encode (self, message: str):
-        # return str(self.id) + '|' + message
-        return (utile.xor_compressed_cipher(str(self.id) + '|' + message, self.team_name))
+    def encode(self, message: str):
+        return utile.xor_compressed_cipher(str(self.id) + "|" + message, self.team_name)
 
-    def decode (self, message: str):
-        # return self.team_name
-        return (utile.xor_compressed_decipher(message, self.team_name))
+    def decode(self, message: str):
+        return utile.xor_compressed_decipher(message, self.team_name)
 
     def add_memory(self, content: list):
         if self.orientation == Orientation.UP:
@@ -277,12 +285,45 @@ class Player:
         for i in items:
             if i == "food":
                 continue
-            if self.inventory.get_ressource(i) < for_level[self.level][i.value]:
+            if self.share_inventory.get_ressource(i) < for_level[self.level][i.value]:
                 return i
         return None
 
-    def go_to(self, obj: Tuple[int, int]):
-        pass
+    def go_to(self, pos: int, item: str):
+        cpt = 0
+        if pos == 0:
+            self.command_to_send.append("Take " + item)
+            return
+        self.command_to_send.append("Forward")
+        while not vision[cpt][0] <= pos <= vision[cpt][1]:
+            self.command_to_send.append("Forward")
+            cpt += 1
+        direction = pos - ((vision[cpt][0] + vision[cpt][1]) // 2)
+        if direction < 0:
+            self.command_to_send.append("Left")
+        elif direction > 0:
+            self.command_to_send.append("Right")
+        for i in range(abs(direction)):
+            self.command_to_send.append("Forward")
+        self.command_to_send.append("Take " + item)
+        return
+
+    def take_item(self):
+        if self.inventory.get_ressource("food") < 20:
+            if "food" in self.look_content:
+                self.go_to(self.look_content.index("food"), "food")
+                return
+            self.command_to_send.append("Forward")
+            return
+        if self.need_to_elevation() is not None:
+            if self.need_to_elevation() in self.look_content:
+                self.go_to(
+                    self.look_content.index(self.need_to_elevation()),
+                    self.need_to_elevation(),
+                )
+                return
+            self.command_to_send.append("Forward")
+            return
 
     def update_inventory(self, result: list):
         #print("update inventory", result)
@@ -292,7 +333,6 @@ class Player:
                 value_return = 1
             self.inventory.set_ressource(item[0], int(item[1]))
         return value_return
-
 
     def update_share_inventory(self, result: list):
         for item in result:
@@ -304,7 +344,9 @@ class Player:
             self.share_inventory[6].set_ressource(j, 0)
         for i in range(6):
             for j in items:
-                self.inventory.add_ressource(j, self.share_inventory[i].get_ressource(j))
+                self.inventory.add_ressource(
+                    j, self.share_inventory[i].get_ressource(j)
+                )
 
     def end_turn_command(self):
         if self.inventory_content != []:
@@ -324,7 +366,6 @@ class Player:
             self.id = 1
         else:
             self.command.append("Fork\n")
-
 
     def message_interpreter(self, messages: list):
         for i in messages:
@@ -361,10 +402,9 @@ class Player:
         self.command.append("Look\n")
         self.command.append("Connect_nbr\n")
 
-
     def logic(self, answer: list, message: list) -> list:
         self.command = []
-        if (self.first_turn == True):
+        if self.first_turn == True:
             self.wake_up()
             self.first_turn = False
             #print("WAKE UP")
