@@ -115,16 +115,14 @@ void decrease_food_left(game_t *game)
 
 const char *get_inventory(game_t *game, player_t *player, const char *arg)
 {
-    char *inventory = calloc(1, sizeof(char) * 5);
+    char *inventory = calloc(1, sizeof(char) * 20);
+    memset(inventory, 0, 20);
     char num_buffer[10];
     memset(num_buffer, 0, 10);
-    strcat(inventory, "[");
-    int before = 0;
+    sprintf(inventory, "[food %d,", player->entity->food_left);
     for (int i = 0; i < 6; i++)
     {
         inventory = realloc(inventory, sizeof(char) * (strlen(inventory) + strlen(mineral_tab[i]) + 5));
-        if (before == 1)
-            strcat(inventory, " ");
         strcat(inventory, mineral_tab[i]);
         strcat(inventory, " ");
         sprintf(num_buffer, "%d", player->entity->minerals[i]);
@@ -133,7 +131,6 @@ const char *get_inventory(game_t *game, player_t *player, const char *arg)
         memset(num_buffer, 0, 10);
         if (i != 5)
             strcat(inventory, ",");
-        before = 1;
     }
     strcat(inventory, "]\n");
     return inventory;
