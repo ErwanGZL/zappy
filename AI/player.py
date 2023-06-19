@@ -373,33 +373,10 @@ class Player:
         return None
 
     def go_to(self, pos: int):
-        u = 0
-        l = 0
-        r = 0
         cpt = 0
         if pos == 0:
             return
-        u += 1
-        while not vision[cpt][0] <= pos <= vision[cpt][1]:
-            # self.command_to_send.append("Forward")
-            u += 1
-            cpt += 1
-        direction = pos - ((vision[cpt][0] + vision[cpt][1]) // 2)
-        if direction < 0:
-            l += 1
-            # self.command_to_send.append("Left")
-        elif direction > 0:
-            r += 1
-            # self.command_to_send.append("Right")
-        for i in range(abs(direction)):
-            u += 1
-            # self.command_to_send.append("Forward")
-        return u, l, r
-
-    def go_to_all(self, pos: list[int]):
-        cpt = 0
-        if pos == 0:
-            return
+        self.command_to_send.append("Forward")
         while not vision[cpt][0] <= pos <= vision[cpt][1]:
             self.command_to_send.append("Forward")
             cpt += 1
