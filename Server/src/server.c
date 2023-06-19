@@ -28,6 +28,10 @@ void server_select(server_t *server)
     readfds = server->netctl->watched_fd;
 
     timeout = server_get_next_timeout(server);
+    if (timeout != NULL)
+        printf("Timeout: %f\n", timeout->tv_usec / 1000000.0);
+    else
+        printf("No timeout\n");
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
     act = select(FD_SETSIZE, &readfds, NULL, NULL, timeout);
@@ -73,7 +77,20 @@ void server_select(server_t *server)
                 if (strcmp(player->team_name, "GRAPHIC") == 0)
                     gui_request_process(server->game, player, buffer);
                 else
+                {
+                    if (strncmp(buffer, "Incantation", 11) == 0)
+                    {
+                        const char *buff = verif_incantation(server->game, player, NULL, 0);
+                        if (strncmp(buff, "ko\n", 3) == 0)
+                        {
+                            dprintf(player->fd, buff);
+                            head = head->next;
+                            continue;
+                        }
+                        get_incantation(server->game, player);
+                    }
                     actions_accept(&server->actions, action_new(((socket_t *)head->value)->fd, buffer));
+                }
             }
         }
         head = head->next;
@@ -135,18 +152,21 @@ int server_run(server_t *server)
             player_t *player = (player_t *)head->value;
             if (strncmp(player->team_name, "GRAPHIC", 7) == 0)
                 continue;
-            if (player->entity->food_timer_units <= 0) {
+            if (player->entity->food_timer_units <= 0)
+            {
                 player->entity->food_left -= 1;
                 player->entity->food_timer_units += 126;
                 printf("Food left : %d\n", player->entity->food_left);
             }
         }
-        check_death(server->game);
         for (list_t *head = &server->game->players; (*head) != NULL;)
         {
             player_t *player = (player_t *)(*head)->value;
             if (strncmp(player->team_name, "GRAPHIC", 7) == 0)
+            {
+                head = &(*head)->next;
                 continue;
+            }
             if (player->entity->food_left <= 0)
             {
                 printf("Player %d died\n", player->fd);
@@ -162,8 +182,9 @@ int server_run(server_t *server)
             action_t *action = (action_t *)(*head)->value;
             if (action->cooldown <= 0)
             {
-                // player_t *p = get_player_by_fd(server->game, action->issuer);
-                // action->callback(server->game, p, action->arg);
+                player_t *p = get_player_by_fd(server->game, action->issuer);
+                const char *buff = action->callback(server->game, p, action->arg);
+                dprintf(action->issuer, buff);
                 free(action);
                 printf("Action done\n");
                 list_del_elem_at_front(head);

@@ -35,9 +35,6 @@ static const int cooldowns[] = {
     300 // Incantation
 };
 
-/**
- * TODO: Callback needs to return a structure containing the response
- */
 static const char *(*callbacks[])(game_t *, player_t *, const char *) = {
     &move_forward,
     &turn_right,

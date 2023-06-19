@@ -26,6 +26,12 @@ PlayerGui::PlayerGui(int id, sf::Texture *texture, int teamId, Data *data)
     _spriteBroadcast.setTexture(*_texture);
     _spriteBroadcast.setTextureRect(sf::IntRect(0, 16 * 24, 16, 16));
     _spriteBroadcast.setOrigin(8, 8);
+
+    _bufferWalk.loadFromFile("GUI/sounds/effects/walk.wav");
+    _soundWalk.setBuffer(_bufferWalk);
+
+    _bufferBroadcast.loadFromFile("GUI/sounds/effects/ioi.wav");
+    _soundBroadcast.setBuffer(_bufferBroadcast);
 }
 
 PlayerGui::~PlayerGui()
@@ -35,6 +41,7 @@ PlayerGui::~PlayerGui()
 int PlayerGui::stateTop()
 {
     int top = 0;
+    if (_data->getPlayerById(_id) == NULL) return (top);
     Player *player = _data->getPlayerById(_id);
     PlayerStatus status = player->getStatus();
     if (status == NONE)
@@ -50,9 +57,10 @@ int PlayerGui::stateTop()
     return (top);
 }
 
-void PlayerGui::update(int tileId)
+void PlayerGui::update(int tileId, int volume)
 {
     _tileId = tileId;
+    if (_data->getPlayerById(_id) == NULL) return;
     _nextX = _data->getPlayerById(_id)->getX() * 16;
     _nextY = _data->getPlayerById(_id)->getY() * 16;
     if (_data->getPlayerById(_id)->getX() != _sprite.getPosition().x / 16 || _data->getPlayerById(_id)->getY() != _sprite.getPosition().y / 16) {
@@ -99,6 +107,11 @@ void PlayerGui::update(int tileId)
         _sprite.setTextureRect(_rect);
         _clock.restart();
     }
+
+    _soundBroadcast.setVolume(volume * 0.8);
+    _soundIncantation.setVolume(volume);
+    _soundEgg.setVolume(volume);
+    _soundWalk.setVolume(volume);
 }
 
 void PlayerGui::animate(int timeUnit)
@@ -111,7 +124,11 @@ void PlayerGui::animate(int timeUnit)
             _frame++;
             if (_frame >= _nbFrame)
                 _frame = 0;
+            _soundWalk.play();
         }
+    }
+    if (_data->getPlayerById(_id) != NULL && _data->getPlayerById(_id)->getStatus() == BROADCASTING) {
+        _soundBroadcast.play();
     }
 }
 

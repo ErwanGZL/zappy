@@ -52,10 +52,14 @@ Network::Network(int ac, char **av)
         _data->setPort(_port);
     }
     _buffer = "";
+    _tv.tv_sec = 1;
+    _tv.tv_usec = 0;
 }
 
 Network::~Network()
 {
+    pthread_join(_guiThread, NULL);
+    delete _data;
 }
 
 std::string Network::getMessage()
@@ -66,12 +70,25 @@ std::string Network::getMessage()
             _buffer = _buffer.substr(_buffer.find("\n") + 1);
             return message;
         }
-        char buffer[BUFSIZ] = {0};
-        size_t size = read(_socket, buffer, BUFSIZ);
-        if (size == 0) {
+        std::vector<char> buffer = std::vector<char>(BUFSIZ, 0);
+        FD_ZERO(&_readfds);
+        FD_SET(_socket, &_readfds);
+        _tv.tv_sec = 1;
+        _tv.tv_usec = 0;
+        int retval = select(_socket + 1, &_readfds, NULL, NULL, &_tv);
+        if (retval == -1) {
+            perror("select()");
+            return "internal stop";
+        } else if (retval == 0) {
+            if (_data->stop == true)
+                return "internal stop";
+            continue;
+        }
+        size_t size = read(_socket, buffer.data(), BUFSIZ);
+        if (size == 0 || _data->stop == true) {
             return "internal stop";
         }
-        _buffer += std::string(buffer).substr(0, size);
+        _buffer += std::string(buffer.begin(), buffer.begin() + size);
     }
     return "";
 }
@@ -80,13 +97,13 @@ void Network::run()
 {
     pthread_create(&_guiThread, NULL, threadGui, (void *)_data);
     _data->wait();
-    _data->lock();
     _port = _data->getPort();
     _machine = _data->getMachine();
     _socket = socket(PF_INET, SOCK_STREAM, 0);
     if (_socket == -1) {
         perror("socket");
         _data->stop = true;
+        _data->post();
         return;
     }
     _addr.sin_family = AF_INET;
@@ -95,9 +112,10 @@ void Network::run()
     if (::connect(_socket, (struct sockaddr *)&_addr, sizeof(_addr)) == -1) {
         perror("connect");
         _data->stop = true;
+        _data->post();
         return;
     }
-    _data->unlock();
+    _data->post();
     while (1) {
         if (handleMessages()) return;
     }
@@ -105,10 +123,11 @@ void Network::run()
 
 int Network::handleMessages()
 {
-    std::cout << "end read" << std::endl;
+    // std::cout << "end read" << std::endl;
     std::string message = getMessage();
     std::string data;
-    std::cout << "Message received: |" << message << "|" << std::endl;
+    // std::cout << "Message received: |" << message << "|" << std::endl;
+    _data->lock();
     if (message.find(" ") != std::string::npos)
         data = message.substr(message.find(" ") + 1);
     int returnCode = 0;
@@ -164,18 +183,20 @@ int Network::handleMessages()
         returnCode = commandParameter(data);
     else if (message.find("ebo") == 0)
         returnCode = eggConnect(data);
-    else if (message.find("internal stop") == 0)
+    else if (message.find("internal stop") == 0) {
+        _data->unlock();
         return 1;
-    else
+    } else
         std::cout << "Unknown command : |" << message << "|" << std::endl;
+    _data->unlock();
     if (returnCode)
         return 1;
-    std::cout << "Return code: " << returnCode << std::endl;
+    // std::cout << "Return code: " << returnCode << std::endl;
     return 0;
 }
 
 void Network::sendCommand(std::string command)
 {
     command += "\n";
-    write(_socket, command.c_str(), command.size());
+    send(_socket, command.c_str(), command.size(), 0);
 }

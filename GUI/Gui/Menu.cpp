@@ -57,21 +57,31 @@ Menu::Menu()
     _textButton.setPosition(720 / 2, 480 / 2 + 120);
     _textButton.setOrigin(_textButton.getGlobalBounds().width / 2, _textButton.getGlobalBounds().height / 2);
 
-
     _textureBackground.loadFromFile("GUI/sprites/background.png");
     _background.setTexture(_textureBackground);
     _background.setPosition(720 / 2, 480 / 2);
     _background.setTextureRect(sf::IntRect(0, 0, 1903, 1109));
     _background.setScale(0.5, 0.5);
     _background.setOrigin(1903 / 2, 1109 / 2);
+    _connected = false;
 
-    // _music.openFromFile("GUI/sounds/music/game.ogg");
-    // _music.setLoop(true);
-    // _music.play();
+    _music = new sf::Music();
+
+    _music->openFromFile("GUI/sounds/music/game.ogg");
+    _music->setLoop(true);
+    _music->play();
+    _musicBar = new Sound("Music", 720 / 2 - 200, 480 / 2 + 150, 50);
+    _effectsBar = new Sound("Effects", 720 / 2 + 200, 480 / 2 + 150, 50);
 }
 
 Menu::~Menu()
 {
+    _music->stop();
+    _window->close();
+    delete _music;
+    delete _window;
+    delete _musicBar;
+    delete _effectsBar;
 }
 
 void Menu::run()
@@ -79,6 +89,7 @@ void Menu::run()
     while (_window->isOpen()) {
         event();
         display();
+        _music->setVolume(_musicBar->getVolume());
         if (_connected == true)
             break;
     }
@@ -103,6 +114,8 @@ void Menu::display()
     _window->draw(_textPort);
     _window->draw(_button);
     _window->draw(_textButton);
+    _musicBar->draw(_window);
+    _effectsBar->draw(_window);
     _window->display();
 }
 
@@ -110,6 +123,9 @@ void Menu::event()
 {
     sf::Event event;
     while (_window->pollEvent(event)) {
+        int x = _window->mapPixelToCoords(sf::Mouse::getPosition(*_window)).x;
+        int y = _window->mapPixelToCoords(sf::Mouse::getPosition(*_window)).y;
+        sf::Vector2f pos = sf::Vector2f((float) x, (float) y);
         if (event.type == sf::Event::Closed)
             _window->close();
         if (event.type == sf::Event::TextEntered) {
@@ -133,12 +149,13 @@ void Menu::event()
             _textMachine.setOrigin(_textMachine.getGlobalBounds().width / 2, _textMachine.getGlobalBounds().height / 2);
             _textPort.setOrigin(_textPort.getGlobalBounds().width / 2, _textPort.getGlobalBounds().height / 2);
         }
-        if (_button.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(*_window)))) {
+        if (_button.getGlobalBounds().contains(pos)) {
             _textButton.setFillColor(sf::Color::White);
             if (event.type == sf::Event::MouseButtonPressed) {
                 _button.setTextureRect(sf::IntRect(24, 0, 24, 16));
             }
             if (event.type == sf::Event::MouseButtonReleased) {
+                _button.setTextureRect(sf::IntRect(0, 0, 24, 16));
                 try {
                     _portConnect = std::stoi(_port);
                     _connected = true;
@@ -149,12 +166,12 @@ void Menu::event()
             _textButton.setFillColor(sf::Color::Black);
             _button.setTextureRect(sf::IntRect(0, 0, 24, 16));
         }
-        if (_box1.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(*_window)))) {
+        if (_box1.getGlobalBounds().contains(pos)) {
             if (event.type == sf::Event::MouseButtonPressed) {
                 _positionWrite = 1;
             }
         }
-        if (_box2.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(*_window)))) {
+        if (_box2.getGlobalBounds().contains(pos)) {
             if (event.type == sf::Event::MouseButtonPressed) {
                 _positionWrite = 2;
             }
@@ -169,6 +186,8 @@ void Menu::event()
             _box1.setFillColor(sf::Color(0, 0, 0, 200));
             _box2.setFillColor(sf::Color(0, 0, 0, 200));
         }
+        _effectsBar->event(event, _window);
+        _musicBar->event(event, _window);
     }
 }
 

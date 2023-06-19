@@ -17,19 +17,21 @@ void *threadGui(void *arg)
     Data *data = (Data *)arg;
     Menu *menu = new Menu();
     if (data->getMachine() == "" || data->getPort() == -1) {
-        data->lock();
         menu->run();
         data->setMachine(menu->getMachine());
         data->setPort(menu->getPort());
-        data->unlock();
     }
     data->post();
-    Gui *gui = new Gui(data, menu->getWindow());
+    usleep(100000);
+    data->wait();
+    Gui *gui = new Gui(data, menu->getWindow(), menu->getMusicVolume(), menu->getEffectVolume(), menu->getMusic());
     gui->run();
+    delete gui;
+    delete menu;
     return (NULL);
 }
 
-Gui::Gui(Data *data, sf::RenderWindow *window)
+Gui::Gui(Data *data, sf::RenderWindow *window, int vol1, int vol2, sf::Music *music) : _musicBar("Music", 720 / 2 - 230, 480 / 2 + 200, vol1), _effectBar("Effects", 720 / 2 + 230, 480 / 2 + 200, vol2)
 {
     _data = data;
     _window = window;
@@ -39,16 +41,35 @@ Gui::Gui(Data *data, sf::RenderWindow *window)
     _infoTile = new InfoTile(_data);
     _infoPlayer = new InfoPlayer(_data);
     _egg = new EggGui(_data, &_texturePlayer);
+    _music = music;
+    _tile = new sf::Sprite();
+    _tile->setTexture(_textureMap);
+    _tile->setOrigin(8, 8);
 }
 
 Gui::~Gui()
 {
+    for (int i = 0; i < _map.size(); i++) {
+        TileGui *tile = _map[i];
+        _map.erase(_map.begin() + i);
+        delete _map[i];
+    }
+    for (int i = 0; i < _players.size(); i++) {
+        PlayerGui *player = _players[i];
+        _players.erase(_players.begin() + i);
+        delete _players[i];
+    }
+    delete _egg;
+    delete _infoTile;
+    delete _infoPlayer;
+    delete _tile;
 }
 
 void Gui::run ()
 {
     bool generated = false;
     while (_window->isOpen()) {
+        _music->setVolume(_musicBar.getVolume());
         if (_data->stop == true) {
             _window->close();
             return;
@@ -59,12 +80,16 @@ void Gui::run ()
         }
         sf::Event event;
         while (_window->pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                _window->close();
+            if (event.type == sf::Event::Closed) {
+                _data->stop = true;
+                return;
+            }
             if (generated == true) {
                 _infoTile->setMouse(*_window, event);
                 _infoPlayer->setMouse(*_window, event, _viewGlobal);
             }
+            _musicBar.event(event, _window);
+            _effectBar.event(event, _window);
         }
         if (generated == true) {
             _window->clear(sf::Color::Black);
@@ -90,7 +115,7 @@ void Gui::generateMap()
     std::vector<std::vector<int>> noiseMap = perlin.run();
     for (int i = 0; i < noiseMap.size() ; i++) {
         for (int j = 0; j < noiseMap[i].size(); j++) {
-            TileGui *tile = new TileGui(j * 16, i * 16, noiseMap[i][j], &_textureMap, getRect(i, j, noiseMap), 0, _data);
+            TileGui *tile = new TileGui(_tile ,j * 16, i * 16, noiseMap[i][j], &_textureMap, getRect(i, j, noiseMap), 0, _data);
             _map.push_back(tile);
         }
     }
@@ -99,7 +124,7 @@ void Gui::generateMap()
             if (i < 0 || j < 0 || i >= width || j >= height) {
                 int rotate = 0;
                 sf::IntRect rect = getRectBorder(i, j, &rotate);
-                TileGui *tile = new TileGui(i * 16, j * 16, -1, &_textureMap, rect, rotate, _data);
+                TileGui *tile = new TileGui(_tile, i * 16, j * 16, -1, &_textureMap, rect, rotate, _data);
                 _map.push_back(tile);
             }
         }
@@ -244,9 +269,12 @@ void Gui::display()
     for (size_t i = 0;i < _players.size();i++) {
         _players[i]->draw(_window);
     }
+    _window->setView(_currentView);
     _infoTile->draw(*_window);
     _window->setView(_currentView);
     _infoPlayer->draw(*_window);
+    _musicBar.draw(_window);
+    _effectBar.draw(_window);
     _window->setView(_currentView);
 }
 
@@ -274,6 +302,7 @@ void Gui::generatePlayer()
         _players.push_back(player);
     }
 
+    std::vector<int> index;
     for (size_t i = 0;i < _players.size();i++) {
         bool found = false;
         for (size_t j = 0;j < _data->getPlayers().size();j++) {
@@ -281,22 +310,28 @@ void Gui::generatePlayer()
                 found = true;
         }
         if (!found) {
-            _players.erase(_players.begin() + i);
-            i--;
+            index.push_back(i);
         }
+    }
+    for (size_t i = 0;i < index.size();i++) {
+        PlayerGui *player = _players[index[i]];
+        _players.erase(_players.begin() + index[i]);
+        delete player;
     }
 }
 
 void Gui::updateData()
 {
+    _data->lock();
     _currentView = _infoPlayer->getView(_viewGlobal, _players);
     generatePlayer();
     for (size_t i = 0;i < _players.size();i++) {
-        _players[i]->update(_map[_players[i]->getX() / 16 + _players[i]->getY() / 16 * _data->getWidth()]->getId());
+        _players[i]->update(_map[_players[i]->getX() / 16 + _players[i]->getY() / 16 * _data->getWidth()]->getId(), _effectBar.getVolume());
     }
     for (size_t i = 0;i < _map.size();i++) {
         _map[i]->update();
     }
     _infoTile->update();
     _infoPlayer->update();
+    _data->unlock();
 }
