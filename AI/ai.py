@@ -76,20 +76,23 @@ class AI:
                 with self.lock:
                     self.buffer += data.decode()
 
-                    if "\n" in self.buffer:
-                        # print("____", self.buffer.count("\n"))
-                        # for _ in range(self.buffer.count("\n")):
-                        self.msg_avl.set()
-
             except socket.timeout:  # Timeout occurred, check the flag variable
                 if not self.running:
                     return
+            with self.lock:
+    
+                if "\n" in self.buffer:
+                    # print("____", self.buffer.count("\n"))
+                    # for _ in range(self.buffer.count("\n")):
+                    self.msg_avl.set()
 
     def get_next_message(self) -> str | None:
         """
         This function returns the next message from the buffer.
         """
         with self.lock:
+            if "\n" not in self.buffer:
+                return None
             msg = self.buffer.split("\n", 1)[0]
             self.buffer = self.buffer[len(msg) + 1 :]
             return msg
@@ -144,17 +147,23 @@ class AI:
 
         while self.running:
             # Wait for a message from the server
-            for i in range(min(len(send), 10)):
-                tmp = self.get_next_message()
-                if tmp == "":
+            i = 0
+            while i < (min(len(send), 10)):
+                if self.msg_avl.is_set():
                     str_recieved = self.wait_for_message()
                 else:
-                    str_recieved = tmp
+                    tmp = self.get_next_message()
+                    if tmp == None:
+                        str_recieved = self.wait_for_message()
+                    else:
+                        str_recieved = tmp
+                        print("no wait for message")
                 if str_recieved.split(" ")[0] == "message":
-                    message.append(str_recieved.split(" ")[1])
-                    i -= 1
+                    message.append(str_recieved.split("message ")[1])
                 else:
                     recieved.append(send[i].split("\n", 1)[0] + "|" + str_recieved)
+                    print("recieved: ", recieved[-1])
+                    i += 1
 
             if len(send) > 10:
                 send = send[10:]
