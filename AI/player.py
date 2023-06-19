@@ -71,6 +71,16 @@ for_level = [
     [6, 2, 2, 2, 2, 2, 1],
 ]
 
+vision = [
+    [1, 3],
+    [4, 8],
+    [9, 15],
+    [16, 24],
+    [25, 35],
+    [36, 48],
+    [49, 63],
+    [64, 80],
+]
 items = ["food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"]
 
 
@@ -218,11 +228,11 @@ class Player:
 
         self.first_turn = True
 
-    def encode (self, message: str):
-        return (utile.xor_compressed_cipher(str(self.id) + '|' + message, self.team_name))
+    def encode(self, message: str):
+        return utile.xor_compressed_cipher(str(self.id) + "|" + message, self.team_name)
 
-    def decode (self, message: str):
-        return (utile.xor_compressed_decipher(message, self.team_name))
+    def decode(self, message: str):
+        return utile.xor_compressed_decipher(message, self.team_name)
 
     def add_memory(self, content: list):
         if self.orientation == Orientation.UP:
@@ -239,7 +249,9 @@ class Player:
         content = self.add_memory(content)
 
     def broadcast_inventory(self):
-        self.command.append("Broadcast " + self.encode(self.inventory.print_inventory()) + "\n")
+        self.command.append(
+            "Broadcast " + self.encode(self.inventory.print_inventory()) + "\n"
+        )
 
     def elevation(self):
         pass
@@ -279,8 +291,22 @@ class Player:
                 return i
         return None
 
-    def go_to(self, obj: Tuple[int, int]):
-        pass
+    def go_to(self, pos: int):
+        cpt = 0
+        if pos == 0:
+            return
+        self.command_to_send.append("Forward")
+        while not vision[cpt][0] <= pos <= vision[cpt][1]:
+            self.command_to_send.append("Forward")
+            cpt += 1
+        direction = pos - ((vision[cpt][0] + vision[cpt][1]) // 2)
+        if direction < 0:
+            self.command_to_send.append("Left")
+        elif direction > 0:
+            self.command_to_send.append("Right")
+        for i in range(abs(direction)):
+            self.command_to_send.append("Forward")
+        return
 
     def update_inventory(self, result: list):
         value_return = 0
@@ -290,7 +316,6 @@ class Player:
             self.inventory.set_ressource(item[0], int(item[1]))
             print(item[0], int(item[1]))
         return value_return
-
 
     def update_share_inventory(self, result: list):
         for item in result:
@@ -302,7 +327,9 @@ class Player:
             self.share_inventory[6].set_ressource(j, 0)
         for i in range(6):
             for j in items:
-                self.inventory.add_ressource(j, self.share_inventory[i].get_ressource(j))
+                self.inventory.add_ressource(
+                    j, self.share_inventory[i].get_ressource(j)
+                )
 
     def end_turn_command(self):
         if self.inventory_content != []:
@@ -316,7 +343,11 @@ class Player:
 
     def fork_player(self):
         print(self.inventory.get_ressource("food"))
-        if self.inventory.get_ressource("food") < 20 or self.enough_player == True or self.id != 0:
+        if (
+            self.inventory.get_ressource("food") < 20
+            or self.enough_player == True
+            or self.id != 0
+        ):
             return
         if self.slot_open != 0:
             subprocess.call(
@@ -331,9 +362,8 @@ class Player:
                 ]
             )
             self.id = 1
-        else :
+        else:
             self.command.append("Fork\n")
-
 
     def message_interpreter(self, messages: list):
         for i in messages:
@@ -366,10 +396,9 @@ class Player:
         self.command.append("Look\n")
         self.command.append("Connect_nbr\n")
 
-
     def logic(self, answer: list, message: list) -> list:
         self.command = []
-        if (self.first_turn == True):
+        if self.first_turn == True:
             self.wake_up()
             self.first_turn = False
             return self.command
