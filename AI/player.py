@@ -82,6 +82,17 @@ for_level = [
     [6, 2, 2, 2, 2, 2, 1],
 ]
 
+vision = [
+    [1, 3],
+    [4, 8],
+    [9, 15],
+    [16, 24],
+    [25, 35],
+    [36, 48],
+    [49, 63],
+    [64, 80],
+]
+
 
 class Inventory:
     def __init__(self):
@@ -213,7 +224,7 @@ class Player:
         ]
         self.orientation = Orientation.UP
         self.slot = 0
-        self.player_conected = 6
+        self.unuse_egg = 0
         self.command = []
         self.look_content = []
         self.inventory_content = []
@@ -361,8 +372,45 @@ class Player:
                 return i
         return None
 
-    def go_to(self, obj: Tuple[int, int]):
-        pass
+    def go_to(self, pos: int):
+        u = 0
+        l = 0
+        r = 0
+        cpt = 0
+        if pos == 0:
+            return
+        u += 1
+        while not vision[cpt][0] <= pos <= vision[cpt][1]:
+            # self.command_to_send.append("Forward")
+            u += 1
+            cpt += 1
+        direction = pos - ((vision[cpt][0] + vision[cpt][1]) // 2)
+        if direction < 0:
+            l += 1
+            # self.command_to_send.append("Left")
+        elif direction > 0:
+            r += 1
+            # self.command_to_send.append("Right")
+        for i in range(abs(direction)):
+            u += 1
+            # self.command_to_send.append("Forward")
+        return u, l, r
+
+    def go_to_all(self, pos: list[int]):
+        cpt = 0
+        if pos == 0:
+            return
+        while not vision[cpt][0] <= pos <= vision[cpt][1]:
+            self.command_to_send.append("Forward")
+            cpt += 1
+        direction = pos - ((vision[cpt][0] + vision[cpt][1]) // 2)
+        if direction < 0:
+            self.command_to_send.append("Left")
+        elif direction > 0:
+            self.command_to_send.append("Right")
+        for i in range(abs(direction)):
+            self.command_to_send.append("Forward")
+        return
 
     def update_inventory(self, result: str):
         for item in result:
@@ -385,7 +433,7 @@ class Player:
         for i in answer:
             command = i.split("|")
             if command[0] == "Connect_nbr":
-                self.player_conected = int(command[1])
+                self.unuse_egg = int(command[1])
             elif command[0] == "Look":
                 self.look_content = str_to_list(command[1])
             elif command[0] == "Inventory":
@@ -396,7 +444,8 @@ class Player:
     def logic(self, answer: list, direction: int, message_brod: str) -> list:
         self.command_interpreter(answer)
         self.command.append("Connect_nbr")
-        if self.player_conected < 6:
+        self.command.append("Look")
+        if self.inventory.get_ressource(Ressouces.FOOD) >= 20 and self.unuse_egg > 0:
             subprocess.call(
                 [
                     "./zappy_ia",
@@ -409,6 +458,16 @@ class Player:
                 ]
             )
             return self.command
+        if (
+            self.inventory.get_ressource(Ressouces.FOOD) < 20
+            and self.look_content != []
+            and "food" in self.look_content
+        ):
+            indices = []
+            for index, valeur in enumerate(self.look_content):
+                if valeur == "food":
+                    indices.append(index)
+            self.go_to_all(indices)
         if self.inventory_content != []:
             tmp = self.inventory
             self.update_inventory(self.inventory_content)
