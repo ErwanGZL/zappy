@@ -251,7 +251,9 @@ class Player:
         content = self.add_memory(content)
 
     def broadcast_inventory(self):
-        self.command.append("Broadcast " + self.encode(self.inventory.print_inventory()))
+        self.command.append(
+            "Broadcast " + self.encode(self.inventory.print_inventory())
+        )
 
     def elevation(self):
         pass
@@ -284,11 +286,13 @@ class Player:
         pass
 
     def need_to_elevation(self) -> str:
+        cpt = 1
         for i in items:
             if i == "food":
                 continue
-            if self.share_inventory.get_ressource(i) < for_level[self.level][i.value]:
+            if self.share_inventory.get_ressource(i) < for_level[self.level][cpt]:
                 return i
+            cpt += 1
         return None
 
     def go_to(self, pos: int, item: str):
@@ -311,13 +315,12 @@ class Player:
         self.command.append("Take " + item)
         self.inventory_in_turn = True
         return
-    
-    def item_in_look (self, item: str) -> int:
+
+    def item_in_look(self, item: str) -> int:
         for i in range(len(self.look_content)):
             if item in self.look_content[i]:
                 return i
         return None
-
 
     def take_item(self):
         if self.inventory.get_ressource("food") < 20:
@@ -343,7 +346,7 @@ class Player:
                 return
 
     def update_inventory(self, result: list):
-        #print("update inventory", result)
+        # print("update inventory", result)
         value_return = 0
         for item in result:
             if self.inventory.get_ressource(item[0]) != int(item[1]):
@@ -379,17 +382,31 @@ class Player:
         self.inventory_content = []
 
     def fork_player(self):
-        if self.inventory.get_ressource("food") < 20 or self.enough_player == True or self.id != 0:
+        if (
+            self.inventory.get_ressource("food") < 20
+            or self.enough_player == True
+            or self.id != 0
+        ):
             return
         if self.slot_open != 0:
-            subprocess.Popen(["./zappy_ai", "-p", str(self.servhost), "-n", str(self.team_name), "-h", str(self.servport)])
+            subprocess.Popen(
+                [
+                    "./zappy_ai",
+                    "-p",
+                    str(self.servhost),
+                    "-n",
+                    str(self.team_name),
+                    "-h",
+                    str(self.servport),
+                ]
+            )
             self.id = 1
         else:
             self.command.append("Fork\n")
 
     def message_interpreter(self, messages: list):
         for i in messages:
-            #print("message received: ", i)
+            # print("message received: ", i)
             direction = i.split(", ")[0]
             message = i.split(", ")[1].split("\n")[0]
             message = self.decode(message)
