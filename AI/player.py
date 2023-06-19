@@ -287,13 +287,14 @@ class Player:
         for i in items:
             if i == "food":
                 continue
-            if self.inventory.get_ressource(i) < for_level[self.level][i.value]:
+            if self.share_inventory.get_ressource(i) < for_level[self.level][i.value]:
                 return i
         return None
 
-    def go_to(self, pos: int):
+    def go_to(self, pos: int, item: str):
         cpt = 0
         if pos == 0:
+            self.command_to_send.append("Take " + item)
             return
         self.command_to_send.append("Forward")
         while not vision[cpt][0] <= pos <= vision[cpt][1]:
@@ -306,7 +307,25 @@ class Player:
             self.command_to_send.append("Right")
         for i in range(abs(direction)):
             self.command_to_send.append("Forward")
+        self.command_to_send.append("Take " + item)
         return
+
+    def take_item(self):
+        if self.inventory.get_ressource("food") < 20:
+            if "food" in self.look_content:
+                self.go_to(self.look_content.index("food"), "food")
+                return
+            self.command_to_send.append("Forward")
+            return
+        if self.need_to_elevation() is not None:
+            if self.need_to_elevation() in self.look_content:
+                self.go_to(
+                    self.look_content.index(self.need_to_elevation()),
+                    self.need_to_elevation(),
+                )
+                return
+            self.command_to_send.append("Forward")
+            return
 
     def update_inventory(self, result: list):
         value_return = 0
