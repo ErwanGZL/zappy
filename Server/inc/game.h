@@ -179,7 +179,7 @@ const char *gui_pex(game_t *game, player_t *target);
 // player broadcast
 const char *gui_pbc(game_t *game, fd_t from, const char *message);
 // player incantation
-const char *gui_pic(game_t *game, player_t *first, player_t *casters[]);
+const char *gui_pic(game_t *game, player_t *first, list_t casters);
 // player incantation end
 const char *gui_pie(game_t *game, player_t *player, int result);
 // player fork

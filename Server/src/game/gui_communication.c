@@ -102,7 +102,7 @@ const char *gui_pbc(game_t *game, fd_t from, const char *message)
 }
 
 // player incantation
-const char *gui_pic(game_t *game, player_t *first, player_t *casters[])
+const char *gui_pic(game_t *game, player_t *first, list_t casters)
 {
     memset(game->send_message, 0, BUFSIZ);
     memset(game->buffer, 0, BUFSIZ / 2);
@@ -112,9 +112,10 @@ const char *gui_pic(game_t *game, player_t *first, player_t *casters[])
             first->entity->pos.y,
             first->entity->level + 1,
             first->fd);
-    for (int i = 0; casters[i] != NULL; i++) {
+    for (list_t ptr = casters; ptr != NULL; ptr = ptr->next) {
         strcpy(game->buffer, game->send_message);
-        sprintf(game->send_message, "%s %d", game->buffer, casters[i]->fd);
+        player_t *caster = (player_t *)ptr->value;
+        sprintf(game->send_message, "%s %d", game->buffer, caster->fd);
     }
     strcat(game->send_message, "\n");
     return game->send_message;
