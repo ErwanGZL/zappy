@@ -28,10 +28,6 @@ void server_select(server_t *server)
     readfds = server->netctl->watched_fd;
 
     timeout = server_get_next_timeout(server);
-    // if (timeout != NULL)
-    //     printf("Timeout: %f\n", timeout->tv_usec / 1000000.0);
-    // else
-    //     printf("No timeout\n");
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
     act = select(FD_SETSIZE, &readfds, NULL, NULL, timeout);
@@ -44,100 +40,44 @@ void server_select(server_t *server)
     actions_apply_elapsed_time(server->actions, elapsed);
     player_decrease_food(server->game->players, elapsed);
     server->game->ressources_time_unit -= elapsed;
-    if (act < 0)
-    {
-        printf("Timeout\n");
-        return;
-    }
-    if (FD_ISSET(server->netctl->entrypoint.fd, &readfds))
-    {
-        printf("New connection\n");
-        int fd = netctl_accept(server->netctl);
-        server_handshake(server, fd);
-    }
-    for (list_t head = server->netctl->clients; head != NULL;)
-    {
-        if (FD_ISSET(((socket_t *)head->value)->fd, &readfds))
-        {
-            char buffer[1024] = {0};
-            ssize_t rbytes = recv(((socket_t *)head->value)->fd, buffer, 1024, 0);
-            if (rbytes == 0)
-            {
-                printf("Client disconnected\n");
-                actions_remove_from_issuer(&server->actions, ((socket_t *)head->value)->fd);
-                remove_player(server->game, ((socket_t *)head->value)->fd);
-                netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
-                head = server->netctl->clients;
-                continue;
-            }
-            else
-            {
-                //printf("Received %ld bytes\n", rbytes);
-                printf("%s\n", buffer);
-                player_t *player = get_player_by_fd(server->game, ((socket_t *)head->value)->fd);
-                if (strcmp(player->team_name, "GRAPHIC") == 0)
-                    gui_request_process(server->game, player, buffer);
-                else
-                {
-                    if (strncmp(buffer, "Incantation", 11) == 0)
-                    {
-                        const char *buff = verif_incantation(server->game, player, NULL, 0);
-                        if (strncmp(buff, "ko\n", 3) == 0)
-                        {
-                            //dprintf(player->fd, buff);
-                            head = head->next;
-                            continue;
-                        }
-                        get_incantation(server->game, player);
-                    }
-                    actions_accept(&server->actions, action_new(((socket_t *)head->value)->fd, buffer));
-                }
-            }
-        }
-        head = head->next;
-    }
+
+    server_process_activity(server, &readfds, act);
 }
 
 /**
  * Sends the welcome message to the client and waits for the team name
  */
-void server_handshake(server_t *server, int fd)
+void server_handshake(server_t *server, socket_t *s)
 {
-    send(fd, "WELCOME\n", 8, 0);
-    char buffer[1024] = {0};
-    recv(fd, buffer, 1024, 0);
-    printf("Handshake done\n");
-    printf("Client is on team %s\n", buffer);
-    if (strncmp(buffer, "GRAPHIC", 7) == 0)
+    s->handshaked = true;
+    if (strncmp(s->buffer, "GRAPHIC", 7) == 0)
     {
         printf("Graphic client connected\n");
-        add_player(server->game, "GRAPHIC", fd);
-        gui_send_at_connexion(server->game, fd);
+        add_player(server->game, "GRAPHIC", s->fd);
+        gui_send_at_connexion(server->game, s->fd);
         return;
     }
     for (list_t head = server->game->teams; head != NULL; head = head->next)
     {
         team_t *team = (team_t *)head->value;
-        if (strncmp(team->name, buffer, strlen(team->name)) == 0 && team->nb_players < team->max_players)
+        if (strncmp(team->name, s->buffer, strlen(team->name)) == 0 && team->nb_players < team->max_players)
         {
-            dprintf(fd, "%d\n"
-                        "%d %d\n",
+            dprintf(s->fd, "%d\n"
+                           "%d %d\n",
                     team->max_players - team->nb_players,
                     server->options->width,
                     server->options->height);
-            printf("Player added %d\n", fd);
-            add_player(server->game, team->name, fd);
-            // gui communication
-            gui_player_connexion(server->game, get_player_by_fd(server->game, fd));
+            printf("Player added %d\n", s->fd);
+            add_player(server->game, team->name, s->fd);
+            gui_player_connexion(server->game, get_player_by_fd(server->game, s->fd));
             gui_send_all(server->game, server->game->send_message);
             return;
         }
     }
-    printf("Team not found\n");
-    dprintf(fd, "0\n"
-                "0 0\n");
-    remove_player(server->game, fd);
-    netctl_disconnect(server->netctl, fd);
+    dprintf(s->fd, "0\n"
+                   "0 0\n");
+    remove_player(server->game, s->fd);
+    netctl_disconnect(server->netctl, s->fd);
 }
 
 /**
@@ -195,7 +135,8 @@ int server_run(server_t *server)
             }
             head = &(*head)->next;
         }
-        if (server->game->ressources_time_unit <= 0) {
+        if (server->game->ressources_time_unit <= 0)
+        {
             spawn_ressources(server->game);
             server->game->ressources_time_unit += 20;
         }
@@ -211,4 +152,80 @@ void server_destroy(server_t *server)
     options_destroy(server->options);
     netctl_destroy(server->netctl);
     free(server);
+}
+
+/**
+ * Processes the client buffer after recving data
+ * for each line if the client is handshaked
+ */
+void server_process_buffer(server_t *server, socket_t *s)
+{
+    player_t *player = get_player_by_fd(server->game, s->fd);
+    char *eol;
+    while ((eol = strchr(s->buffer, '\n')) != NULL)
+    {
+        *eol = '\0';
+        if (!s->handshaked)
+            server_handshake(server, s);
+        else
+        {
+            if (strcmp(player->team_name, "GRAPHIC") == 0)
+                gui_request_process(server->game, player, s->buffer);
+            else
+            {
+                if (strncmp(s->buffer, "Incantation", 11) == 0)
+                {
+                    const char *buff = verif_incantation(server->game, player, NULL, 0);
+                    if (strncmp(buff, "ko\n", 3) == 0)
+                    {
+                        // dprintf(player->fd, buff);
+                        return;
+                    }
+                    get_incantation(server->game, player);
+                }
+                actions_accept(&server->actions, action_new(s->fd, s->buffer));
+            }
+        }
+
+        s->bufsz -= strlen(s->buffer) + 1;
+        memmove(s->buffer, eol + 1, s->bufsz);
+    }
+}
+
+/**
+ * Analyzes the activity on the server sockets
+ * and processes it
+ */
+void server_process_activity(server_t *server, fd_set *readfds, int act)
+{
+    if (FD_ISSET(server->netctl->entrypoint.fd, readfds))
+    {
+        int fd = netctl_accept(server->netctl);
+        send(fd, "WELCOME\n", 8, 0);
+    }
+    for (list_t head = server->netctl->clients; head != NULL;)
+    {
+        if (FD_ISSET(((socket_t *)head->value)->fd, readfds))
+        {
+            char query[1024] = {0};
+            socket_t *s = (socket_t *)head->value;
+            ssize_t rbytes = recv(((socket_t *)head->value)->fd, query, 1024, 0);
+
+            if (rbytes == 0)
+            {
+                actions_remove_from_issuer(&server->actions, ((socket_t *)head->value)->fd);
+                remove_player(server->game, ((socket_t *)head->value)->fd);
+                netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
+                head = server->netctl->clients;
+                continue;
+            }
+            else
+            {
+                s->bufsz += rbytes;
+                s->buffer = realloc(s->buffer, s->bufsz);
+                memcpy(s->buffer + s->bufsz - rbytes, query, rbytes);
+            }
+        }
+        head = head->next;
+    }
 }

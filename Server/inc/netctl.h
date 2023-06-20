@@ -13,6 +13,9 @@ typedef struct sockaddr_in sockaddr_in_t;
 typedef struct socket_s {
     int fd;
     sockaddr_in_t addr;
+    char *buffer;
+    size_t bufsz;
+    bool handshaked;
 } socket_t;
 
 typedef struct netctl_s {
