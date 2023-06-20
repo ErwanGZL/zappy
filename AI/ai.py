@@ -158,6 +158,7 @@ class AI:
                         str_recieved = self.wait_for_message()
                     else:
                         str_recieved = tmp
+                print(str_recieved)
                 if str_recieved.split(" ")[0] == "message":
                     message.append(str_recieved.split("message ")[1])
                 elif send[i].split("\n", 1)[0] == "Incantation" and elevation == 0:
@@ -175,12 +176,11 @@ class AI:
 
             # Process the message
             if send == []:
-                print("recieved:", recieved)
                 send = self.player.logic(recieved, message)
                 recieved = []
                 message = []
 
             for i in range(min(len(send), 10)):
                 self.send_message(send[i])
-                print("send:", send[i])
+                print("send:", "|", send[i], "|", sep="")
         pass
