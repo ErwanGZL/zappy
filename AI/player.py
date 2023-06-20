@@ -391,7 +391,6 @@ class Player:
         if self.inventory_content != []:
             if self.update_inventory(self.inventory_content) == 1:
                 self.broadcast_inventory()
-        self.command.append("Connect_nbr")
         self.command.append("Look")
 
     def fork_player(self):
@@ -535,7 +534,6 @@ class Player:
 
     def elevation(self):
         if self.id != 6:
-            self.command.append("Command_nbr")
             return
         enought_food = True
         if self.is_elevating == False:
@@ -566,4 +564,5 @@ class Player:
             self.end_turn_command()
         self.inventory_content = []
         self.move_in_turn = False
+        self.command.append("Connect_nbr")
         return self.command
