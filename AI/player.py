@@ -356,7 +356,7 @@ class Player:
                 self.command.append("Forward")
                 return
         else:
-            self.command.append("Inventory\n")
+            self.command.append("Inventory")
 
 
     def update_inventory(self, result: list):
@@ -386,13 +386,13 @@ class Player:
 
     def end_turn_command(self):
         if self.inventory_in_turn == True:
-            self.command.append("Inventory\n")
+            self.command.append("Inventory")
             self.inventory_in_turn = False
         if self.inventory_content != []:
             if self.update_inventory(self.inventory_content) == 1:
                 self.broadcast_inventory()
-        self.command.append("Connect_nbr\n")
-        self.command.append("Look\n")
+        self.command.append("Connect_nbr")
+        self.command.append("Look")
 
     def fork_player(self):
         if (
@@ -415,7 +415,7 @@ class Player:
             )
             self.id = 1
         else:
-            self.command.append("Fork\n")
+            self.command.append("Fork")
 
     def message_interpreter(self, messages: list):
         for i in messages:
@@ -444,17 +444,17 @@ class Player:
                 self.is_elevating = True
                 direction = int(direction)
                 if direction == 1:
-                    self.command.append("Forward\n")
+                    self.command.append("Forward")
                 elif direction == 5:
-                    self.command.append("Left\n")
-                    self.command.append("Left\n")
-                    self.command.append("Forward\n")
+                    self.command.append("Left")
+                    self.command.append("Left")
+                    self.command.append("Forward")
                 elif direction == 2 or direction == 3 or direction == 4:
-                    self.command.append("Left\n")
-                    self.command.append("Forward\n")
+                    self.command.append("Left")
+                    self.command.append("Forward")
                 elif direction == 6 or direction == 7 or direction == 8:
-                    self.command.append("Right\n")
-                    self.command.append("Forward\n")
+                    self.command.append("Right")
+                    self.command.append("Forward")
                 elif direction == 0:
                     self.drop_item_for_elevation()
 
@@ -465,7 +465,7 @@ class Player:
                 continue
             if for_level[self.level - 1][cpt] != 0:
                 for j in range(self.inventory.get_ressource(i)):
-                    self.command.append("Set " + i + "\n")
+                    self.command.append("Set " + i)
             cpt += 1
 
     def command_interpreter(self, answer: list):
@@ -491,9 +491,9 @@ class Player:
 
     def wake_up(self):
         self.command.append("Broadcast " + self.encode("here"))
-        self.command.append("Inventory\n")
-        self.command.append("Look\n")
-        self.command.append("Connect_nbr\n")
+        self.command.append("Inventory")
+        self.command.append("Look")
+        self.command.append("Connect_nbr")
 
     def can_elevation(self) -> bool:
         nb_player = 0
@@ -535,7 +535,7 @@ class Player:
 
     def elevation(self):
         if self.id != 6:
-            self.command.append("Command_nbr\n")
+            self.command.append("Command_nbr")
             return
         enought_food = True
         if self.is_elevating == False:
@@ -546,10 +546,10 @@ class Player:
             self.is_elevating = True
         if self.is_elevating == True:
             self.command.append("Broadcast " + self.encode("elevation"))
-            self.command.append("Look\n")
+            self.command.append("Look")
             self.drop_item_for_elevation()
             if self.can_elevation() == True:
-                self.command.append("Incantation\n")
+                self.command.append("Incantation")
 
     def logic(self, answer: list, message: list) -> list:
         self.command = []
