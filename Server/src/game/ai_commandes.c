@@ -94,7 +94,7 @@ const char *turn_left(game_t *game ,player_t *player, const char *arg)
 
 const char *team_unused_slots(game_t *game, player_t *player, const char *arg)
 {
-    team_t *team = get_team_by_name(game, arg);
+    team_t *team = get_team_by_name(game, player->team_name);
     if (team == NULL)
         return "ko\n";
     memset(game->buffer, 0, BUFSIZ);

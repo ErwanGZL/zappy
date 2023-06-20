@@ -49,6 +49,7 @@ void server_select(server_t *server)
  */
 void server_handshake(server_t *server, socket_t *s)
 {
+    printf("Handshaked back\n");
     s->handshaked = true;
     if (strncmp(s->buffer, "GRAPHIC", 7) == 0)
     {
@@ -57,6 +58,7 @@ void server_handshake(server_t *server, socket_t *s)
         gui_send_at_connexion(server->game, s->fd);
         return;
     }
+    printf("Not a graphic client\n");
     for (list_t head = server->game->teams; head != NULL; head = head->next)
     {
         team_t *team = (team_t *)head->value;
@@ -123,13 +125,15 @@ int server_run(server_t *server)
         for (list_t *head = &server->actions; *head != NULL;)
         {
             action_t *action = (action_t *)(*head)->value;
+            if (action->type == ACTION_CONNECT_NBR)
+                printf("Connect_nbr action cooldown = %d\n", action->cooldown);
             if (action->cooldown <= 0)
             {
                 player_t *p = get_player_by_fd(server->game, action->issuer);
                 const char *buff = action->callback(server->game, p, action->arg);
+                printf("Action %s executed\n", action->name);
                 dprintf(action->issuer, buff);
                 free(action);
-                printf("Action done\n");
                 list_del_elem_at_front(head);
                 continue;
             }
@@ -160,6 +164,8 @@ void server_destroy(server_t *server)
  */
 void server_process_buffer(server_t *server, socket_t *s)
 {
+    if (s->buffer == NULL)
+        printf("Buffer is null\n");
     player_t *player = get_player_by_fd(server->game, s->fd);
     char *eol;
     while ((eol = strchr(s->buffer, '\n')) != NULL)
@@ -202,6 +208,7 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
     {
         int fd = netctl_accept(server->netctl);
         send(fd, "WELCOME\n", 8, 0);
+        printf("Welcoming new client\n");
     }
     for (list_t head = server->netctl->clients; head != NULL;)
     {
@@ -210,6 +217,12 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
             char query[1024] = {0};
             socket_t *s = (socket_t *)head->value;
             ssize_t rbytes = recv(((socket_t *)head->value)->fd, query, 1024, 0);
+            printf("\nNew data from client\n");
+            printf("Bytes read: %ld\n", rbytes);
+            printf("Query: %s\n", query);
+            for (int i = 0; i < rbytes; i++)
+                printf("%X ", query[i]);
+            printf("\n");
 
             if (rbytes == 0)
             {
@@ -217,6 +230,7 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
                 remove_player(server->game, ((socket_t *)head->value)->fd);
                 netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
                 head = server->netctl->clients;
+                printf("Client disconnected\n");
                 continue;
             }
             else
@@ -224,6 +238,7 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
                 s->bufsz += rbytes;
                 s->buffer = realloc(s->buffer, s->bufsz);
                 memcpy(s->buffer + s->bufsz - rbytes, query, rbytes);
+                server_process_buffer(server, s);
             }
         }
         head = head->next;
