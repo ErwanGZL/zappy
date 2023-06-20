@@ -16,6 +16,8 @@ void netctl_disconnect(netctl_t *netctl, int fd)
             close(socket->fd);
             FD_CLR(socket->fd, &netctl->watched_fd);
             list_del_elem_at_front(head);
+            free(socket->buffer);
+            free(socket);
             return;
         }
     }

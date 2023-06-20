@@ -22,6 +22,7 @@ typedef struct action_s {
     } type;
     int cooldown;
     int issuer;
+    char name[64];
     char arg[1024];
     const char *(*callback)(game_t *game, player_t *player, const char *arg);
 } action_t;
