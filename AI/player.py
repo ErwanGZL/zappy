@@ -229,6 +229,8 @@ class Player:
 
         self.first_turn = True
         self.inventory_in_turn = False
+        self.is_elevating = False
+        self.move_in_turn = False
 
     def encode(self, message: str):
         return utile.xor_compressed_cipher(str(self.id) + "|" + message, self.team_name)
@@ -290,7 +292,7 @@ class Player:
         for i in items:
             if i == "food":
                 continue
-            if self.share_inventory[6].get_ressource(i) < for_level[self.level][cpt]:
+            if self.share_inventory[6].get_ressource(i) < for_level[self.level - 1][cpt]:
                 return i
             cpt += 1
         return None
@@ -298,7 +300,9 @@ class Player:
     def go_to(self, pos: int, item: str):
         cpt = 0
         if pos == 0:
-            self.command.append("Take " + item)
+            for i in range(len(self.look_content[0])):
+                if item in self.look_content[0][i]:
+                    self.command.append("Take " + item)
             self.inventory_in_turn = True
             return
         self.command.append("Forward")
@@ -312,7 +316,9 @@ class Player:
             self.command.append("Right")
         for i in range(abs(direction)):
             self.command.append("Forward")
-        self.command.append("Take " + item)
+        for i in range(len(self.look_content[cpt])):
+            if item in self.look_content[cpt][i]:
+                self.command.append("Take " + item)
         self.inventory_in_turn = True
         return
 
@@ -325,9 +331,9 @@ class Player:
     def take_item(self):
         nessesary_food = 0
         if self.id == 0:
-            nessesary_food = 15
-        else:
             nessesary_food = 20
+        else:
+            nessesary_food = 40
         if self.inventory.get_ressource("food") < nessesary_food:
             if self.item_in_look("food") is not None:
                 self.go_to(self.item_in_look("food"), "food")
@@ -375,7 +381,7 @@ class Player:
                 self.share_inventory[6].add_ressource(
                     j, self.share_inventory[i].get_ressource(j)
                 )
-        print("total inventory: ", self.share_inventory[6].print_inventory())
+        # print("total inventory: ", self.share_inventory[6].print_inventory())
 
 
     def end_turn_command(self):
@@ -388,11 +394,9 @@ class Player:
         self.command.append("Connect_nbr\n")
         self.command.append("Look\n")
 
-        self.inventory_content = []
-
     def fork_player(self):
         if (
-            self.inventory.get_ressource("food") < 15
+            self.inventory.get_ressource("food") < 20
             or self.enough_player == True
             or self.id != 0
         ):
@@ -415,16 +419,11 @@ class Player:
 
     def message_interpreter(self, messages: list):
         for i in messages:
-            # print("message received: ", i)
             direction = i.split(", ")[0]
             message = i.split(", ")[1].split("\n")[0]
             message = self.decode(message)
             id_player = int(message.split("|", 1)[0])
             message = message.split("|", 1)[1]
-            # print("direction: ", direction)
-            # print("message: ", message)
-            # print("id_player: ", id_player)
-
             if "ready" in message:
                 self.enough_player = True
                 if self.id == 0:
@@ -438,7 +437,36 @@ class Player:
                     utile.str_to_list(message.split("|")[1])
                 )
                 self.update_total_inventory()
+            if "finished" in message:
+                self.is_elevating = False
+            if "elevation" in message and self.move_in_turn == False:
+                self.command = []
+                self.is_elevating = True
+                direction = int(direction)
+                if direction == 1:
+                    self.command.append("Forward\n")
+                elif direction == 5:
+                    self.command.append("Left\n")
+                    self.command.append("Left\n")
+                    self.command.append("Forward\n")
+                elif direction == 2 or direction == 3 or direction == 4:
+                    self.command.append("Left\n")
+                    self.command.append("Forward\n")
+                elif direction == 6 or direction == 7 or direction == 8:
+                    self.command.append("Right\n")
+                    self.command.append("Forward\n")
+                elif direction == 0:
+                    self.drop_item_for_elevation()
 
+    def drop_item_for_elevation(self):
+        cpt = 1
+        for i in items:
+            if i == "food":
+                continue
+            if for_level[self.level - 1][cpt] != 0:
+                for j in range(self.inventory.get_ressource(i)):
+                    self.command.append("Set " + i + "\n")
+            cpt += 1
 
     def command_interpreter(self, answer: list):
         for i in answer:
@@ -449,12 +477,79 @@ class Player:
                 self.look_content = utile.str_to_list(command[1])
             elif command[0] == "Inventory":
                 self.inventory_content = utile.str_to_list(command[1])
+            elif command[0] == "Incantation":
+                self.is_elevating = False
+                if (len(command[1].split(":")) == 2):
+                    self.level = int(command[1].split(":")[1])
+                self.command.append("Broadcast " + self.encode("finished"))
+            elif command[0] == "Forward":
+                self.move_in_turn = True
+            elif command[0] == "Right":
+                self.move_in_turn = True
+            elif command[0] == "Left":
+                self.move_in_turn = True
 
     def wake_up(self):
         self.command.append("Broadcast " + self.encode("here"))
         self.command.append("Inventory\n")
         self.command.append("Look\n")
         self.command.append("Connect_nbr\n")
+
+    def can_elevation(self) -> bool:
+        nb_player = 0
+        lim = 0
+        der = 0
+        sib = 0
+        mend = 0
+        phi = 0
+        thys = 0
+        if self.look_content == []:
+            return False
+        for i in self.look_content[0]:
+            if "player" in i:
+                nb_player += 1
+            elif "linemate" in i:
+                lim += 1
+            elif "deraumere" in i:
+                der += 1
+            elif "sibur" in i:
+                sib += 1
+            elif "mendiane" in i:
+                mend += 1
+            elif "phiras" in i:
+                phi += 1
+            elif "thystame" in i:
+                thys += 1
+        if (
+            nb_player >= 6
+            and for_level[self.level - 1][1] <= lim
+            and for_level[self.level - 1][2] <= der
+            and for_level[self.level - 1][3] <= sib
+            and for_level[self.level - 1][4] <= mend
+            and for_level[self.level - 1][5] <= phi
+            and for_level[self.level - 1][6] <= thys
+        ):
+            return True
+        return False
+
+
+    def elevation(self):
+        if self.id != 6:
+            self.command.append("Command_nbr\n")
+            return
+        enought_food = True
+        if self.is_elevating == False:
+            for i in range(6):
+                if self.share_inventory[i].get_ressource("food") < 40:
+                    enought_food = False
+        if self.need_to_elevation() is None and enought_food == True:
+            self.is_elevating = True
+        if self.is_elevating == True:
+            self.command.append("Broadcast " + self.encode("elevation"))
+            self.command.append("Look\n")
+            self.drop_item_for_elevation()
+            if self.can_elevation() == True:
+                self.command.append("Incantation\n")
 
     def logic(self, answer: list, message: list) -> list:
         self.command = []
@@ -464,7 +559,11 @@ class Player:
             return self.command
         self.command_interpreter(answer)
         self.message_interpreter(message)
-        self.fork_player()
-        self.take_item()
-        self.end_turn_command()
+        self.elevation()
+        if self.is_elevating == False:
+            self.fork_player()
+            self.take_item()
+            self.end_turn_command()
+        self.inventory_content = []
+        self.move_in_turn = False
         return self.command

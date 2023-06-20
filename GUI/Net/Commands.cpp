@@ -159,6 +159,7 @@ int Network::startIncantation(std::string str)
 
 int Network::endIncantation(std::string str)
 {
+    std::cout << "end incantation: " << str << std::endl;
     std::string tmp = str;
     int x = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
