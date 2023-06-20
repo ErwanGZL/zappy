@@ -172,7 +172,6 @@ class AI:
 
             # Process the message
             if send == []:
-                sleep(0.1)
                 send = self.player.logic(recieved, message)
                 recieved = []
                 message = []
