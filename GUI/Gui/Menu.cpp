@@ -72,6 +72,9 @@ Menu::Menu()
     _music->play();
     _musicBar = new Sound("Music", 720 / 2 - 200, 480 / 2 + 150, 50);
     _effectsBar = new Sound("Effects", 720 / 2 + 200, 480 / 2 + 150, 50);
+
+    _textMachine.setOrigin(_textMachine.getGlobalBounds().width / 2, _textMachine.getGlobalBounds().height / 2);
+    _textPort.setOrigin(_textPort.getGlobalBounds().width / 2, _textPort.getGlobalBounds().height / 2);
 }
 
 Menu::~Menu()
@@ -133,6 +136,11 @@ void Menu::event()
                 _machine.pop_back();
             } else if (event.text.unicode == 8 && _port.size() > 0 && _positionWrite == 2) {
                 _port.pop_back();
+            } else if (event.text.unicode == 9) {
+                if (_positionWrite == 1)
+                    _positionWrite = 2;
+                else
+                    _positionWrite = 1;
             } else if (event.text.unicode > 31 && event.text.unicode < 128 && _machine.size() < 20 && _positionWrite == 1) {
                 _machine += static_cast<char>(event.text.unicode);
             } else if (event.text.unicode > 31 && event.text.unicode < 128 && _port.size() < 20 && _positionWrite == 2) {

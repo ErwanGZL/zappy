@@ -38,8 +38,8 @@ class Menu {
         sf::Text _textButton;
         sf::RectangleShape _box1;
         sf::RectangleShape _box2;
-        std::string _machine;
-        std::string _port;
+        std::string _machine = "127.0.0.1";
+        std::string _port = "4242";
         int _portConnect;
 
         sf::Sprite _button;
@@ -51,7 +51,7 @@ class Menu {
 
         bool _connected;
 
-        int _positionWrite = 0;
+        int _positionWrite = 1;
 
         sf::Music *_music;
 
