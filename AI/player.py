@@ -301,11 +301,8 @@ class Player:
         cpt = 0
         if pos == 0:
             for i in range(len(self.look_content[0])):
-                # print(self.look_content[0][i])
                 if item in self.look_content[0][i]:
-                    # print("===")
                     self.command.append("Take " + item)
-            # print("||")
             self.inventory_in_turn = True
             return
         self.command.append("Forward")
@@ -338,7 +335,6 @@ class Player:
         else:
             nessesary_food = 40
         if self.inventory.get_ressource("food") < nessesary_food:
-            print("take food")
             if self.item_in_look("food") is not None:
                 self.go_to(self.item_in_look("food"), "food")
                 return
@@ -348,7 +344,6 @@ class Player:
                 self.command.append("Forward")
                 return
         elif self.need_to_elevation() is not None:
-            print("take stones")
             if self.item_in_look(self.need_to_elevation()) is not None:
                 self.go_to(
                     self.item_in_look(self.need_to_elevation()),
@@ -361,7 +356,6 @@ class Player:
                 self.command.append("Forward")
                 return
         else:
-            print("inventory")
             self.command.append("Inventory\n")
 
 
@@ -387,7 +381,7 @@ class Player:
                 self.share_inventory[6].add_ressource(
                     j, self.share_inventory[i].get_ressource(j)
                 )
-        print("total inventory: ", self.share_inventory[6].print_inventory())
+        # print("total inventory: ", self.share_inventory[6].print_inventory())
 
 
     def end_turn_command(self):
@@ -445,7 +439,6 @@ class Player:
                 self.update_total_inventory()
             if "finished" in message:
                 self.is_elevating = False
-                self.level += 1
             if "elevation" in message and self.move_in_turn == False:
                 self.command = []
                 self.is_elevating = True
@@ -486,7 +479,8 @@ class Player:
                 self.inventory_content = utile.str_to_list(command[1])
             elif command[0] == "Incantation":
                 self.is_elevating = False
-                self.level += 1
+                if (len(command[1].split(":")) == 2):
+                    self.level = int(command[1].split(":")[1])
                 self.command.append("Broadcast " + self.encode("finished"))
             elif command[0] == "Forward":
                 self.move_in_turn = True
@@ -551,7 +545,6 @@ class Player:
         if self.need_to_elevation() is None and enought_food == True:
             self.is_elevating = True
         if self.is_elevating == True:
-            print("need to elevation")
             self.command.append("Broadcast " + self.encode("elevation"))
             self.command.append("Look\n")
             self.drop_item_for_elevation()
