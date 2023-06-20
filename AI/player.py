@@ -192,8 +192,8 @@ class Inventory:
             raise Exception("Invalid ressource")
 
     def set_inventory(self, inventory: list):
-        for i in inventory:
-            self.set_ressource(i[0], int(i[1]))
+        for i in range(6):
+            self.set_ressource(items[i], inventory[i][1])
 
 
 ##class player:
@@ -252,7 +252,7 @@ class Player:
 
     def broadcast_inventory(self):
         self.command.append(
-            "Broadcast " + self.encode(self.inventory.print_inventory())
+            "Broadcast " + self.encode("inventory|" + self.inventory.print_inventory())
         )
 
     def elevation(self):
@@ -291,7 +291,6 @@ class Player:
             if i == "food":
                 continue
             if self.share_inventory[6].get_ressource(i) < for_level[self.level][cpt]:
-                # print("need to elevation: ", i)
                 return i
             cpt += 1
         return None
@@ -324,7 +323,12 @@ class Player:
         return None
 
     def take_item(self):
-        if self.inventory.get_ressource("food") < 20:
+        nessesary_food = 0
+        if self.id == 0:
+            nessesary_food = 15
+        else:
+            nessesary_food = 20
+        if self.inventory.get_ressource("food") < nessesary_food:
             if self.item_in_look("food") is not None:
                 self.go_to(self.item_in_look("food"), "food")
                 return
@@ -333,7 +337,7 @@ class Player:
                     self.command.append("Left")
                 self.command.append("Forward")
                 return
-        if self.need_to_elevation() is not None:
+        elif self.need_to_elevation() is not None:
             if self.item_in_look(self.need_to_elevation()) is not None:
                 self.go_to(
                     self.item_in_look(self.need_to_elevation()),
@@ -345,31 +349,34 @@ class Player:
                     self.command.append("Left")
                 self.command.append("Forward")
                 return
+        else:
+            self.command.append("Inventory\n")
+
 
     def update_inventory(self, result: list):
-        # print("update inventory", result)
         value_return = 0
         for item in result:
             if self.inventory.get_ressource(item[0]) != int(item[1]):
                 value_return = 1
             self.inventory.set_ressource(item[0], int(item[1]))
-        self.update_share_inventory(result)
+        self.share_inventory[self.id - 1].set_inventory(result)
         return value_return
 
     def update_share_inventory(self, result: list):
         for item in result:
             self.share_inventory[self.id - 1].set_ressource(item[0], item[1])
-        self.udate_total_inventory()
+        self.update_total_inventory()
 
-    def udate_total_inventory(self):
+    def update_total_inventory(self):
         for j in items:
             self.share_inventory[6].set_ressource(j, 0)
         for i in range(6):
             for j in items:
-                self.inventory.add_ressource(
+                self.share_inventory[6].add_ressource(
                     j, self.share_inventory[i].get_ressource(j)
                 )
-        print("total inventory: ", self.inventory.print_inventory())
+        print("total inventory: ", self.share_inventory[6].print_inventory())
+
 
     def end_turn_command(self):
         if self.inventory_in_turn == True:
@@ -385,7 +392,7 @@ class Player:
 
     def fork_player(self):
         if (
-            self.inventory.get_ressource("food") < 20
+            self.inventory.get_ressource("food") < 15
             or self.enough_player == True
             or self.id != 0
         ):
@@ -412,18 +419,26 @@ class Player:
             direction = i.split(", ")[0]
             message = i.split(", ")[1].split("\n")[0]
             message = self.decode(message)
-            id_player = int(message.split("|")[0])
-            message = message.split("|")[1]
+            id_player = int(message.split("|", 1)[0])
+            message = message.split("|", 1)[1]
             # print("direction: ", direction)
             # print("message: ", message)
             # print("id_player: ", id_player)
 
-            if message == "ready":
+            if "ready" in message:
                 self.enough_player = True
-            if message == "here":
+                if self.id == 0:
+                    self.id = 1
+            if "here" in message:
                 self.id += 1
                 if self.id == 6:
                     self.command.append("Broadcast " + self.encode("ready"))
+            if "inventory" in message:
+                self.share_inventory[id_player - 1].set_inventory(
+                    utile.str_to_list(message.split("|")[1])
+                )
+                self.update_total_inventory()
+
 
     def command_interpreter(self, answer: list):
         for i in answer:
