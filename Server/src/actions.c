@@ -27,7 +27,7 @@ static const int cooldowns[] = {
     7,  // Look
     1,  // Inventory
     7,  // Broadcast
-    1,  // Connect_nbr
+    0,  // Connect_nbr
     42, // Fork
     7,  // Eject
     7,  // Take
@@ -65,7 +65,7 @@ action_t *action_new(int issuer, const char *cmd)
             action->cooldown = cooldowns[action->type];
             action->callback = callbacks[action->type];
             if (action->type == ACTION_BROADCAST || action->type == ACTION_TAKE || action->type == ACTION_SET)
-                strncpy(action->arg, cmd + strlen(actions[i]), strlen(cmd) - strlen(actions[i]) - 1);
+                strncpy(action->arg, cmd + strlen(actions[i]), strlen(cmd) - strlen(actions[i]));
             return action;
         }
     }
