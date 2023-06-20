@@ -290,7 +290,8 @@ class Player:
         for i in items:
             if i == "food":
                 continue
-            if self.share_inventory.get_ressource(i) < for_level[self.level][cpt]:
+            if self.share_inventory[6].get_ressource(i) < for_level[self.level][cpt]:
+                # print("need to elevation: ", i)
                 return i
             cpt += 1
         return None
@@ -333,9 +334,9 @@ class Player:
                 self.command.append("Forward")
                 return
         if self.need_to_elevation() is not None:
-            if self.need_to_elevation() in self.look_content:
+            if self.item_in_look(self.need_to_elevation()) is not None:
                 self.go_to(
-                    self.look_content.index(self.need_to_elevation()),
+                    self.item_in_look(self.need_to_elevation()),
                     self.need_to_elevation(),
                 )
                 return
@@ -352,6 +353,7 @@ class Player:
             if self.inventory.get_ressource(item[0]) != int(item[1]):
                 value_return = 1
             self.inventory.set_ressource(item[0], int(item[1]))
+        self.update_share_inventory(result)
         return value_return
 
     def update_share_inventory(self, result: list):
@@ -367,6 +369,7 @@ class Player:
                 self.inventory.add_ressource(
                     j, self.share_inventory[i].get_ressource(j)
                 )
+        print("total inventory: ", self.inventory.print_inventory())
 
     def end_turn_command(self):
         if self.inventory_in_turn == True:
@@ -374,7 +377,6 @@ class Player:
             self.inventory_in_turn = False
         if self.inventory_content != []:
             if self.update_inventory(self.inventory_content) == 1:
-                self.update_share_inventory(self.inventory_content)
                 self.broadcast_inventory()
         self.command.append("Connect_nbr\n")
         self.command.append("Look\n")

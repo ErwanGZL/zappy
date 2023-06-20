@@ -157,12 +157,12 @@ class AI:
                         str_recieved = self.wait_for_message()
                     else:
                         str_recieved = tmp
-                        print("no wait for message")
+                        # print("no wait for message")
                 if str_recieved.split(" ")[0] == "message":
                     message.append(str_recieved.split("message ")[1])
                 else:
                     recieved.append(send[i].split("\n", 1)[0] + "|" + str_recieved)
-                    print("recieved: ", recieved[-1])
+                    # print("recieved: ", recieved[-1])
                     i += 1
 
             if len(send) > 10:
