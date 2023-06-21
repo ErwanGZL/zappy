@@ -378,7 +378,7 @@ class Player:
     def update_total_inventory(self):
         for j in items:
             self.share_inventory[6].set_ressource(j, 0)
-        for i in range(7):
+        for i in range(6):
             for j in items:
                 self.share_inventory[6].add_ressource(
                     j, self.share_inventory[i].get_ressource(j)
