@@ -477,8 +477,7 @@ class Player:
             elif command[0] == "Inventory":
                 self.inventory_content = utile.str_to_list(command[1])
             elif command[0] == "Incantation":
-                if (self.id == 6):
-                    print("GROOOOOSSS CACACACACAAAAAA")
+                print(command)
                 self.is_elevating = False
                 if (len(command[1].split(":")) == 2):
                     self.level = int(command[1].split(":")[1])
@@ -497,6 +496,7 @@ class Player:
         self.command.append("Connect_nbr")
 
     def can_elevation(self) -> bool:
+        print(self.level)
         nb_player = 0
         lim = 0
         der = 0
@@ -549,11 +549,9 @@ class Player:
             self.drop_item_for_elevation()
             if self.can_elevation() == True:
                 self.command.append("Incantation")
+                print("elevation")
 
     def logic(self, answer: list, message: list) -> list:
-        if (self.id == 6):
-            print(answer)
-            # print(message)
         self.command = []
         if self.first_turn == True:
             self.wake_up()

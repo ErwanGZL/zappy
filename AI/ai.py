@@ -164,8 +164,11 @@ class AI:
                 if str_received.split(" ")[0] == "message":
                     message.append(str_received.split("message ")[1])
 
-                elif str_received.split(":")[0] == "Current level":
-                    received.append("Incantation|" + str_received.split(":")[1])
+                elif "Elevation underway" in str_received:
+                    received.append("Incantation|" + str_received)
+                elif "Current level" in str_received:
+                    received.append("Incantation|" + str_received)
+
 
                 # else
                 # add the message to the received list "<request>|<message>"
@@ -187,4 +190,8 @@ class AI:
             for i in range(min(len(send), 10)):
                 self.send_message(send[i])
                 #print("send:", "|", send[i], "|", sep="")
+            for i in range(min(len(send), 10)):
+                if "Incantation" in send[i]:
+                    send.pop(i)
+                    break
         pass
