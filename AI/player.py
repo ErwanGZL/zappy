@@ -531,7 +531,6 @@ class Player:
             return True
         return False
 
-
     def elevation(self):
         if self.id != 6:
             return

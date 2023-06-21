@@ -32,11 +32,12 @@ typedef struct action_s {
 */
 action_t *action_new(int issuer, const char *cmd);
 int action_cmp_cooldown(const void *a, const void *b);
+void action_dump(const void *value);
 
 /**
  * Actions list functions
 */
 bool actions_accept(list_t *action_list, action_t *action);
-timeval_t *actions_get_next_timeout(list_t action_list, int frequency);
+timeval_t *actions_get_next_timeout(list_t *action_list, int frequency);
 void actions_apply_elapsed_time(list_t action_list, size_t elapsed_time);
 void actions_remove_from_issuer(list_t *action_list, int issuer);

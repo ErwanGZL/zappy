@@ -62,7 +62,7 @@ class AI:
             self.player = player.Player(
                 self.team_name, self.servaddr[0], self.servaddr[1]
             )
-            if self.slots_avl > 0:
+            if self.slots_avl >= 0:
                 self.connected = True
 
         self.socket.settimeout(0.5)
