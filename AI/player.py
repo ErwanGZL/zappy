@@ -192,7 +192,7 @@ class Inventory:
             raise Exception("Invalid ressource")
 
     def set_inventory(self, inventory: list):
-        for i in range(6):
+        for i in range(7):
             self.set_ressource(items[i], inventory[i][1])
 
 
@@ -368,6 +368,8 @@ class Player:
                 value_return = 1
             self.inventory.set_ressource(item[0], int(item[1]))
         self.share_inventory[self.id - 1].set_inventory(result)
+        if self.level == 7:
+            print(f"inventory: {self.share_inventory[self.id]}")
         return value_return
 
     def update_share_inventory(self, result: list):
