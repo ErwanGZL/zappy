@@ -122,22 +122,21 @@ int server_run(server_t *server)
             }
             head = &(*head)->next;
         }
-        for (list_t *head = &server->actions; *head != NULL;)
+        list_t *head = &server->actions;
+        while (*head != NULL)
         {
             action_t *action = (action_t *)(*head)->value;
-            if (action->type == ACTION_CONNECT_NBR)
-                printf("Connect_nbr action cooldown = %d\n", action->cooldown);
             if (action->cooldown <= 0)
             {
                 player_t *p = get_player_by_fd(server->game, action->issuer);
                 const char *buff = action->callback(server->game, p, action->arg);
-                printf("Action %s executed\n", action->name);
+                // printf("Action %s executed\n", action->name);
                 dprintf(action->issuer, buff);
                 free(action);
                 list_del_elem_at_front(head);
-                continue;
             }
-            head = &(*head)->next;
+            else
+                head = &((*head)->next);
         }
         if (server->game->ressources_time_unit <= 0)
         {
@@ -184,7 +183,7 @@ void server_process_buffer(server_t *server, socket_t *s)
                     const char *buff = verif_incantation(server->game, player, NULL, 0);
                     if (strncmp(buff, "ko\n", 3) == 0)
                     {
-                        // dprintf(player->fd, buff);
+                        dprintf(player->fd, buff);
                         return;
                     }
                     get_incantation(server->game, player);
