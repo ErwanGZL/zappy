@@ -89,12 +89,12 @@ const char *turn_left(game_t *game ,player_t *player, const char *arg)
     }
     gui_player_position(game, player);
     gui_send_all(game, game->send_message);
-    return "ok";
+    return "ok\n";
 }
 
 const char *team_unused_slots(game_t *game, player_t *player, const char *arg)
 {
-    team_t *team = get_team_by_name(game, arg);
+    team_t *team = get_team_by_name(game, player->team_name);
     if (team == NULL)
         return "ko\n";
     memset(game->buffer, 0, BUFSIZ);
@@ -142,11 +142,26 @@ int get_mineral_index(const char *arg)
         if (strcmp(mineral_tab[i], arg) == 0)
             return i;
     }
-    return -1;
+    return -100;
 }
 
 const char *take_object(game_t *game, player_t *player, const char *arg)
 {
+    int x = player->entity->pos.x;
+    int y = player->entity->pos.y;
+    printf("TILE AVL FOOD: %d\n", game->map->tiles[y][x].ressources[0]);
+    printf("FOOD ARG: '%s'\n", arg);
+
+    if (strncmp(arg, "food", 4) == 0 && game->map->tiles[y][x].ressources[0] > 0) {
+        game->map->tiles[y][x].ressources[0] -= 1;
+        player->entity->food_left += 1;
+        printf("Player %d take %s\n", player->fd, "food");
+        gui_pgt(game, player, -1);
+        gui_send_all(game, game->send_message);
+        gui_player_inventory(game, player);
+        gui_send_all(game, game->send_message);
+        return "ok\n";
+    }
     int index = get_mineral_index(arg);
     if (game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1] > 0) {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]--;
@@ -164,6 +179,18 @@ const char *take_object(game_t *game, player_t *player, const char *arg)
 
 const char *drop_object(game_t *game, player_t *player, const char *arg)
 {
+    int x = player->entity->pos.x;
+    int y = player->entity->pos.y;
+    if (strncmp(arg, "food", 4) == 0 && player->entity->food_left > 0) {
+        game->map->tiles[y][x].ressources[0] += 1;
+        player->entity->food_left -= 1;
+        printf("Player %d take %s\n", player->fd, "food");
+        gui_pgt(game, player, -1);
+        gui_send_all(game, game->send_message);
+        gui_player_inventory(game, player);
+        gui_send_all(game, game->send_message);
+        return "ok\n";
+    }
     int index = get_mineral_index(arg);
     if (player->entity->minerals[index] > 0) {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]++;
@@ -350,7 +377,7 @@ const char *eject_player(game_t *game, player_t *player, const char *arg)
     int success = 0;
     for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
         player_t *player2 = ptr->value;
-        if (strcmp(player->team_name, "GRAPHIC") == 0)
+        if (strcmp(player2->team_name, "GRAPHIC") == 0)
             continue;
         if (player2->entity->pos.x == x && player2->entity->pos.y == y && player2 != player) {
             player2->entity->pos.x = normalize(player2->entity->pos.x + 1, game->map->size.x);

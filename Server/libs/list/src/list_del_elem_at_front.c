@@ -7,18 +7,17 @@
 
 #include "list.h"
 #include <stdlib.h>
-
+#include <stdio.h>
 bool list_del_elem_at_front(list_t *front_ptr)
 {
     if (*front_ptr == NULL)
         return false;
     list_t head = *front_ptr;
-    list_t buff = head->next;
-    if (buff != NULL)
-        buff->prev = head->prev;
+    *front_ptr = head->next;
+    if (head->next != NULL)
+        head->next->prev = head->prev;
     if (head->prev != NULL)
-        head->prev->next = buff;
+        head->prev->next = head->next;
     free(head);
-    *front_ptr = buff;
     return true;
 }
