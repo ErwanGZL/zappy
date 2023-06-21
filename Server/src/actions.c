@@ -72,7 +72,6 @@ action_t *action_new(int issuer, const char *cmd)
     printf("Unknown command: %s\n", cmd);
     free(action);
     return NULL;
-
 }
 
 int action_cmp_cooldown(const void *a, const void *b)
@@ -100,7 +99,7 @@ bool actions_accept(list_t *action_list, action_t *action)
     if (occ < 10)
     {
         accumulate_cooldown(*action_list, action);
-        printf("New action\n");
+        printf("New action %s\n", action->name);
         printf("Action cooldown: %d\n", action->cooldown);
         list_add_elem_at_back(action_list, action);
         return true;
@@ -144,4 +143,16 @@ static void accumulate_cooldown(list_t action_list, action_t *action)
             max_cooldown = a->cooldown > max_cooldown ? a->cooldown : max_cooldown;
     }
     action->cooldown += max_cooldown;
+}
+
+void action_dump(const void *value)
+{
+    if (value == NULL) {
+        printf("Action: NULL\n");
+    }
+    else
+    {
+        action_t *action = (action_t *)value;
+        printf("Action: %s <%s>, cd=%d\n", action->name, action->arg, action->cooldown);
+    }
 }
