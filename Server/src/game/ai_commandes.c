@@ -267,12 +267,12 @@ const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
         player_t *player2 = ptr->value;
         if (player2->entity->pos.x == player->entity->pos.x && player2->entity->pos.y == player->entity->pos.y)
         {
+            player2->entity->is_incantating = 0;
             player2->entity->level++;
             gui_pie(game, player, player2->entity->level);
             gui_send_all(game, game->send_message);
             if (player2->fd != player->fd) {
                 dprintf(player2->fd, "Current level: %d\n", player2->entity->level);
-                printf("%d\n", player2->fd);
             }
         }
     }
@@ -280,7 +280,6 @@ const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
     memset(game->buffer, 0, BUFSIZ);
     sprintf(game->buffer, "Current level: %d\n", player->entity->level);
     remove_incantation_by_player(game, player);
-    printf("%d\n", player->fd);
     return game->buffer;
 }
 

@@ -166,8 +166,10 @@ class AI:
 
                 elif "Elevation underway" in str_received:
                     received.append("Incantation|" + str_received)
+                    print("Incantation|" + str_received)
                 elif "Current level" in str_received:
                     received.append("Incantation|" + str_received)
+                    print("Incantation|" + str_received)
 
 
                 # else

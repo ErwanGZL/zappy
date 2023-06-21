@@ -120,10 +120,14 @@ int server_run(server_t *server)
         while (*head != NULL)
         {
             action_t *action = (action_t *)(*head)->value;
+            if (action->type == ACTION_INCANTATION)
+                printf("Incantation in %d units\n", action->cooldown);
             if (action->cooldown <= 0)
             {
                 player_t *p = get_player_by_fd(server->game, action->issuer);
                 const char *msg = action->callback(server->game, p, action->arg);
+                if (action->type == ACTION_INCANTATION)
+                    printf("Incantation done >>> %s\n", msg);
                 dprintf(action->issuer, msg);
                 free(action);
                 list_del_elem_at_front(head);
@@ -171,12 +175,15 @@ void server_process_buffer(server_t *server, socket_t *s)
             {
                 if (strncmp(s->buffer, "Incantation", 11) == 0)
                 {
+                    printf("RECEIVED INCANTATION\n");
                     const char *buff = verif_incantation(server->game, player, NULL, 0);
                     if (strncmp(buff, "ko\n", 3) == 0)
                     {
+                        printf("INCANTATION KO\n");
                         dprintf(player->fd, buff);
                         return;
                     }
+                    printf("INCANTATION OK\n");
                     get_incantation(server->game, player);
                 }
                 actions_accept(&server->actions, action_new(s->fd, s->buffer));

@@ -293,6 +293,8 @@ class Player:
             if i == "food":
                 continue
             if self.share_inventory[6].get_ressource(i) < for_level[self.level - 1][cpt]:
+                if self.level == 7:
+                    print(f"{i} : {self.share_inventory[6].get_ressource(i)} @ {for_level[self.level - 1][cpt]}")
                 return i
             cpt += 1
         return None
@@ -376,7 +378,7 @@ class Player:
     def update_total_inventory(self):
         for j in items:
             self.share_inventory[6].set_ressource(j, 0)
-        for i in range(6):
+        for i in range(7):
             for j in items:
                 self.share_inventory[6].add_ressource(
                     j, self.share_inventory[i].get_ressource(j)
