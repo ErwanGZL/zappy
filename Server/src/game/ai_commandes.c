@@ -159,6 +159,8 @@ const char *take_object(game_t *game, player_t *player, const char *arg)
         return "ok\n";
     }
     int index = get_mineral_index(arg);
+    if (index == -100)
+        return "ko\n";
     if (game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1] > 0) {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]--;
         player->entity->minerals[index]++;
@@ -188,6 +190,8 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
         return "ok\n";
     }
     int index = get_mineral_index(arg);
+    if (index == -100)
+        return "ko\n";
     if (player->entity->minerals[index] > 0) {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]++;
         player->entity->minerals[index]--;
