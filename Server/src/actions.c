@@ -98,11 +98,9 @@ bool actions_accept(list_t *action_list, action_t *action)
     if (occ < 10)
     {
         accumulate_cooldown(*action_list, action);
-        printf("\nNew action %s <%s> requested by %d with %d cd\n", action->name, action->arg, action->issuer, action->cooldown);
         list_add_elem_at_back(action_list, action);
         return true;
     }
-    printf("Too many actions for client %d\n", action->issuer);
     free(action);
     return false;
 }

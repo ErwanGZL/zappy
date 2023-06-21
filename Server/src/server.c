@@ -109,7 +109,6 @@ int server_run(server_t *server)
             }
             if (player->entity->food_left <= 0)
             {
-                printf("Player %d died\n", player->fd);
                 actions_remove_from_issuer(&server->actions, player->fd);
                 remove_player(server->game, player->fd);
                 netctl_disconnect(server->netctl, player->fd);
@@ -125,7 +124,6 @@ int server_run(server_t *server)
             {
                 player_t *p = get_player_by_fd(server->game, action->issuer);
                 const char *msg = action->callback(server->game, p, action->arg);
-                printf("\nAction %s <%s> executed by %d with response %s\n", action->name, action->arg, action->issuer, msg);
                 dprintf(action->issuer, msg);
                 free(action);
                 list_del_elem_at_front(head);
@@ -200,7 +198,6 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
     {
         int fd = netctl_accept(server->netctl);
         send(fd, "WELCOME\n", 8, 0);
-        printf("Welcoming new client\n");
     }
     for (list_t head = server->netctl->clients; head != NULL;)
     {
@@ -209,12 +206,6 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
             char query[1024] = {0};
             socket_t *s = (socket_t *)head->value;
             ssize_t rbytes = recv(((socket_t *)head->value)->fd, query, 1024, 0);
-            printf("\nNew data from client %d\n", s->fd);
-            printf("Bytes read: %ld\n", rbytes);
-            printf("Query: %s\n", query);
-            for (int i = 0; i < rbytes; i++)
-                printf("%X ", query[i]);
-            printf("\n");
 
             if (rbytes == 0)
             {
@@ -222,7 +213,6 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
                 remove_player(server->game, ((socket_t *)head->value)->fd);
                 netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
                 head = server->netctl->clients;
-                printf("Client disconnected\n");
                 continue;
             }
             else

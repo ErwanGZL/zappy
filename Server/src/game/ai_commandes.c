@@ -151,7 +151,6 @@ const char *take_object(game_t *game, player_t *player, const char *arg)
     if (strncmp(arg, "food", 4) == 0 && game->map->tiles[y][x].ressources[0] > 0) {
         game->map->tiles[y][x].ressources[0] -= 1;
         player->entity->food_left += 1;
-        printf("Player %d take %s\n", player->fd, "food");
         gui_pgt(game, player, -1);
         gui_send_all(game, game->send_message);
         gui_player_inventory(game, player);
@@ -164,7 +163,6 @@ const char *take_object(game_t *game, player_t *player, const char *arg)
     if (game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1] > 0) {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]--;
         player->entity->minerals[index]++;
-        printf("Player %d take %s\n", player->fd, mineral_tab[index]);
         //gui communication
         gui_pgt(game, player, index);
         gui_send_all(game, game->send_message);
@@ -182,7 +180,6 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
     if (strncmp(arg, "food", 4) == 0 && player->entity->food_left > 0) {
         game->map->tiles[y][x].ressources[0] += 1;
         player->entity->food_left -= 1;
-        printf("Player %d take %s\n", player->fd, "food");
         gui_pgt(game, player, -1);
         gui_send_all(game, game->send_message);
         gui_player_inventory(game, player);
@@ -195,7 +192,6 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
     if (player->entity->minerals[index] > 0) {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]++;
         player->entity->minerals[index]--;
-        printf("Player %d dropped %s\n", player->fd, mineral_tab[index]);
         //gui communication
         gui_pdr(game, player, index);
         gui_send_all(game, game->send_message);

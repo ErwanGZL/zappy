@@ -37,7 +37,6 @@ void print_ressources(game_t *game)
 {
     for (int y = 0 ; y < game->map->size.y ; y++) {
         for (int x = 0 ; x < game->map->size.x ; x++) {
-            printf("x: %d, y: %d = ", x, y);
             for (int i = 0 ; i < 7 ; i++) {
                 printf("%d, ", game->map->tiles[y][x].ressources[i]);
             }
