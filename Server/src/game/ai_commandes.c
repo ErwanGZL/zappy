@@ -377,7 +377,7 @@ const char *eject_player(game_t *game, player_t *player, const char *arg)
     int success = 0;
     for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
         player_t *player2 = ptr->value;
-        if (strcmp(player->team_name, "GRAPHIC") == 0)
+        if (strcmp(player2->team_name, "GRAPHIC") == 0)
             continue;
         if (player2->entity->pos.x == x && player2->entity->pos.y == y && player2 != player) {
             player2->entity->pos.x = normalize(player2->entity->pos.x + 1, game->map->size.x);
