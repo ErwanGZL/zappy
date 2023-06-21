@@ -43,14 +43,14 @@ class AI:
             try:
                 self.socket.connect(self.servaddr)
             except ConnectionRefusedError:
-                print("Error: Connection refused")
+                #print("Error: Connection refused")
                 self.lock.release()
                 return
 
             r = self.socket.recv(1024)  # Receive the welcome message
             if r != b"WELCOME\n":
-                print("Error: Invalid welcome message")
-                print(r)
+                #print("Error: Invalid welcome message")
+                #print(r)
                 return
 
             # Sending the team name to the server
@@ -81,7 +81,7 @@ class AI:
                     return
             with self.lock:
                 if "\n" in self.buffer:
-                    # print("____", self.buffer.count("\n"))
+                    # #print("____", self.buffer.count("\n"))
                     # for _ in range(self.buffer.count("\n")):
                     self.msg_avl.set()
 
@@ -136,14 +136,13 @@ class AI:
         with self.lock:
             if not self.connected:
                 return
-            print(
-                f"Connected to the server. Slots available: {self.slots_avl}, Map size: w={self.map_x}, h={self.map_y}"
-            )
+            #print(
+            #    f"Connected to the server. Slots available: {self.slots_avl}, Map size: w={self.map_x}, h={self.map_y}"
+            #)
 
         received = []
         message = []
         send = []
-        elevation = 0
 
         while self.running:
 
@@ -159,7 +158,7 @@ class AI:
                         str_received = self.wait_for_message()
                     else:
                         str_received = tmp
-                print(f"Received: {str_received}")
+                #print(f"Received: {str_received}")
 
                 # If the message is a "message", add it to the message list (Broadcast)
                 if str_received.split(" ")[0] == "message":
@@ -168,16 +167,9 @@ class AI:
                 elif str_received.split(":")[0] == "Current level":
                     received.append("Incantation|" + str_received.split(":")[1])
 
-                # if the current request is an incantation, wait for the end of the incantation
-                # add the message to the received list "Incantation|<message>"
-                elif send[i].split("\n", 1)[0] == "Incantation" and elevation == 0:
-                    received.append(send[i].split("\n", 1)[0] + "|" + str_received)
-                    elevation += 1
-
                 # else
                 # add the message to the received list "<request>|<message>"
                 else:
-                    elevation = 0
                     received.append(send[i].split("\n", 1)[0] + "|" + str_received)
                     i += 1
 
@@ -194,5 +186,5 @@ class AI:
 
             for i in range(min(len(send), 10)):
                 self.send_message(send[i])
-                print("send:", "|", send[i], "|", sep="")
+                #print("send:", "|", send[i], "|", sep="")
         pass

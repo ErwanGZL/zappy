@@ -124,7 +124,7 @@ class ManualAI:
             if r != b"WELCOME\n":
                 self.scr.addstr(
                     0, 0, f"invalid welcome message", curses.color_pair(1))
-                print(r)
+                #print(r)
                 return
 
             # Sending the team name to the server
@@ -450,5 +450,5 @@ if __name__ == "__main__":
         ManualAI(*args).run()
 
     except Exception as e:
-        print(e)
+        #print(e)
         sys.exit(1)

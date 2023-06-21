@@ -27,7 +27,7 @@ static const int cooldowns[] = {
     7,  // Look
     1,  // Inventory
     7,  // Broadcast
-    0,  // Connect_nbr
+    1,  // Connect_nbr
     42, // Fork
     7,  // Eject
     7,  // Take

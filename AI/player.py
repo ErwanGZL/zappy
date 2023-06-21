@@ -381,7 +381,7 @@ class Player:
                 self.share_inventory[6].add_ressource(
                     j, self.share_inventory[i].get_ressource(j)
                 )
-        # print("total inventory: ", self.share_inventory[6].print_inventory())
+        # #print("total inventory: ", self.share_inventory[6].print_inventory())
 
 
     def end_turn_command(self):
@@ -477,6 +477,8 @@ class Player:
             elif command[0] == "Inventory":
                 self.inventory_content = utile.str_to_list(command[1])
             elif command[0] == "Incantation":
+                if (self.id == 6):
+                    print("GROOOOOSSS CACACACACAAAAAA")
                 self.is_elevating = False
                 if (len(command[1].split(":")) == 2):
                     self.level = int(command[1].split(":")[1])
@@ -549,6 +551,9 @@ class Player:
                 self.command.append("Incantation")
 
     def logic(self, answer: list, message: list) -> list:
+        if (self.id == 6):
+            print(answer)
+            # print(message)
         self.command = []
         if self.first_turn == True:
             self.wake_up()
