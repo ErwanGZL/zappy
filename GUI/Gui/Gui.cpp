@@ -313,10 +313,10 @@ void Gui::generatePlayer()
             index.push_back(i);
         }
     }
+    int indexE = 0;
     for (size_t i = 0;i < index.size();i++) {
-        PlayerGui *player = _players[index[i]];
-        _players.erase(_players.begin() + index[i]);
-        delete player;
+        _players.erase(_players.begin() + index[i] - indexE);
+        indexE++;
     }
 }
 
