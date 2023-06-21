@@ -270,13 +270,17 @@ const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
             player2->entity->level++;
             gui_pie(game, player, player2->entity->level);
             gui_send_all(game, game->send_message);
-            dprintf(player2->fd, "Current level: %d\n", player2->entity->level);
+            if (player2->fd != player->fd) {
+                dprintf(player2->fd, "Current level: %d\n", player2->entity->level);
+                printf("%d\n", player2->fd);
+            }
         }
     }
     //gui communication
     memset(game->buffer, 0, BUFSIZ);
     sprintf(game->buffer, "Current level: %d\n", player->entity->level);
     remove_incantation_by_player(game, player);
+    printf("%d\n", player->fd);
     return game->buffer;
 }
 
