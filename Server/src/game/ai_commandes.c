@@ -126,7 +126,6 @@ const char *get_inventory(game_t *game, player_t *player, const char *arg)
         strcat(inventory, mineral_tab[i]);
         strcat(inventory, " ");
         sprintf(num_buffer, "%d", player->entity->minerals[i]);
-        printf("%s\n", num_buffer);
         strcat(inventory, num_buffer);
         memset(num_buffer, 0, 10);
         if (i != 5)
@@ -149,13 +148,9 @@ const char *take_object(game_t *game, player_t *player, const char *arg)
 {
     int x = player->entity->pos.x;
     int y = player->entity->pos.y;
-    printf("TILE AVL FOOD: %d\n", game->map->tiles[y][x].ressources[0]);
-    printf("FOOD ARG: '%s'\n", arg);
-
     if (strncmp(arg, "food", 4) == 0 && game->map->tiles[y][x].ressources[0] > 0) {
         game->map->tiles[y][x].ressources[0] -= 1;
         player->entity->food_left += 1;
-        printf("Player %d take %s\n", player->fd, "food");
         gui_pgt(game, player, -1);
         gui_send_all(game, game->send_message);
         gui_player_inventory(game, player);
@@ -163,10 +158,11 @@ const char *take_object(game_t *game, player_t *player, const char *arg)
         return "ok\n";
     }
     int index = get_mineral_index(arg);
+    if (index == -100)
+        return "ko\n";
     if (game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1] > 0) {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]--;
         player->entity->minerals[index]++;
-        printf("Player %d take %s\n", player->fd, mineral_tab[index]);
         //gui communication
         gui_pgt(game, player, index);
         gui_send_all(game, game->send_message);
@@ -184,7 +180,6 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
     if (strncmp(arg, "food", 4) == 0 && player->entity->food_left > 0) {
         game->map->tiles[y][x].ressources[0] += 1;
         player->entity->food_left -= 1;
-        printf("Player %d take %s\n", player->fd, "food");
         gui_pgt(game, player, -1);
         gui_send_all(game, game->send_message);
         gui_player_inventory(game, player);
@@ -192,10 +187,11 @@ const char *drop_object(game_t *game, player_t *player, const char *arg)
         return "ok\n";
     }
     int index = get_mineral_index(arg);
+    if (index == -100)
+        return "ko\n";
     if (player->entity->minerals[index] > 0) {
         game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[index + 1]++;
         player->entity->minerals[index]--;
-        printf("Player %d dropped %s\n", player->fd, mineral_tab[index]);
         //gui communication
         gui_pdr(game, player, index);
         gui_send_all(game, game->send_message);
@@ -271,10 +267,13 @@ const char *resolve_incantation(game_t *game, player_t *player, const char *arg)
         player_t *player2 = ptr->value;
         if (player2->entity->pos.x == player->entity->pos.x && player2->entity->pos.y == player->entity->pos.y)
         {
+            player2->entity->is_incantating = 0;
             player2->entity->level++;
             gui_pie(game, player, player2->entity->level);
             gui_send_all(game, game->send_message);
-            dprintf(player2->fd, "Current level: %d\n", player2->entity->level);
+            if (player2->fd != player->fd) {
+                dprintf(player2->fd, "Current level: %d\n", player2->entity->level);
+            }
         }
     }
     //gui communication
@@ -294,12 +293,10 @@ const char *verif_incantation(game_t *game, player_t *player, const char *arg, i
         status = check_incantation_players(game, player, for_level[lvl][0], for_level[lvl][1]);
     if (status == 1)
         return "ko\n";
-    printf("players ok\n");
     for (int i = 0; i < 6; i++) {
         if (game->map->tiles[player->entity->pos.y][player->entity->pos.x].ressources[i + 1] < for_level[lvl][i + 2])
             return "ko\n";
     }
-    printf("map ok\n");
     return "Elevation underway\n";
 }
 
@@ -410,7 +407,6 @@ void send_broadcast_message(const char *message, int dest_fd, int tile_from)
 
 int convert_provenance(int provenance, pos_t orientation)
 {
-    printf("before convert: %d\n", provenance);
     if (provenance == 0)
         return 0;
     int to_add = 0;
@@ -433,7 +429,6 @@ pos_t check_better_pos(pos_t curr, pos_t new, pos_t sender)
 {
     int total_curr = abs(curr.x - sender.x) + abs(curr.y - sender.y);
     int total_new = abs(new.x - sender.x) + abs(new.y - sender.y);
-    printf("total_curr: %d, total_new: %d\n", total_curr, total_new);
     if (total_curr < total_new)
         return curr;
     return new;
@@ -441,7 +436,6 @@ pos_t check_better_pos(pos_t curr, pos_t new, pos_t sender)
 
 int get_impact_point(pos_t receiver, pos_t sender)
 {
-    printf("receiver = %d, %d\nsender = %d, %d\n", receiver.x, receiver.y, sender.x, sender.y);
     if (receiver.y > sender.y) {
         if (receiver.x < sender.x)
             return 8;
@@ -484,7 +478,6 @@ int find_provenance(game_t *game, player_t *sender, player_t *receiver)
         pos_t buff = {all_pos[i].x, all_pos[i].y};
         better = check_better_pos(better, buff, sender->entity->pos);
     }
-    printf("better: %d %d\n", better.x, better.y);
     return convert_provenance(get_impact_point(better, sender->entity->pos), receiver->entity->orientation);
 }
 

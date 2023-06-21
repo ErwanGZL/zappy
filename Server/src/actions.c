@@ -27,7 +27,7 @@ static const int cooldowns[] = {
     7,  // Look
     1,  // Inventory
     7,  // Broadcast
-    0,  // Connect_nbr
+    1,  // Connect_nbr
     42, // Fork
     7,  // Eject
     7,  // Take
@@ -69,7 +69,6 @@ action_t *action_new(int issuer, const char *cmd)
             return action;
         }
     }
-    printf("Unknown command: %s\n", cmd);
     free(action);
     return NULL;
 }
@@ -99,12 +98,9 @@ bool actions_accept(list_t *action_list, action_t *action)
     if (occ < 10)
     {
         accumulate_cooldown(*action_list, action);
-        printf("New action %s\n", action->name);
-        printf("Action cooldown: %d\n", action->cooldown);
         list_add_elem_at_back(action_list, action);
         return true;
     }
-    printf("Too many actions for client %d\n", action->issuer);
     free(action);
     return false;
 }

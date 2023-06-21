@@ -15,5 +15,4 @@ void list_dump(list_t list, value_displayer_t val_disp)
         val_disp(list->value);
         list = list->next;
     }
-    printf("end\n");
 }

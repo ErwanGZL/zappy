@@ -192,7 +192,7 @@ class Inventory:
             raise Exception("Invalid ressource")
 
     def set_inventory(self, inventory: list):
-        for i in range(6):
+        for i in range(7):
             self.set_ressource(items[i], inventory[i][1])
 
 
@@ -293,6 +293,8 @@ class Player:
             if i == "food":
                 continue
             if self.share_inventory[6].get_ressource(i) < for_level[self.level - 1][cpt]:
+                if self.level == 7:
+                    print(f"{i} : {self.share_inventory[6].get_ressource(i)} @ {for_level[self.level - 1][cpt]}")
                 return i
             cpt += 1
         return None
@@ -366,6 +368,8 @@ class Player:
                 value_return = 1
             self.inventory.set_ressource(item[0], int(item[1]))
         self.share_inventory[self.id - 1].set_inventory(result)
+        if self.level == 7:
+            print(f"inventory: {self.share_inventory[self.id]}")
         return value_return
 
     def update_share_inventory(self, result: list):
@@ -381,7 +385,7 @@ class Player:
                 self.share_inventory[6].add_ressource(
                     j, self.share_inventory[i].get_ressource(j)
                 )
-        # print("total inventory: ", self.share_inventory[6].print_inventory())
+        # #print("total inventory: ", self.share_inventory[6].print_inventory())
 
 
     def end_turn_command(self):
@@ -477,6 +481,7 @@ class Player:
             elif command[0] == "Inventory":
                 self.inventory_content = utile.str_to_list(command[1])
             elif command[0] == "Incantation":
+                print(command)
                 self.is_elevating = False
                 if (len(command[1].split(":")) == 2):
                     self.level = int(command[1].split(":")[1])
@@ -495,6 +500,7 @@ class Player:
         self.command.append("Connect_nbr")
 
     def can_elevation(self) -> bool:
+        print(self.level)
         nb_player = 0
         lim = 0
         der = 0
@@ -547,6 +553,7 @@ class Player:
             self.drop_item_for_elevation()
             if self.can_elevation() == True:
                 self.command.append("Incantation")
+                print("elevation")
 
     def logic(self, answer: list, message: list) -> list:
         self.command = []

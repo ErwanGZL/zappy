@@ -230,7 +230,7 @@ incantation_t *get_incantation(game_t *game, player_t *player)
         if (p->entity->pos.x == x && p->entity->pos.y == y && p->entity->level == player->entity->level && p->entity->is_incantating == false) {
             list_add_elem_at_back(&incantation->casters, p);
             p->entity->is_incantating = true;
-            dprintf(p->fd, "Elevation underway\n");
+            // dprintf(p->fd, "Elevation underway\n");
         }
     }
     gui_pic(game, incantation->first, incantation->casters);
