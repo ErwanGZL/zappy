@@ -28,14 +28,21 @@ timeval_t *player_get_next_food_timeout(list_t players, int freq)
     return timeout;
 }
 
-timeval_t *actions_get_next_timeout(list_t action_list, int frequency)
+timeval_t *actions_get_next_timeout(list_t *action_list, int frequency)
 {
-    if (action_list == NULL)
+    if (*action_list == NULL)
         return NULL;
     timeval_t *timeout = calloc(1, sizeof(timeval_t));
-    list_sort(&action_list, action_cmp_cooldown);
-    action_t *action = (action_t *)action_list->value;
-    timeout->tv_usec = ((double)action->cooldown / frequency) * 1000000;
+
+    action_t *next_action = (action_t *)(*action_list)->value;
+    list_t head = *action_list;
+    while (head != NULL) {
+        action_t *action = (action_t *)head->value;
+        if (action->cooldown < next_action->cooldown)
+            next_action = action;
+        head = head->next;
+    }
+    timeout->tv_usec = ((double)next_action->cooldown / frequency) * 1000000;
     return timeout;
 }
 
@@ -48,7 +55,7 @@ timeval_t *ressources_get_next_timeout(game_t *game, int frequency)
 
 timeval_t *server_get_next_timeout(server_t *server)
 {
-    timeval_t *action_timeout = actions_get_next_timeout(server->actions, server->game->freq);
+    timeval_t *action_timeout = actions_get_next_timeout(&server->actions, server->game->freq);
     timeval_t *pfood_timeout = player_get_next_food_timeout(server->game->players, server->game->freq);
     timeval_t *ressources_timeout = ressources_get_next_timeout(server->game, server->game->freq);
 
