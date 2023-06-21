@@ -184,7 +184,7 @@ void server_process_buffer(server_t *server, socket_t *s)
                     const char *buff = verif_incantation(server->game, player, NULL, 0);
                     if (strncmp(buff, "ko\n", 3) == 0)
                     {
-                        // dprintf(player->fd, buff);
+                        dprintf(player->fd, buff);
                         return;
                     }
                     get_incantation(server->game, player);

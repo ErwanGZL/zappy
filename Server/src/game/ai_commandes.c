@@ -492,7 +492,7 @@ const char *broadcast(game_t *game, player_t *player, const char *arg)
 {
     for (list_t ptr = game->players ; ptr != NULL ; ptr = ptr->next) {
         player_t *player2 = ptr->value;
-        if (strcmp(player2->team_name, "GRAPHIC") == 0 || player2 == player)
+        if (strcmp(player2->team_name, "GRAPHIC") == 0 || player2->fd == player->fd)
             continue;
         send_broadcast_message(arg, player2->fd, find_provenance(game, player, player2));
     }
