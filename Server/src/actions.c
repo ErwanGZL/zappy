@@ -69,7 +69,6 @@ action_t *action_new(int issuer, const char *cmd)
             return action;
         }
     }
-    printf("Unknown command: %s\n", cmd);
     free(action);
     return NULL;
 }
@@ -99,8 +98,7 @@ bool actions_accept(list_t *action_list, action_t *action)
     if (occ < 10)
     {
         accumulate_cooldown(*action_list, action);
-        printf("New action %s\n", action->name);
-        printf("Action cooldown: %d\n", action->cooldown);
+        printf("\nNew action %s <%s> requested by %d with %d cd\n", action->name, action->arg, action->issuer, action->cooldown);
         list_add_elem_at_back(action_list, action);
         return true;
     }

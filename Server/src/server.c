@@ -49,16 +49,13 @@ void server_select(server_t *server)
  */
 void server_handshake(server_t *server, socket_t *s)
 {
-    printf("Handshaked back\n");
     s->handshaked = true;
     if (strncmp(s->buffer, "GRAPHIC", 7) == 0)
     {
-        printf("Graphic client connected\n");
         add_player(server->game, "GRAPHIC", s->fd);
         gui_send_at_connexion(server->game, s->fd);
         return;
     }
-    printf("Not a graphic client\n");
     for (list_t head = server->game->teams; head != NULL; head = head->next)
     {
         team_t *team = (team_t *)head->value;
@@ -69,7 +66,6 @@ void server_handshake(server_t *server, socket_t *s)
                     team->max_players - team->nb_players,
                     server->options->width,
                     server->options->height);
-            printf("Player added %d\n", s->fd);
             add_player(server->game, team->name, s->fd);
             gui_player_connexion(server->game, get_player_by_fd(server->game, s->fd));
             gui_send_all(server->game, server->game->send_message);
@@ -99,7 +95,6 @@ int server_run(server_t *server)
             {
                 player->entity->food_left -= 1;
                 player->entity->food_timer_units += 126;
-                printf("Food left : %d\n", player->entity->food_left);
                 gui_player_inventory(server->game, player);
                 gui_send_all(server->game, server->game->send_message);
             }
@@ -129,9 +124,9 @@ int server_run(server_t *server)
             if (action->cooldown <= 0)
             {
                 player_t *p = get_player_by_fd(server->game, action->issuer);
-                const char *buff = action->callback(server->game, p, action->arg);
-                // printf("Action %s executed\n", action->name);
-                dprintf(action->issuer, buff);
+                const char *msg = action->callback(server->game, p, action->arg);
+                printf("\nAction %s <%s> executed by %d with response %s\n", action->name, action->arg, action->issuer, msg);
+                dprintf(action->issuer, msg);
                 free(action);
                 list_del_elem_at_front(head);
             }
@@ -163,8 +158,6 @@ void server_destroy(server_t *server)
  */
 void server_process_buffer(server_t *server, socket_t *s)
 {
-    if (s->buffer == NULL)
-        printf("Buffer is null\n");
     player_t *player = get_player_by_fd(server->game, s->fd);
     char *eol;
     while ((eol = strchr(s->buffer, '\n')) != NULL)
@@ -216,7 +209,7 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
             char query[1024] = {0};
             socket_t *s = (socket_t *)head->value;
             ssize_t rbytes = recv(((socket_t *)head->value)->fd, query, 1024, 0);
-            printf("\nNew data from client\n");
+            printf("\nNew data from client %d\n", s->fd);
             printf("Bytes read: %ld\n", rbytes);
             printf("Query: %s\n", query);
             for (int i = 0; i < rbytes; i++)

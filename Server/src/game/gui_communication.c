@@ -53,7 +53,6 @@ const char *gui_team_names(game_t *game)
         memcpy(game->buffer, game->send_message, strlen(game->send_message));
         sprintf(game->send_message, "%stna %s\n", game->buffer, ((team_t *)ptr->value)->name);
     }
-    printf(game->send_message);
     return game->send_message;
 }
 
@@ -279,7 +278,6 @@ void gui_send_at_connexion(game_t *game, int fd)
 
 void gui_send_all(game_t *game, const char *msg)
 {
-    printf("%s\n", msg);
     for (list_t head = game->players; head != NULL; head = head->next) {
         player_t *player = head->value;
         if (strcmp(player->team_name, "GRAPHIC") == 0)
