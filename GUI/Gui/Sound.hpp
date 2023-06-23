@@ -10,7 +10,7 @@
 
 class Sound {
     public:
-        Sound(std::string str, int x, int y, int base);
+        Sound(std::string str, int x, int y, int base, int max = 100);
         ~Sound();
         int getVolume();
         void event(sf::Event event, sf::RenderWindow *window);
@@ -30,5 +30,6 @@ class Sound {
         sf::View _view;
         int _x;
         int _y;
-        int _volume = 50;
+        int _volume;
+        int _max;
 };

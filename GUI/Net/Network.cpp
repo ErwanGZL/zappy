@@ -82,6 +82,8 @@ std::string Network::getMessage()
         } else if (retval == 0) {
             if (_data->stop == true)
                 return "internal stop";
+            if (_data->time != 0)
+                sendCommand("sst " + std::to_string(_data->time));
             continue;
         }
         size_t size = read(_socket, buffer.data(), BUFSIZ);
@@ -89,6 +91,8 @@ std::string Network::getMessage()
             return "internal stop";
         }
         _buffer += std::string(buffer.begin(), buffer.begin() + size);
+        // if (_data->time != 0)
+        //     sendCommand("sst " + std::to_string(_data->time));
     }
     return "";
 }

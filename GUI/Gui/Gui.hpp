@@ -55,6 +55,7 @@ class Gui {
         Data *_data;
         Sound _musicBar;
         Sound _effectBar;
+        Sound _ticBar;
         sf::Music *_music;
 
         sf::Sprite *_tile;
