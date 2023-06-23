@@ -49,6 +49,7 @@ class Data {
         void wait() {sem_wait(&_semaphore);};
         void post() {sem_post(&_semaphore);};
         bool stop = false;
+        int time = 0;
 
     private:
         std::vector<std::vector<Tile*>> _map;

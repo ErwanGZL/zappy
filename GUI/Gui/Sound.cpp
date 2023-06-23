@@ -7,14 +7,17 @@
 
 #include "Sound.hpp"
 
-Sound::Sound(std::string str, int x, int y, int base)
+Sound::Sound(std::string str, int x, int y, int base, int max)
 {
+    if (base > max)
+        base = max;
     _volume = base;
+    _max = max;
     _box1.setSize(sf::Vector2f(120, 30));
     _box1.setFillColor(sf::Color(0, 0, 0, 200));
     _box1.setPosition(x, y);
     _box1.setOrigin(_box1.getGlobalBounds().width / 2, _box1.getGlobalBounds().height / 2);
-    _box2.setSize(sf::Vector2f(_volume * 1.2, 30));
+    _box2.setSize(sf::Vector2f(_volume * 100 / max * 1.2, 30));
     _box2.setFillColor(sf::Color(255, 255, 255, 200));
     _box2.setPosition(x - 60, y);
     _box2.setOrigin(0, _box2.getGlobalBounds().height / 2);
@@ -77,8 +80,8 @@ void Sound::event(sf::Event event, sf::RenderWindow *window)
         }
         if (event.type == sf::Event::MouseButtonReleased) {
             _buttonPlus.setTextureRect(sf::IntRect(0, 0, 16, 16));
-            if (_volume != 100)
-                _volume += 10;
+            if (_volume != _max)
+                _volume += 10 * _max / 100;
         }
     } else {
         _text2.setFillColor(sf::Color::Black);
@@ -93,7 +96,7 @@ void Sound::event(sf::Event event, sf::RenderWindow *window)
         if (event.type == sf::Event::MouseButtonReleased) {
             _buttonMinus.setTextureRect(sf::IntRect(0, 0, 16, 16));
             if (_volume != 0)
-                _volume -= 10;
+                _volume -= 10 * _max / 100;
         }
     } else {
         _text3.setFillColor(sf::Color::Black);
@@ -106,7 +109,7 @@ void Sound::draw(sf::RenderWindow *window)
     _view.setCenter(window->getView().getCenter());
     setPos(window->getView().getCenter().x - 720 / 2 + _x, window->getView().getCenter().y - 480 / 2 + _y);
     window->setView(_view);
-    _box2.setSize(sf::Vector2f(_volume * 1.2, 30));
+    _box2.setSize(sf::Vector2f(_volume * 100 / _max * 1.2, 30));
     window->draw(_box1);
     window->draw(_box2);
     window->draw(_buttonPlus);

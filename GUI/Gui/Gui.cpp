@@ -31,7 +31,11 @@ void *threadGui(void *arg)
     return (NULL);
 }
 
-Gui::Gui(Data *data, sf::RenderWindow *window, int vol1, int vol2, sf::Music *music) : _musicBar("Music", 720 / 2 - 230, 480 / 2 + 200, vol1), _effectBar("Effects", 720 / 2 + 230, 480 / 2 + 200, vol2)
+Gui::Gui(Data *data, sf::RenderWindow *window, int vol1, int vol2, sf::Music *music) :
+    _musicBar("\n\nMusic", 720 / 2 - 230, 480 / 2 + 200, vol1),
+    _effectBar("\n\nEffects", 720 / 2 + 230, 480 / 2 + 200, vol2),
+    _ticBar("\n\nFreq", 720 / 2, 480 / 2 - 200, data->getTimeUnit(), 500)
+
 {
     _data = data;
     _window = window;
@@ -90,6 +94,7 @@ void Gui::run ()
             }
             _musicBar.event(event, _window);
             _effectBar.event(event, _window);
+            _ticBar.event(event, _window);
         }
         if (generated == true) {
             _window->clear(sf::Color::Black);
@@ -275,6 +280,7 @@ void Gui::display()
     _infoPlayer->draw(*_window);
     _musicBar.draw(_window);
     _effectBar.draw(_window);
+    _ticBar.draw(_window);
     _window->setView(_currentView);
 }
 
@@ -333,5 +339,6 @@ void Gui::updateData()
     }
     _infoTile->update();
     _infoPlayer->update();
+    _data->time = (_ticBar.getVolume() == 0) ? 2 : _ticBar.getVolume();
     _data->unlock();
 }
