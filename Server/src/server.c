@@ -47,14 +47,14 @@ void server_select(server_t *server)
 /**
  * Sends the welcome message to the client and waits for the team name
  */
-void server_handshake(server_t *server, socket_t *s)
+bool server_handshake(server_t *server, socket_t *s)
 {
     s->handshaked = true;
     if (strncmp(s->buffer, "GRAPHIC", 7) == 0)
     {
         add_player(server->game, "GRAPHIC", s->fd);
         gui_send_at_connexion(server->game, s->fd);
-        return;
+        return true;
     }
     for (list_t head = server->game->teams; head != NULL; head = head->next)
     {
@@ -69,13 +69,14 @@ void server_handshake(server_t *server, socket_t *s)
             add_player(server->game, team->name, s->fd);
             gui_player_connexion(server->game, get_player_by_fd(server->game, s->fd));
             gui_send_all(server->game, server->game->send_message);
-            return;
+            return true;
         }
     }
     dprintf(s->fd, "0\n"
                    "0 0\n");
     remove_player(server->game, s->fd);
     netctl_disconnect(server->netctl, s->fd);
+    return false;
 }
 
 /**
@@ -155,15 +156,17 @@ void server_destroy(server_t *server)
  * Processes the client buffer after recving data
  * for each line if the client is handshaked
  */
-void server_process_buffer(server_t *server, socket_t *s)
+bool server_process_buffer(server_t *server, socket_t *s)
 {
     player_t *player = get_player_by_fd(server->game, s->fd);
     char *eol;
     while ((eol = strchr(s->buffer, '\n')) != NULL)
     {
         *eol = '\0';
-        if (!s->handshaked)
-            server_handshake(server, s);
+        if (!s->handshaked) {
+            if (!server_handshake(server, s))
+                return false;
+        }
         else
         {
             if (strcmp(player->team_name, "GRAPHIC") == 0)
@@ -176,17 +179,17 @@ void server_process_buffer(server_t *server, socket_t *s)
                     if (strncmp(buff, "ko\n", 3) == 0)
                     {
                         dprintf(player->fd, buff);
-                        return;
+                        return true;
                     }
                     get_incantation(server->game, player);
                 }
                 actions_accept(&server->actions, action_new(s->fd, s->buffer));
             }
         }
-
         s->bufsz -= strlen(s->buffer) + 1;
         memmove(s->buffer, eol + 1, s->bufsz);
     }
+    return true;
 }
 
 /**
@@ -221,7 +224,11 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
                 s->bufsz += rbytes;
                 s->buffer = realloc(s->buffer, s->bufsz);
                 memcpy(s->buffer + s->bufsz - rbytes, query, rbytes);
-                server_process_buffer(server, s);
+                if (!server_process_buffer(server, s)) {
+                    printf("Client disconnected\n");
+                    head = server->netctl->clients;
+                    continue;
+                }
             }
         }
         head = head->next;
