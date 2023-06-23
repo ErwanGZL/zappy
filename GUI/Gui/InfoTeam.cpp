@@ -64,7 +64,7 @@ void InfoTeam::update()
     for (int i = 0;i < _data->getPlayers().size();i++) {
         if (_data->getPlayers()[i]->getTeamName() == _name) {
             _numberOfPlayers++;
-            if (i == _index && _clicked) {
+            if (_numberOfPlayers - 1 == _index && _clicked) {
                 ressources = _data->getPlayers()[i]->getRessources();
                 level = _data->getPlayers()[i]->getLevel();
                 _textPlayer3.setString(_data->getPlayers()[i]->getMessage());

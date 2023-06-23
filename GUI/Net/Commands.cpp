@@ -61,6 +61,7 @@ int Network::playerConnect(std::string str)
     tmp = tmp.substr(tmp.find(" ") + 1);
     std::string team = tmp.substr(0, tmp.find(" "));
     _data->addPlayer(id, x, y, orientation, level, team);
+    std::cout << "nb player: " << _data->getPlayers().size() << std::endl;
     sendCommand("pin " + std::to_string(id));
     sendCommand("plv " + std::to_string(id));
     return 0;
@@ -159,7 +160,6 @@ int Network::startIncantation(std::string str)
 
 int Network::endIncantation(std::string str)
 {
-    std::cout << "end incantation: " << str << std::endl;
     std::string tmp = str;
     int x = std::stoi(tmp.substr(0, tmp.find(" ")));
     tmp = tmp.substr(tmp.find(" ") + 1);
