@@ -26,10 +26,14 @@ def xor_compressed_cipher(message, key):
 
 
 def xor_compressed_decipher(encrypted_message, key):
-    decrypted_message = xor_cipher(bytes.fromhex(encrypted_message).decode("utf-8"), key)
-    compressed_message = base64.b64decode(decrypted_message)
-    decompressed_message = zlib.decompress(compressed_message).decode()
-    return decompressed_message
+    try :
+        decrypted_message = xor_cipher(bytes.fromhex(encrypted_message).decode("utf-8"), key)
+        compressed_message = base64.b64decode(decrypted_message)
+        zlib.decompress(compressed_message)
+        decompressed_message = zlib.decompress(compressed_message).decode()
+        return decompressed_message
+    except:
+        return "error"
 
 def str_to_list(content: str):
     content = content.split(",")
