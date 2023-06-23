@@ -122,10 +122,10 @@ const char *get_inventory(game_t *game, player_t *player, const char *arg)
     sprintf(inventory, "[food %d,", player->entity->food_left);
     for (int i = 0; i < 6; i++)
     {
-        inventory = realloc(inventory, sizeof(char) * (strlen(inventory) + strlen(mineral_tab[i]) + 5));
+        sprintf(num_buffer, "%d", player->entity->minerals[i]);
+        inventory = realloc(inventory, sizeof(char) * (strlen(inventory) + strlen(mineral_tab[i]) + strlen(num_buffer) + 5));
         strcat(inventory, mineral_tab[i]);
         strcat(inventory, " ");
-        sprintf(num_buffer, "%d", player->entity->minerals[i]);
         strcat(inventory, num_buffer);
         memset(num_buffer, 0, 10);
         if (i != 5)
