@@ -43,14 +43,11 @@ class AI:
             try:
                 self.socket.connect(self.servaddr)
             except ConnectionRefusedError:
-                #print("Error: Connection refused")
                 self.lock.release()
                 return
 
             r = self.socket.recv(1024)  # Receive the welcome message
             if r != b"WELCOME\n":
-                #print("Error: Invalid welcome message")
-                #print(r)
                 return
 
             # Sending the team name to the server
@@ -81,8 +78,6 @@ class AI:
                     return
             with self.lock:
                 if "\n" in self.buffer:
-                    # #print("____", self.buffer.count("\n"))
-                    # for _ in range(self.buffer.count("\n")):
                     self.msg_avl.set()
 
     def get_next_message(self) -> str | None:
@@ -136,9 +131,6 @@ class AI:
         with self.lock:
             if not self.connected:
                 return
-            #print(
-            #    f"Connected to the server. Slots available: {self.slots_avl}, Map size: w={self.map_x}, h={self.map_y}"
-            #)
 
         received = []
         message = []
@@ -158,7 +150,6 @@ class AI:
                         str_received = self.wait_for_message()
                     else:
                         str_received = tmp
-                #print(f"Received: {str_received}")
 
                 # If the message is a "message", add it to the message list (Broadcast)
                 if str_received.split(" ")[0] == "message":
@@ -166,10 +157,8 @@ class AI:
 
                 elif "Elevation underway" in str_received:
                     received.append("Incantation|" + str_received)
-                    print("Incantation|" + str_received)
                 elif "Current level" in str_received:
                     received.append("Incantation|" + str_received)
-                    print("Incantation|" + str_received)
 
 
                 # else
@@ -191,7 +180,6 @@ class AI:
 
             for i in range(min(len(send), 10)):
                 self.send_message(send[i])
-                #print("send:", "|", send[i], "|", sep="")
             for i in range(min(len(send), 10)):
                 if "Incantation" in send[i]:
                     send.pop(i)
