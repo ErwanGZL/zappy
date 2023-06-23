@@ -19,16 +19,18 @@ server_t *server_new(int argc, char *argv[])
  */
 void server_select(server_t *server)
 {
+    static int remaining_nsec = 0;
     size_t elapsed, dt;
     int act;
     fd_set readfds;
     timeval_t *timeout;
-    struct timespec start = {0}, end = {0};
+    static struct timespec start = {0}, end = {0};
 
     readfds = server->netctl->watched_fd;
 
     timeout = server_get_next_timeout(server);
-    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    if (start.tv_sec == 0 && start.tv_nsec == 0)
+        clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
     act = select(FD_SETSIZE, &readfds, NULL, NULL, timeout);
 
@@ -37,6 +39,16 @@ void server_select(server_t *server)
 
     dt = (end.tv_nsec - start.tv_nsec) + ((end.tv_sec - start.tv_sec) * 1E9);
     elapsed = dt * server->game->freq * 1E-9;
+    remaining_nsec += (dt * server->game->freq) % (int)1E9;
+
+    if (remaining_nsec >= (int)1E9)
+    {
+        elapsed += remaining_nsec / (int)1E9;
+        remaining_nsec %= (int)1E9;
+    }
+
+    start = end;
+
     actions_apply_elapsed_time(server->actions, elapsed);
     player_decrease_food(server->game->players, elapsed);
     server->game->ressources_time_unit -= elapsed;
@@ -163,7 +175,8 @@ bool server_process_buffer(server_t *server, socket_t *s)
     while ((eol = strchr(s->buffer, '\n')) != NULL)
     {
         *eol = '\0';
-        if (!s->handshaked) {
+        if (!s->handshaked)
+        {
             if (!server_handshake(server, s))
                 return false;
         }
@@ -224,7 +237,8 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
                 s->bufsz += rbytes;
                 s->buffer = realloc(s->buffer, s->bufsz);
                 memcpy(s->buffer + s->bufsz - rbytes, query, rbytes);
-                if (!server_process_buffer(server, s)) {
+                if (!server_process_buffer(server, s))
+                {
                     printf("Client disconnected\n");
                     head = server->netctl->clients;
                     continue;
