@@ -74,7 +74,7 @@ netctl_t *netctl_new(int port)
         exit(EXIT_FAILURE);
     }
 
-    listen(netctl->entrypoint.fd, 5);
+    listen(netctl->entrypoint.fd, 25);
 
     FD_ZERO(&netctl->watched_fd);
     FD_SET(netctl->entrypoint.fd, &netctl->watched_fd);
