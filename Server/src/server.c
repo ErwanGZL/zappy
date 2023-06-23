@@ -125,8 +125,6 @@ int server_run(server_t *server)
 
                 player_t *p = get_player_by_fd(server->game, action->issuer);
                 const char *msg = action->callback(server->game, p, action->arg);
-                if (action->type == ACTION_INVENTORY)
-                    printf("%s\n", msg);
                 dprintf(action->issuer, msg);
                 free(action);
                 list_del_elem_at_front(head);
