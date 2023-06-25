@@ -10,7 +10,6 @@ team_t *get_team_by_name(game_t *game, const char *team_name)
     return NULL;
 }
 
-
 int *init_ressources()
 {
     int *res = calloc(7, sizeof(int));
@@ -113,17 +112,23 @@ game_t *init_game(option_t *opt)
     return game;
 }
 
-game_t *remove_player(game_t *game, int fd)
+game_t *remove_player(game_t *game, int fd, bool is_dead)
 {
     int i = 0;
-    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next, i++) {
-        if (((player_t *) ptr->value)->fd == fd) {
-            //gui communication
-            gui_pdi(game, ptr->value);
-            gui_send_all(game, game->send_message);
-            //client communication
-            dprintf(((player_t *) ptr->value)->fd, "dead\n");
-            team_t *ptr2 = get_team_by_name(game, ((player_t *) ptr->value)->team_name);
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next, i++)
+    {
+        player_t *player = (player_t *)ptr->value;
+        if (player->fd == fd)
+        {
+            if (strncmp(player->team_name, "GRAPHIC", 7) != 0)
+            {
+                // gui communication
+                gui_pdi(game, ptr->value);
+                gui_send_all(game, game->send_message);
+                if (is_dead)
+                    dprintf(((player_t *)ptr->value)->fd, "dead\n");
+            }
+            team_t *ptr2 = get_team_by_name(game, ((player_t *)ptr->value)->team_name);
             if (ptr2 != NULL)
                 ptr2->nb_players--;
             game->nb_players--;
@@ -136,14 +141,16 @@ game_t *remove_player(game_t *game, int fd)
 
 void free_game(game_t *game)
 {
-    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
-        free(((player_t *) ptr->value)->entity->minerals);
-        free(((player_t *) ptr->value)->entity);
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
+    {
+        free(((player_t *)ptr->value)->entity->minerals);
+        free(((player_t *)ptr->value)->entity);
         free(ptr->value);
     }
     for (list_t ptr = game->teams; ptr != NULL; ptr = ptr->next)
         free(ptr->value);
-    for (int i = 0; i < game->map->size.y; i++) {
+    for (int i = 0; i < game->map->size.y; i++)
+    {
         for (int a = 0; a < game->map->size.x; a++)
             free(game->map->tiles[i][a].ressources);
         free(game->map->tiles[i]);
@@ -155,14 +162,15 @@ void free_game(game_t *game)
 
 player_t *get_player_by_fd(game_t *game, int fd)
 {
-    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
-        if (((player_t *) ptr->value)->fd == fd)
-            return ((player_t *) ptr->value);
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
+    {
+        if (((player_t *)ptr->value)->fd == fd)
+            return ((player_t *)ptr->value);
     }
     return NULL;
 }
 
-int get_orientation(player_t * player)
+int get_orientation(player_t *player)
 {
     pos_t orientation = player->entity->orientation;
     if (orientation.y == -1)
@@ -176,7 +184,7 @@ int get_orientation(player_t * player)
     return 0;
 }
 
-int get_from_orientation(player_t * player)
+int get_from_orientation(player_t *player)
 {
     pos_t orientation = player->entity->orientation;
     if (orientation.y == -1)
@@ -193,15 +201,17 @@ int get_from_orientation(player_t * player)
 void destroy_egg(game_t *game, int x, int y, int *success)
 {
     int pos = 0;
-    for (list_t ptr = game->eggs ; ptr != NULL ; ptr = ptr->next) {
+    for (list_t ptr = game->eggs; ptr != NULL; ptr = ptr->next)
+    {
         egg_t *egg = ptr->value;
-        if (egg->pos.x == x && egg->pos.y == y) {
-            //gui communication
-            gui_edi(game, ((egg_t *) list_get_elem_at_position(game->eggs, pos))->id);
+        if (egg->pos.x == x && egg->pos.y == y)
+        {
+            // gui communication
+            gui_edi(game, ((egg_t *)list_get_elem_at_position(game->eggs, pos))->id);
             gui_send_all(game, game->send_message);
             list_del_elem_at_position(&game->eggs, pos);
             *success = 1;
-            //remove a place in the team
+            // remove a place in the team
         }
         pos++;
     }
@@ -209,7 +219,8 @@ void destroy_egg(game_t *game, int x, int y, int *success)
 
 void player_decrease_food(list_t players, int elapsed_units)
 {
-    for (list_t head = players; head != NULL; head = head->next) {
+    for (list_t head = players; head != NULL; head = head->next)
+    {
         player_t *p = (player_t *)head->value;
         if (strncmp(p->team_name, "GRAPHIC", 7) == 0)
             continue;
@@ -223,11 +234,13 @@ incantation_t *get_incantation(game_t *game, player_t *player)
     int x = player->entity->pos.x;
     incantation_t *incantation = calloc(1, sizeof(incantation_t));
     incantation->first = player;
-    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next) {
+    for (list_t ptr = game->players; ptr != NULL; ptr = ptr->next)
+    {
         player_t *p = (player_t *)ptr->value;
         if (p->fd == player->fd)
             continue;
-        if (p->entity->pos.x == x && p->entity->pos.y == y && p->entity->level == player->entity->level && p->entity->is_incantating == false) {
+        if (p->entity->pos.x == x && p->entity->pos.y == y && p->entity->level == player->entity->level && p->entity->is_incantating == false)
+        {
             list_add_elem_at_back(&incantation->casters, p);
             p->entity->is_incantating = true;
             // dprintf(p->fd, "Elevation underway\n");
@@ -241,7 +254,8 @@ incantation_t *get_incantation(game_t *game, player_t *player)
 
 incantation_t *get_incantation_by_player(game_t *game, player_t *player)
 {
-    for (list_t ptr = game->incantations; ptr != NULL; ptr = ptr->next) {
+    for (list_t ptr = game->incantations; ptr != NULL; ptr = ptr->next)
+    {
         incantation_t *incantation = (incantation_t *)ptr->value;
         if (incantation->first->fd == player->fd)
             return incantation;
@@ -252,9 +266,11 @@ incantation_t *get_incantation_by_player(game_t *game, player_t *player)
 game_t *remove_incantation_by_player(game_t *game, player_t *player)
 {
     int i = 0;
-    for (list_t ptr = game->incantations; ptr != NULL; ptr = ptr->next, i++) {
+    for (list_t ptr = game->incantations; ptr != NULL; ptr = ptr->next, i++)
+    {
         incantation_t *incantation = (incantation_t *)ptr->value;
-        if (incantation->first->fd == player->fd) {
+        if (incantation->first->fd == player->fd)
+        {
             list_del_elem_at_position(&game->incantations, i);
             break;
         }

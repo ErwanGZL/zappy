@@ -162,7 +162,7 @@ const char *take_object(game_t *game, player_t *player, const char *arg);
 const char *drop_object(game_t *game, player_t *player, const char *arg);
 const char *eject_player(game_t *game, player_t *player, const char *arg);
 const char *fork_player(game_t *game, player_t *player, const char *arg);
-game_t *remove_player(game_t *game, int fd);
+game_t *remove_player(game_t *game, int fd, bool is_dead);
 //end of ai commandes functions
 
 player_t *get_player_by_fd(game_t *game, int fd);

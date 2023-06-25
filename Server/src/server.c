@@ -86,7 +86,7 @@ bool server_handshake(server_t *server, socket_t *s)
     }
     dprintf(s->fd, "0\n"
                    "0 0\n");
-    remove_player(server->game, s->fd);
+    remove_player(server->game, s->fd, false);
     netctl_disconnect(server->netctl, s->fd);
     return false;
 }
@@ -123,7 +123,7 @@ int server_run(server_t *server)
             if (player->entity->food_left <= 0)
             {
                 actions_remove_from_issuer(&server->actions, player->fd);
-                remove_player(server->game, player->fd);
+                remove_player(server->game, player->fd, true);
                 netctl_disconnect(server->netctl, player->fd);
                 continue;
             }
@@ -196,7 +196,10 @@ bool server_process_buffer(server_t *server, socket_t *s)
                     }
                     get_incantation(server->game, player);
                 }
-                actions_accept(&server->actions, action_new(s->fd, s->buffer));
+                if (!actions_accept(&server->actions, action_new(s->fd, s->buffer)))
+                    s->fails_count += 1;
+                else
+                    s->fails_count = 0;
             }
         }
         s->bufsz -= strlen(s->buffer) + 1;
@@ -223,14 +226,17 @@ void server_process_activity(server_t *server, fd_set *readfds, int act)
             char query[1024] = {0};
             socket_t *s = (socket_t *)head->value;
             ssize_t rbytes = recv(((socket_t *)head->value)->fd, query, 1024, 0);
-
-            if (rbytes == 0)
+            if ((rbytes == 0 || rbytes == -1) || s->fails_count >= 10)
             {
-                actions_remove_from_issuer(&server->actions, ((socket_t *)head->value)->fd);
-                remove_player(server->game, ((socket_t *)head->value)->fd);
-                netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
-                head = server->netctl->clients;
-                continue;
+                if (s->fails_count >= 10)
+                    dprintf(s->fd, "kicked for spamming nonsense\n");
+                if (FD_ISSET(s->fd, &server->netctl->watched_fd)) {
+                    actions_remove_from_issuer(&server->actions, ((socket_t *)head->value)->fd);
+                    remove_player(server->game, ((socket_t *)head->value)->fd, false);
+                    netctl_disconnect(server->netctl, ((socket_t *)head->value)->fd);
+                    head = server->netctl->clients;
+                    continue;
+                }
             }
             else
             {

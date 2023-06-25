@@ -16,6 +16,7 @@ typedef struct socket_s {
     char *buffer;
     size_t bufsz;
     bool handshaked;
+    int fails_count;
 } socket_t;
 
 typedef struct netctl_s {
